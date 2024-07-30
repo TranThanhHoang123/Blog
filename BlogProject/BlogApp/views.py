@@ -216,3 +216,42 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         blog = get_object_or_404(Blog, pk=pk, user=request.user)
         blog.delete()  # Xóa comment và tệp tin đính kèm
         return Response({'message': 'Blog deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['post', 'delete','get'],url_path='like')
+    def like(self, request, pk=None):
+        blog = get_object_or_404(Blog, pk=pk)
+        user = request.user
+
+        if request.method == 'POST':
+            if blog.visibility == 'private' and blog.user != user:
+                return Response({'detail': 'You can only like your own private posts.'},
+                                status=status.HTTP_403_FORBIDDEN)
+            if Like.objects.filter(blog=blog, user=user).exists():
+                return Response({"detail": "You have already liked this blog."}, status=status.HTTP_400_BAD_REQUEST)
+            Like.objects.create(blog=blog, user=user)
+            blog.likes_count += 1
+            blog.save()
+            return Response({"detail": "Blog liked successfully."}, status=status.HTTP_200_OK)
+
+        elif request.method == 'DELETE':
+            if blog.visibility == 'private' and blog.user != user:
+                return Response({'detail': 'You can only dislike your own private posts.'},
+                                status=status.HTTP_403_FORBIDDEN)
+            like = get_object_or_404(Like, blog=blog, user=user)
+            like.delete()
+            blog.likes_count -= 1
+            blog.save()
+            return Response({"detail": "Blog unliked successfully."}, status=status.HTTP_200_OK)
+
+        if blog.visibility == 'private' and blog.user != user:
+            return Response({'detail': 'You are not authorized to view likes for this post.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        elif request.method == 'GET':
+            likes = Like.objects.filter(blog=blog).order_by('-created_date')
+            paginator = my_paginations.LikePagination()
+            paginator.page_size = 10  # Số lượng người dùng trên mỗi trang
+            result_page = paginator.paginate_queryset(likes, request)
+            serializer = serializers.UserListSerializer([like.user for like in result_page], many=True, context={'request': request})
+
+            return paginator.get_paginated_response(serializer.data)

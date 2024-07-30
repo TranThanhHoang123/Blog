@@ -40,6 +40,9 @@ class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True,null=True)
 
+    class Meta:
+        unique_together = ('blog', 'user')
+
     def __str__(self):
         return f'Like by {self.user} on {self.blog}'
 
