@@ -141,6 +141,20 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
         serializer = serializers.UserDetailSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['get'], url_path='blog', permission_classes=[permissions.IsAuthenticated])
+    def my_blogs(self, request, pk=None):
+        user = request.user
+        if pk == str(user.id):
+            blogs = Blog.objects.filter(user=user).order_by('-created_date')
+        else:
+            blogs = Blog.objects.filter(user_id=pk, visibility='public').order_by('-created_date')
+
+        paginator = my_paginations.BlogPagination()
+        result_page = paginator.paginate_queryset(blogs, request)
+        serializer = serializers.BlogDetailSerializer(result_page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
+
+
 class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Blog.objects.all().order_by('-created_date')
     serializer_class = serializers.BlogSerializer
@@ -156,6 +170,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def get_permissions(self):
         if self.action in ['list']:
             return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
 
     def get_serializer_class(self):
         if self.action in ['list']:

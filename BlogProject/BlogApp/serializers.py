@@ -3,7 +3,7 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'password','email', 'phone_number', 'location', 'about', 'profile_image', 'profile_bg', 'link']
+        fields = ['id','username', 'password','email', 'phone_number', 'location', 'about', 'profile_image', 'profile_bg', 'link']
         extra_kwargs = {
             'password': {'write_only': True},
             'location': {'required': False},
@@ -54,7 +54,7 @@ class UserDetailSerializer(UserSerializer):
 
 class UserListSerializer(UserDetailSerializer):
     class Meta(UserDetailSerializer.Meta):
-        fields = ['username','first_name','last_name','profile_image','profile_bg']
+        fields = ['id','username','first_name','last_name','profile_image','profile_bg']
 
 class BlogMediaSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
