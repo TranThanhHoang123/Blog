@@ -217,7 +217,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         blog.delete()  # Xóa comment và tệp tin đính kèm
         return Response({'message': 'Blog deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post', 'delete','get'],url_path='like')
+    @action(detail=True, methods=['post', 'delete', 'get'], url_path='like')
     def like(self, request, pk=None):
         blog = get_object_or_404(Blog, pk=pk)
         user = request.user
@@ -252,6 +252,86 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             paginator = my_paginations.LikePagination()
             paginator.page_size = 10  # Số lượng người dùng trên mỗi trang
             result_page = paginator.paginate_queryset(likes, request)
-            serializer = serializers.UserListSerializer([like.user for like in result_page], many=True, context={'request': request})
+            serializer = serializers.UserListSerializer([like.user for like in result_page], many=True,
+                                                        context={'request': request})
 
             return paginator.get_paginated_response(serializer.data)
+
+    @action(detail=True, methods=['post', 'get'], url_path='comment')
+    def add_comment(self, request, pk=None):
+        blog = get_object_or_404(Blog, pk=pk)
+        user = request.user
+
+        # Kiểm tra quyền truy cập dựa vào visibility
+        if blog.visibility == 'private' and blog.user != user:
+            return Response({'detail': 'You do not have permission to view or add comments to this blog.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        if request.method == 'POST':
+            data = request.data.copy()
+            data['blog'] = blog.id
+            parent_id = data.get('parent')
+            if parent_id:
+                parent_comment = get_object_or_404(Comment, id=parent_id)
+                data['parent'] = parent_comment.id
+
+            serializer = serializers.CommentSerializer(data=data, context={'request': request})
+
+            if serializer.is_valid():
+                serializer.save(user=user)
+                blog.comments_count += 1
+                blog.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'GET':
+            comments = Comment.objects.filter(blog=blog).order_by('-created_date')
+
+            paginator = my_paginations.CommentPagination()
+
+            result_page = paginator.paginate_queryset(comments, request)
+
+            serializer = serializers.CommentListSerializer(result_page, many=True, context={'request': request})
+
+            return paginator.get_paginated_response(serializer.data)
+
+
+class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPIView):
+    queryset = Comment.objects.all().order_by('-created_date')
+    serializer_class = serializers.CommentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def update(self, request, *args, **kwargs):
+        comment = self.get_object()
+
+        # Kiểm tra quyền chỉnh sửa
+        if comment.user != request.user:
+            return Response({'detail': 'You do not have permission to edit this comment.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        # Loại bỏ trường 'parent' khỏi dữ liệu gửi đến
+        data = request.data.copy()
+        if 'parent' in data:
+            data.pop('parent')
+
+        partial = True
+        serializer = self.get_serializer(comment, data=data, partial=partial)
+
+        if serializer.is_valid():
+            old_file = comment.file
+            updated_comment = serializer.save()
+
+            # Xóa file cũ nếu có file mới được cập nhật
+            if old_file and old_file != updated_comment.file:
+                old_file.delete(save=False)
+
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        comment = self.get_object()
+        blog = comment.blog
+        response = super().destroy(request, *args, **kwargs)
+        blog.comments_count -= 1
+        blog.save()
+        return Response({"message":"Comment deleted successfully"},status=status.HTTP_204_NO_CONTENT)

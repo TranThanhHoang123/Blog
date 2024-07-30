@@ -84,5 +84,34 @@ class BlogSerializer(serializers.ModelSerializer):
 
 class BlogDetailSerializer(BlogSerializer):
     user = UserListSerializer()
+    liked = serializers.SerializerMethodField()
+
     class Meta(BlogSerializer.Meta):
-        fields = ['user'] + BlogSerializer.Meta.fields + ['created_date','updated_date']
+        fields = ['user'] + BlogSerializer.Meta.fields + ['created_date', 'updated_date', 'liked']
+
+    def get_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            user = request.user
+            return Like.objects.filter(blog=obj, user=user).exists()
+        return False
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['id', 'blog', 'user', 'content', 'file', 'parent', 'created_date', 'updated_date']
+        read_only_fields = ['user', 'created_date', 'updated_date']
+
+class CommentListSerializer(CommentSerializer):
+    user = UserListSerializer()
+    file = serializers.SerializerMethodField()
+
+    def get_file(self, obj):
+        if obj.file:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            file = obj.file.name
+            return self.context['request'].build_absolute_uri(f"/static/{file}")
+
+    class Meta(CommentSerializer.Meta):
+       pass

@@ -2,7 +2,7 @@ from django.db.models.signals import pre_save,post_delete
 from django.dispatch import receiver
 import os
 from django.conf import settings
-from .models import User,BlogMedia
+from .models import User,BlogMedia,Comment
 @receiver(post_delete, sender=BlogMedia)
 def delete_media_file(sender, instance, **kwargs):
     instance.file.delete(False)
@@ -23,3 +23,26 @@ def delete_old_files(sender, instance, **kwargs):
             old_profile_bg_path = os.path.join(settings.MEDIA_ROOT, old_instance.profile_bg.name)
             if os.path.isfile(old_profile_bg_path):
                 os.remove(old_profile_bg_path)
+
+@receiver(post_delete, sender=Comment)
+def delete_comment_file(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.delete(False)
+
+
+@receiver(post_delete, sender=Comment)
+def delete_comment_file(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.delete(save=False)
+
+
+@receiver(pre_save, sender=Comment)
+def handle_comment_file_update(sender, instance, **kwargs):
+    if instance.pk:  # Đã có bản ghi trong cơ sở dữ liệu (đang cập nhật)
+        try:
+            old_instance = Comment.objects.get(pk=instance.pk)
+        except Comment.DoesNotExist:
+            old_instance = None
+
+        if old_instance and old_instance.file and old_instance.file != instance.file:
+            old_instance.file.delete(save=False)

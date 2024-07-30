@@ -5,6 +5,7 @@ from . import views
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet, basename='user')  # Specify the basename here
 router.register(r'blog', views.BlogViewSet, basename='blog')  # Specify the basename here
+router.register(r'comment', views.CommentViewSet, basename='comment')  # Specify the basename here
 
 urlpatterns = [
     path('', include(router.urls)),
