@@ -3,7 +3,7 @@ from oauth2_provider.models import Application, AccessToken, RefreshToken
 from rest_framework import viewsets, generics, status, permissions
 from django.db.models import Q
 from rest_framework.response import Response
-from . import serializers,my_paginations,my_generics
+from . import serializers, my_paginations, my_generics
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
@@ -20,6 +20,8 @@ import json
 import uuid
 from rest_framework import status
 from .models import *
+
+
 # Create your views here.
 class CustomTokenView(TokenView):
     def post(self, request, *args, **kwargs):
@@ -36,6 +38,7 @@ class CustomTokenView(TokenView):
                 samesite='Lax'
             )
         return response
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -91,12 +94,14 @@ def custom_refresh_token(request):
 
     return JsonResponse(response_data)
 
+
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = my_paginations.UserPagination
-    parser_classes = [FormParser,MultiPartParser]
+    parser_classes = [FormParser, MultiPartParser]
+
     def get_permissions(self):
         if self.action in ['create']:
             return [permissions.AllowAny()]
@@ -105,6 +110,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
     def get_serializer_class(self):
         if self.action in ['retrieve']:
             return serializers.UserDetailSerializer
+        return self.serializer_class
 
     def get_object(self):
         return self.request.user
@@ -112,7 +118,8 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
     @action(detail=False, methods=['patch'], url_path='update-profile')
     def update_profile(self, request, *args, **kwargs):
         user = self.get_object()
-        serializer = serializers.UserUpdateSerializer(user, data=request.data, partial=True, context={'request': request})
+        serializer = serializers.UserUpdateSerializer(user, data=request.data, partial=True,
+                                                      context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response({'message': 'Profile updated successfully'}, status=status.HTTP_200_OK)
@@ -124,14 +131,35 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
         serializer = serializers.UserDetailSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def retrieve(self, request, *args, **kwargs):
+        user_id = kwargs.get('pk')  # Lấy ID từ URL
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
-class BlogViewSet(viewsets.ViewSet,generics.RetrieveAPIView, generics.ListAPIView):
+        serializer = serializers.UserDetailSerializer(user, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Blog.objects.all().order_by('-created_date')
     serializer_class = serializers.BlogSerializer
     permission_classes = [permissions.IsAuthenticated]
-    parser_classes = [MultiPartParser,FormParser]
+    parser_classes = [MultiPartParser, FormParser]
+    pagination_class = my_paginations.BlogPagination
+
+    def get_queryset(self):
+        if self.action in ['list']:
+            queryset = Blog.objects.filter(visibility='public').order_by('-created_date')
+            return queryset
+
+    def get_permissions(self):
+        if self.action in ['list']:
+            return [permissions.AllowAny()]
 
     def get_serializer_class(self):
+        if self.action in ['list']:
+            return serializers.BlogDetailSerializer
         return self.serializer_class
 
     def create(self, request, *args, **kwargs):
@@ -168,3 +196,8 @@ class BlogViewSet(viewsets.ViewSet,generics.RetrieveAPIView, generics.ListAPIVie
                     BlogMedia.objects.create(blog=updated_blog, file=file)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        blog = get_object_or_404(Blog, pk=pk, user=request.user)
+        blog.delete()  # Xóa comment và tệp tin đính kèm
+        return Response({'message': 'Blog deleted successfully'}, status=status.HTTP_204_NO_CONTENT)

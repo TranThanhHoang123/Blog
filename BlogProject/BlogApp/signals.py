@@ -1,9 +1,11 @@
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save,post_delete
 from django.dispatch import receiver
 import os
 from django.conf import settings
-from .models import User
-
+from .models import User,BlogMedia
+@receiver(post_delete, sender=BlogMedia)
+def delete_media_file(sender, instance, **kwargs):
+    instance.file.delete(False)
 
 @receiver(pre_save, sender=User)
 def delete_old_files(sender, instance, **kwargs):

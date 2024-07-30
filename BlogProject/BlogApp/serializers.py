@@ -52,6 +52,9 @@ class UserDetailSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         pass
 
+class UserListSerializer(UserDetailSerializer):
+    class Meta(UserDetailSerializer.Meta):
+        fields = ['username','first_name','last_name','profile_image','profile_bg']
 
 class BlogMediaSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
@@ -70,7 +73,7 @@ class BlogSerializer(serializers.ModelSerializer):
     media = BlogMediaSerializer(many=True, required=False)
     class Meta:
         model = Blog
-        fields = ['user','content', 'description', 'visibility', 'likes_count', 'comments_count','media']
+        fields = ['id','content', 'description', 'visibility', 'likes_count', 'comments_count','media']
         extra_kwargs = {
             'content': {'required': True},
             'description': {'required': True},
@@ -80,5 +83,6 @@ class BlogSerializer(serializers.ModelSerializer):
         }
 
 class BlogDetailSerializer(BlogSerializer):
+    user = UserListSerializer()
     class Meta(BlogSerializer.Meta):
-        pass
+        fields = ['user'] + BlogSerializer.Meta.fields + ['created_date','updated_date']
