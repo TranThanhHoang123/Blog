@@ -168,7 +168,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             return queryset
 
     def get_permissions(self):
-        if self.action in ['list']:
+        if self.action in ['list','retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
