@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from . import my_paginations
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -115,3 +116,23 @@ class CommentListSerializer(CommentSerializer):
 
     class Meta(CommentSerializer.Meta):
        pass
+
+
+class BlogDetailWithCommentsSerializer(serializers.Serializer):
+    blog = BlogDetailSerializer()
+    comments = serializers.SerializerMethodField()
+
+    def get_comments(self, obj):
+        request = self.context['request']
+        comments = Comment.objects.filter(blog=obj).order_by('-created_date')
+        paginator = my_paginations.CommentPagination()
+        page = paginator.paginate_queryset(comments, request)
+        serializer = CommentListSerializer(page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data).data
+
+    def to_representation(self, instance):
+        representation = {
+            'blog': BlogDetailSerializer(instance, context=self.context).data,
+            'comments': self.get_comments(instance)
+        }
+        return representation

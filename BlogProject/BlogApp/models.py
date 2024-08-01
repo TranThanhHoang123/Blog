@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MaxLengthValidator
 
 
 class BaseModel(models.Model):
@@ -27,7 +28,7 @@ class Blog(BaseModel):
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=255)
-    description = models.CharField(max_length=255)
+    description = models.TextField(validators=[MaxLengthValidator(1000)])  # Giới hạn 1000 ký tự
     visibility = models.CharField(max_length=9, choices=VISIBILITY_CHOICES, default='public')
     likes_count = models.PositiveIntegerField(default=0)
     comments_count = models.PositiveIntegerField(default=0)

@@ -17,6 +17,6 @@ class LikePagination(PageNumberPagination):
     max_page_size = 100  # Số mục tối đa trên mỗi trang
 
 class CommentPagination(PageNumberPagination):
-    page_size = 10  # Số lượng bình luận trên mỗi trang
+    page_size = 5  # Số lượng bình luận trên mỗi trang
     page_size_query_param = 'page_size'
     max_page_size = 100

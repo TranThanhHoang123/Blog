@@ -177,6 +177,14 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             return serializers.BlogDetailSerializer
         return self.serializer_class
 
+    def retrieve(self, request, pk=None):
+        blog = get_object_or_404(Blog, pk=pk)
+        # Check for private blog visibility
+        if blog.visibility == 'private' and blog.user != request.user:
+            return Response({'detail': 'You do not have permission to view this blog.'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = serializers.BlogDetailWithCommentsSerializer(instance=blog, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def create(self, request, *args, **kwargs):
         user = request.user
         content = request.data.get('content')
