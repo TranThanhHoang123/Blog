@@ -20,7 +20,7 @@ import json
 import uuid
 from rest_framework import status
 from .models import *
-
+from django.contrib.auth.models import Group, Permission
 
 # Create your views here.
 class CustomTokenView(TokenView):
@@ -345,14 +345,28 @@ class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPI
         return Response({"message":"Comment deleted successfully"},status=status.HTTP_204_NO_CONTENT)
 
 
-class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView):
-    queryset = Company.objects.all()
+class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView):
+    queryset = Company.objects.all().order_by('-workers_number')
     serializer_class = serializers.CompanySerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = my_paginations.CompanyPagination
 
     def get_permissions(self):
+        if self.action in ['list','retrieve']:
+            return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
-    def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return serializers.CompanyListSerializer
+        if self.action in ['retrieve']:
+            return serializers.CompanyDetailSerializer
+        return self.serializer_class
+
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            company = serializer.save(founder=request.user)  # Gán người dùng hiện tại là người tạo công ty
+            return Response(serializers.CompanyDetailSerializer(company, context={'request': request}).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
