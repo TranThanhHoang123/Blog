@@ -343,3 +343,16 @@ class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPI
         blog.comments_count -= 1
         blog.save()
         return Response({"message":"Comment deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+
+
+class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView):
+    queryset = Company.objects.all()
+    serializer_class = serializers.CompanySerializer
+
+    def get_permissions(self):
+        return [permissions.IsAuthenticated()]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        return Response(data, status=status.HTTP_201_CREATED, headers=headers)
+

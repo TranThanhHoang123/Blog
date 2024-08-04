@@ -138,3 +138,9 @@ class BlogDetailWithCommentsSerializer(serializers.Serializer):
             'comments': self.get_comments(instance)
         }
         return representation
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['founding_date', 'workers_number', 'location', 'mail', 'phone_number', 'link']

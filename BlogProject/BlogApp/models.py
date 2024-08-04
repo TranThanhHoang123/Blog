@@ -64,3 +64,49 @@ class BlogMedia(models.Model):
 
     def __str__(self):
         return f'Media for blog {self.blog.id}'
+
+
+class Company(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'pending'),
+        ('approved', 'approved'),
+        ('rejected', 'rejected'),
+    ]
+    founder = models.ForeignKey(User, related_name='companies', on_delete=models.SET_NULL,null=True,blank=True)# người tạo
+    founding_date = models.DateField()
+    workers_number = models.IntegerField()
+    location = models.CharField(max_length=255)
+    mail = models.EmailField()
+    phone_number = models.CharField(max_length=20)
+    link = models.URLField()
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+
+class Recruitment(BaseModel):
+    company = models.ForeignKey(Company, related_name='recruitments', on_delete=models.CASCADE)
+    job_title = models.CharField(max_length=255)
+    job_description = models.TextField()
+    job_requirements = models.TextField()
+    salary_range = models.CharField(max_length=100)
+    location = models.CharField(max_length=255)
+    apply_link = models.URLField()
+    status = models.BooleanField(default=True)
+    def __str__(self):
+        return self.job_title
+
+
+class JobApplication(BaseModel):
+    STATUS_CHOICES = [
+        ('pending', 'pending'),
+        ('approved', 'approved'),
+        ('rejected', 'rejected'),
+    ]
+
+    company = models.ForeignKey(Company, related_name='job_applications', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='job_applications', on_delete=models.CASCADE)
+    job_title = models.CharField(max_length=255)
+    cv = models.FileField(upload_to='cv/%Y/%m')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return f'{self.job_title} - {self.user.username}'
