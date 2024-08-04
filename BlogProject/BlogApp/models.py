@@ -72,6 +72,7 @@ class Company(models.Model):
         ('approved', 'approved'),
         ('rejected', 'rejected'),
     ]
+    name = models.CharField(max_length=60,null=True)
     founder = models.ForeignKey(User, related_name='companies', on_delete=models.SET_NULL,null=True,blank=True)# người tạo
     founding_date = models.DateField()
     workers_number = models.IntegerField()

@@ -143,7 +143,7 @@ class BlogDetailWithCommentsSerializer(serializers.Serializer):
 class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
-        fields = ['founding_date', 'workers_number', 'location', 'mail', 'phone_number', 'link']
+        fields = ['name','founding_date', 'workers_number', 'location', 'mail', 'phone_number', 'link']
 
 class CompanyDetailSerializer(CompanySerializer):
     founder = UserListSerializer()
@@ -155,4 +155,4 @@ class CompanyListSerializer(serializers.ModelSerializer):
     founder = UserListSerializer()
     class Meta:
         model = Company
-        fields = ['id','founder','founding_date', 'workers_number', 'location','status']
+        fields = ['id','founder','name','founding_date', 'workers_number', 'location','status']
