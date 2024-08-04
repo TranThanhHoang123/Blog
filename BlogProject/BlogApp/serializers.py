@@ -148,7 +148,6 @@ class CompanySerializer(serializers.ModelSerializer):
 class CompanyDetailSerializer(CompanySerializer):
     founder = UserListSerializer()
     class Meta(CompanySerializer.Meta):
-        model = Company
         fields = ['id','founder'] + CompanySerializer.Meta.fields + ['status']
 
 class CompanyListSerializer(serializers.ModelSerializer):
@@ -156,3 +155,9 @@ class CompanyListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ['id','founder','name','founding_date', 'workers_number', 'location','status']
+
+
+class CompanyStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ['status']

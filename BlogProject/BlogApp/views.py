@@ -370,3 +370,11 @@ class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIVie
             return Response(serializers.CompanyDetailSerializer(company, context={'request': request}).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(methods=['patch'],url_path='status',detail=True)
+    def update_status(self,request,pk=None):
+        company = Company.objects.get(pk=pk)
+        company_status = self.request.data.get('status')
+        company.status = company_status
+        company.save()
+        return Response({"detail": "Status update successfully."}, status=status.HTTP_200_OK)
+
