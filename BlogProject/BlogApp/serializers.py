@@ -180,3 +180,39 @@ class RecruitmentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recruitment
         fields = ['id','company','job_title','salary_range','status','created_date','updated_date']
+
+
+class JobApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobApplication
+        fields = '__all__'
+        read_only_fields = ['user', 'company']
+
+
+class JobApplicationDetailSerializer(serializers.ModelSerializer):
+    company = CompanyListSerializer()
+    user = UserSerializer()
+    cv = serializers.SerializerMethodField()
+
+    def get_cv(self, obj):
+        if obj.cv:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            cv = obj.cv.name
+            return self.context['request'].build_absolute_uri(f"/static/{cv}")
+    class Meta:
+        model = JobApplication
+        fields = '__all__'
+
+
+class JobApplicationListSerializer(serializers.ModelSerializer):
+    user = UserListSerializer()
+    cv = serializers.SerializerMethodField()
+
+    def get_cv(self, obj):
+        if obj.cv:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            cv = obj.cv.name
+            return self.context['request'].build_absolute_uri(f"/static/{cv}")
+    class Meta:
+        model = JobApplication
+        fields = ['id', 'user', 'job_title', 'cv', 'status']

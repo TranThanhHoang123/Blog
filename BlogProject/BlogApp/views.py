@@ -395,6 +395,26 @@ class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIVie
             serializer = serializers.RecruitmentListSerializer(paginated_recruitments, many=True, context={'request': request})
             return paginator.get_paginated_response(serializer.data)
 
+    @action(detail=True, methods=['post','get'], url_path='job-applications')
+    def add_job_application(self, request, pk=None):
+        company = self.get_object()
+        user = request.user
+        if request.method == 'POST':
+            serializer = serializers.JobApplicationSerializer(data=request.data)
+            if serializer.is_valid():
+                # Lưu đơn xin việc với công ty và người dùng hiện tại
+                instance = serializer.save(company=company, user=user, status='pending')
+                return Response(serializers.JobApplicationDetailSerializer(instance, context={'request': request}).data,
+                                status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'GET':
+            job_applications = JobApplication.objects.filter(company=company).order_by('-created_date')
+            paginator = my_paginations.JobApplicationPagination()
+            paginated_applications = paginator.paginate_queryset(job_applications, request)
+            serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
+                                                                  context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
+
 
 class RecruitmentViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = Recruitment.objects.all().order_by('-created_date')
@@ -416,3 +436,35 @@ class RecruitmentViewSet(viewsets.ViewSet, generics.ListAPIView, generics.Update
         recruitment.status = not recruitment.status
         recruitment.save()
         return Response({"detail": "Recruitment updated successfully."}, status=status.HTTP_200_OK)
+
+
+class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAPIView):
+    queryset = JobApplication.objects.all().order_by('-created_date')
+    serializer_class = serializers.JobApplicationSerializer
+
+    def update(self, request, *args, **kwargs):
+        job_application = self.get_object()
+        serializer = serializers.JobApplicationSerializer(job_application, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"detail": "Job application updated successfully."},status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        job_application = self.get_object()
+        job_application.delete()
+        return Response({"detail": "Job application deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['patch'], url_path='status')
+    def update_status(self, request, pk=None):
+        job_application = self.get_object()
+        new_status = request.data.get('status')
+
+        if new_status not in dict(JobApplication.STATUS_CHOICES).keys():
+            return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
+
+        job_application.status = new_status
+        job_application.save()
+
+        serializer = serializers.JobApplicationDetailSerializer(job_application, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
