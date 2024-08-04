@@ -7,6 +7,7 @@ router.register(r'user', views.UserViewSet, basename='user')  # Specify the base
 router.register(r'blog', views.BlogViewSet, basename='blog')  # Specify the basename here
 router.register(r'comment', views.CommentViewSet, basename='comment')  # Specify the basename here
 router.register(r'company', views.CompanyViewSet, basename='company')  # Specify the basename here
+router.register(r'recruitment', views.RecruitmentViewSet, basename='recruitment')  # Specify the basename here
 urlpatterns = [
     path('', include(router.urls)),
     path('o/token/', CustomTokenView.as_view(), name='token'),

@@ -85,6 +85,7 @@ class Company(models.Model):
 
 class Recruitment(BaseModel):
     company = models.ForeignKey(Company, related_name='recruitments', on_delete=models.CASCADE)
+    owner = models.ForeignKey(User, related_name='recruitments', on_delete=models.SET_NULL,null=True,blank=True)# người tạo
     job_title = models.CharField(max_length=255)
     job_description = models.TextField()
     job_requirements = models.TextField()

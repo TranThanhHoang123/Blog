@@ -151,13 +151,32 @@ class CompanyDetailSerializer(CompanySerializer):
         fields = ['id','founder'] + CompanySerializer.Meta.fields + ['status']
 
 class CompanyListSerializer(serializers.ModelSerializer):
-    founder = UserListSerializer()
     class Meta:
         model = Company
-        fields = ['id','founder','name','founding_date', 'workers_number', 'location','status']
+        fields = ['id','name','founding_date', 'workers_number', 'location','status']
 
 
 class CompanyStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ['status']
+
+
+class RecruitmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recruitment
+        fields = '__all__'
+        read_only_fields = ['owner','company','status']
+
+class RecruitmentDetailSerializer(serializers.ModelSerializer):
+    company = CompanyListSerializer()
+    class Meta:
+        model = Recruitment
+        fields = '__all__'
+
+
+class RecruitmentListSerializer(serializers.ModelSerializer):
+    company = CompanyListSerializer()
+    class Meta:
+        model = Recruitment
+        fields = ['id','company','job_title','salary_range','status','created_date','updated_date']

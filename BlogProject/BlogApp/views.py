@@ -378,3 +378,41 @@ class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIVie
         company.save()
         return Response({"detail": "Status update successfully."}, status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post','get'],url_path='recruitments')
+    def add_recruitment(self, request, pk=None):
+        company = self.get_object()
+        owner = request.user
+        if request.method == 'POST':
+            serializer = serializers.RecruitmentSerializer(data=request.data)
+            if serializer.is_valid():
+                instance = serializer.save(company=company, owner=owner, status=True)
+                return Response(serializers.RecruitmentDetailSerializer(instance,context={'request':request}).data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'GET':
+            recruitments = Recruitment.objects.filter(company=company).order_by('-created_date')
+            paginator = my_paginations.RecruitmentPagination()
+            paginated_recruitments = paginator.paginate_queryset(recruitments, request)
+            serializer = serializers.RecruitmentListSerializer(paginated_recruitments, many=True, context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
+
+
+class RecruitmentViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+    queryset = Recruitment.objects.all().order_by('-created_date')
+    serializer_class = serializers.RecruitmentSerializer
+
+    def retrieve(self, request, pk=None):
+        recruitment = self.get_object()
+        serializer = serializers.RecruitmentDetailSerializer(recruitment, context={'request': request})
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk=None):
+        recruitment = self.get_object()
+        recruitment.delete()
+        return Response({"detail": "Recruitment deleted successfully."},status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=['patch'], url_path='status')
+    def toggle_status(self, request, pk=None):
+        recruitment = self.get_object()
+        recruitment.status = not recruitment.status
+        recruitment.save()
+        return Response({"detail": "Recruitment updated successfully."}, status=status.HTTP_200_OK)
