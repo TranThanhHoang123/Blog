@@ -48,25 +48,3 @@ def handle_comment_file_update(sender, instance, **kwargs):
 
         if old_instance and old_instance.file and old_instance.file != instance.file:
             old_instance.file.delete(save=False)
-
-
-# @receiver(post_save, sender=Company)
-# def create_admin_group(sender, instance, created, **kwargs):
-#     if created:
-#         group_name = f'admin_{instance.id}'
-#         group, created = Group.objects.get_or_create(name=group_name)
-#
-#         # Gán quyền cho nhóm
-#         permissions = [
-#             'edit_company',
-#             'add_user_to_group',
-#             'remove_user_from_group',
-#             'full_access_recruitment',
-#             'create_job_application',
-#             'delete_job_application',
-#             'change_job_application_status',
-#         ]
-#
-#         for perm_codename in permissions:
-#             permission = Permission.objects.get(codename=perm_codename)
-#             group.permissions.add(permission)

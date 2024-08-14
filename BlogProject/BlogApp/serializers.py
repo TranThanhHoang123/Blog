@@ -140,59 +140,6 @@ class BlogDetailWithCommentsSerializer(serializers.Serializer):
         return representation
 
 
-class RecruitmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recruitment
-        fields = '__all__'
-        read_only_fields = ['owner','company','status']
-
-class RecruitmentDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recruitment
-        fields = '__all__'
-
-
-class RecruitmentListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recruitment
-        fields = ['id','job_title','salary_range','status','created_date','updated_date']
-
-
-class JobApplicationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JobApplication
-        fields = '__all__'
-        read_only_fields = ['user', 'company']
-
-
-class JobApplicationDetailSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    cv = serializers.SerializerMethodField()
-
-    def get_cv(self, obj):
-        if obj.cv:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            cv = obj.cv.name
-            return self.context['request'].build_absolute_uri(f"/static/{cv}")
-    class Meta:
-        model = JobApplication
-        fields = '__all__'
-
-
-class JobApplicationListSerializer(serializers.ModelSerializer):
-    user = UserListSerializer()
-    cv = serializers.SerializerMethodField()
-
-    def get_cv(self, obj):
-        if obj.cv:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            cv = obj.cv.name
-            return self.context['request'].build_absolute_uri(f"/static/{cv}")
-    class Meta:
-        model = JobApplication
-        fields = ['id', 'user', 'job_title', 'cv', 'status']
-
-
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
@@ -264,6 +211,44 @@ class JobPostListSerializer(serializers.ModelSerializer):
         exclude = ['job_detail']  # Loại bỏ trường `job_detail`
 
 
+class JobApplicationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobApplication
+        fields = "__all__"
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'status': {'required': False,'read_only': True},
+        }
+
+
+class JobApplicationDetailSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    cv = serializers.SerializerMethodField()
+    job_post = JobPostListSerializer()
+    def get_cv(self, obj):
+        if obj.cv:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            cv = obj.cv.name
+            return self.context['request'].build_absolute_uri(f"/static/{cv}")
+    class Meta:
+        model = JobApplication
+        fields = '__all__'
+
+
+class JobApplicationListSerializer(serializers.ModelSerializer):
+    user = UserListSerializer()
+    cv = serializers.SerializerMethodField()
+
+    def get_cv(self, obj):
+        if obj.cv:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            cv = obj.cv.name
+            return self.context['request'].build_absolute_uri(f"/static/{cv}")
+    class Meta:
+        model = JobApplication
+        fields = ['id', 'user', 'job_title', 'cv', 'status']
+
+
 
 
 
@@ -287,3 +272,19 @@ class JobPostListSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Company
 #         fields = ['status']
+# class RecruitmentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Recruitment
+#         fields = '__all__'
+#         read_only_fields = ['owner','company','status']
+#
+# class RecruitmentDetailSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Recruitment
+#         fields = '__all__'
+#
+#
+# class RecruitmentListSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Recruitment
+#         fields = ['id','job_title','salary_range','status','created_date','updated_date']

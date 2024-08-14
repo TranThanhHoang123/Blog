@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'oauth2_provider',
     'BlogApp.apps.BlogappConfig',
+    'django_filters',
     # 'NotificationApp.apps.NotificationappConfig',
 ]
 

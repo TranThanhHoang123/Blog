@@ -4,7 +4,7 @@ from oauth2_provider.models import Application, AccessToken, RefreshToken
 from rest_framework import viewsets, generics, status, permissions
 from django.db.models import Q
 from rest_framework.response import Response
-from . import serializers, my_paginations, my_generics
+from . import serializers, my_paginations, my_generics,filters
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
@@ -22,6 +22,7 @@ import uuid
 from rest_framework import status
 from .models import *
 from django.contrib.auth.models import Group, Permission
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Create your views here.
 class CustomTokenView(TokenView):
@@ -102,9 +103,16 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = my_paginations.UserPagination
     parser_classes = [FormParser, MultiPartParser]
-
+    filterset_class = filters.UserFilterBase
+    filter_backends = [DjangoFilterBackend]
+    # Thêm filter_backends và filterset_fields
+    def get_filterset_class(self):
+        # user = self.get_object()
+        # if user là admin thì:
+        #     return filters.UserFilter
+        return self.filterset_class
     def get_permissions(self):
-        if self.action in ['create']:
+        if self.action in ['create','list']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -115,6 +123,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
 
     def get_object(self):
         return self.request.user
+
 
     @action(detail=False, methods=['patch'], url_path='update-profile')
     def update_profile(self, request, *args, **kwargs):
@@ -346,37 +355,16 @@ class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPI
         return Response({"message":"Comment deleted successfully"},status=status.HTTP_204_NO_CONTENT)
 
 
-
-
-
-class RecruitmentViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
-    queryset = Recruitment.objects.all().order_by('-created_date')
-    serializer_class = serializers.RecruitmentSerializer
-
-    def retrieve(self, request, pk=None):
-        recruitment = self.get_object()
-        serializer = serializers.RecruitmentDetailSerializer(recruitment, context={'request': request})
-        return Response(serializer.data,status=status.HTTP_200_OK)
-
-    def destroy(self, request, pk=None):
-        recruitment = self.get_object()
-        recruitment.delete()
-        return Response({"detail": "Recruitment deleted successfully."},status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=True, methods=['patch'], url_path='status')
-    def toggle_status(self, request, pk=None):
-        recruitment = self.get_object()
-        recruitment.status = not recruitment.status
-        recruitment.save()
-        return Response({"detail": "Recruitment updated successfully."}, status=status.HTTP_200_OK)
-
-
 class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = JobApplication.objects.all().order_by('-created_date')
     serializer_class = serializers.JobApplicationSerializer
 
     def update(self, request, *args, **kwargs):
         job_application = self.get_object()
+        # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
+        if request.user != job_application.user:
+            return Response({"detail": "You do not have permission to update this job application."},
+                            status=status.HTTP_403_FORBIDDEN)
         serializer = serializers.JobApplicationSerializer(job_application, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -385,6 +373,10 @@ class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.D
 
     def destroy(self, request, pk=None):
         job_application = self.get_object()
+        # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
+        if request.user != job_application.user:
+            return Response({"detail": "You do not have permission to delete this job application."},
+                            status=status.HTTP_403_FORBIDDEN)
         job_application.delete()
         return Response({"detail": "Job application deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
@@ -392,7 +384,10 @@ class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.D
     def update_status(self, request, pk=None):
         job_application = self.get_object()
         new_status = request.data.get('status')
-
+        # Kiểm tra quyền chỉnh sửa: Chỉ cho phép người tạo bài đăng sửa đổi nó
+        if job_application.job_post.user != request.user:
+            return Response({'detail': 'You do not have permission to change status this job application.'},
+                            status=status.HTTP_403_FORBIDDEN)
         if new_status not in dict(JobApplication.STATUS_CHOICES).keys():
             return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -469,7 +464,7 @@ class ChangePasswordViewSet(viewsets.ViewSet):
 
 
 
-class JobPostViewSet(viewsets.ViewSet,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView,generics.CreateAPIView):
+class JobPostViewSet(viewsets.ViewSet,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView,generics.CreateAPIView,generics.DestroyAPIView):
     queryset = JobPost.objects.all()
     serializer_class = serializers.JobPostSerializer
     pagination_class = my_paginations.JobPostPagination
@@ -521,6 +516,38 @@ class JobPostViewSet(viewsets.ViewSet,generics.ListAPIView,generics.RetrieveAPIV
             instance = serializer.save(user=user)
             return Response(serializers.JobPostDetailSerializer(instance,context={'request': request}).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['post','get'], url_path='job-applications')
+    def add_job_application(self, request, pk=None):
+        job_post = self.get_object()
+        user = request.user
+        if request.method == 'POST':
+            serializer = serializers.JobApplicationSerializer(data=request.data)
+            if serializer.is_valid():
+                # Lưu đơn xin việc với công ty và người dùng hiện tại
+                instance = serializer.save(job_post=job_post, user=user, status='pending')
+                return Response({'detail':"Job application created successfully."},
+                                status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        elif request.method == 'GET':
+            if user != job_post.user:
+                return Response({"detail": "You do not have permission to view these job applications."}, status=status.HTTP_403_FORBIDDEN)
+            job_applications = JobApplication.objects.filter(job_post=job_post).order_by('-created_date')
+            paginator = my_paginations.JobApplicationPagination()
+            paginated_applications = paginator.paginate_queryset(job_applications, request)
+            serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        job_post = self.get_object()
+        if job_post.user != request.user:
+            return Response({'detail': 'You do not have permission to delete this job post.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        job_post.delete()
+        return Response({'detail': 'Job post deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+
+
+
 
 
 
@@ -609,3 +636,24 @@ class JobPostViewSet(viewsets.ViewSet,generics.ListAPIView,generics.RetrieveAPIV
 #             serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
 #                                                                   context={'request': request})
 #             return paginator.get_paginated_response(serializer.data)
+
+# class RecruitmentViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+#     queryset = Recruitment.objects.all().order_by('-created_date')
+#     serializer_class = serializers.RecruitmentSerializer
+#
+#     def retrieve(self, request, pk=None):
+#         recruitment = self.get_object()
+#         serializer = serializers.RecruitmentDetailSerializer(recruitment, context={'request': request})
+#         return Response(serializer.data,status=status.HTTP_200_OK)
+#
+#     def destroy(self, request, pk=None):
+#         recruitment = self.get_object()
+#         recruitment.delete()
+#         return Response({"detail": "Recruitment deleted successfully."},status=status.HTTP_204_NO_CONTENT)
+#
+#     @action(detail=True, methods=['patch'], url_path='status')
+#     def toggle_status(self, request, pk=None):
+#         recruitment = self.get_object()
+#         recruitment.status = not recruitment.status
+#         recruitment.save()
+#         return Response({"detail": "Recruitment updated successfully."}, status=status.HTTP_200_OK)
