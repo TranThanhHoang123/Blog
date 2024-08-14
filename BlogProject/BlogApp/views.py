@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.utils.crypto import get_random_string
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from rest_framework import viewsets, generics, status, permissions
 from django.db.models import Q
@@ -468,3 +469,67 @@ class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.D
 
         serializer = serializers.JobApplicationDetailSerializer(job_application, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ChangePasswordViewSet(viewsets.ViewSet):
+    queryset = User.objects.all()
+    serializer_class = serializers.ChangePasswordSerializer
+    def get_permissions(self):
+        if self.action in ['reset_password','verify_code']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+    @action(detail=False, methods=['patch'], url_path='change-password')
+    def change_password(self, request, pk=None):
+        serializer = serializers.ChangePasswordSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = request.user
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response({"message": "Password updated successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='reset-password')
+    def reset_password(self, request):
+        serializer = serializers.PasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+        user = User.objects.get(email=email)
+        code = get_random_string(length=6, allowed_chars='0123456789')
+
+        try:
+            reset_code = PasswordResetCode.objects.get(user=user)
+            if not reset_code.is_expired():
+                return Response({"error": "Already sent verify code"}, status=status.HTTP_400_BAD_REQUEST)
+        except PasswordResetCode.DoesNotExist:
+            reset_code = PasswordResetCode(user=user)
+
+        reset_code.code = code
+        reset_code.expires_at = timezone.now() + timedelta(minutes=3)
+        reset_code.status = False
+        reset_code.save()
+
+        send_verification_email(email,'Mã xác nhận đổi mật khẩu',f'Đây là mã xác nhận của bạn: {code}'
+                                                                 f'\n MÃ HIỆU LỰC NÀY CÓ TÁC DỤNG TRONG 3 PHÚT!')
+
+        return Response({"message": "Verification code sent to your email"}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], url_path='verify-code')
+    def verify_code(self, request):
+        serializer = serializers.VerifyCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.get(email=serializer.validated_data['email'])
+        reset_code = PasswordResetCode.objects.get(user=user, code=serializer.validated_data['code'])
+
+        if reset_code.is_expired():
+            return Response({"error": "Verification code expired"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if reset_code.status:
+            return Response({"error": "Verification code already used"}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(serializer.validated_data['new_password'])
+        user.save()
+
+        reset_code.status = True
+        reset_code.save()
+
+        return Response({"message": "Password has been updated successfully"}, status=status.HTTP_200_OK)

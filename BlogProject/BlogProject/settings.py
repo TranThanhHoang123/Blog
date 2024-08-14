@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,6 +42,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'oauth2_provider',
     'BlogApp.apps.BlogappConfig',
+    # 'NotificationApp.apps.NotificationappConfig',
 ]
 
 REST_FRAMEWORK = {
@@ -87,23 +89,23 @@ TEMPLATES = [
 MEDIA_ROOT = '%s/BlogApp/static/' % BASE_DIR
 
 WSGI_APPLICATION = 'BlogProject.wsgi.application'
+ASGI_APPLICATION = "BlogProject.asgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
 import pymysql
 pymysql.install_as_MySQLdb()
+# DATABASE_ROUTERS = ['NotificationApp.routers.NotificationRouter']
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'blogdb',
-        'USER':'root',
-        'PASSWORD':'Admin@123',
-        'HOST':''
-    }
+        'USER': 'root',
+        'PASSWORD': 'Admin@123',
+        'HOST': '',
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -158,3 +160,18 @@ OAUTH2_PROVIDER = {
 }
 #id:FX4glR4JIGLryn5EaXp4cjh21n8sZvuaqMqTrU1S
 #sc:L2DWvzpcf6OW7MFiFanE0y3sEQN6dBxGF93QcAQO8LEZqpUevFwGDbqVxUECr70Iy0BbODuysHAKICax3CkgOSWT6wpVbHd6TSInh4rotyQmMBpdZO9iDUy2l2wODimD
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [("127.0.0.1", 6379)],
+#         },
+#     },
+# }
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = 'taxhuy2001@gmail.com'
+EMAIL_HOST_PASSWORD = 'owum fexk zmuh gddj'  # Use the App Password here

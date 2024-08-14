@@ -216,3 +216,51 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
         fields = ['id', 'user', 'job_title', 'cv', 'status']
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+    def validate_old_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Old password is not correct")
+        return value
+
+    def validate_new_password(self, value):
+        if self.context['request'].user.check_password(value):
+            raise serializers.ValidationError("New password cannot be the same as the old password.")
+        return value
+
+    class Meta:
+        fields = ['old_password', 'new_password']
+
+
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email not found.")
+        return value
+
+
+class VerifyCodeSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    code = serializers.CharField(max_length=6)
+    new_password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        try:
+            user = User.objects.get(email=data['email'])
+            reset_code = PasswordResetCode.objects.get(user=user, code=data['code'])
+        except (User.DoesNotExist, PasswordResetCode.DoesNotExist):
+            raise serializers.ValidationError("Invalid email or code.")
+
+        if reset_code.is_expired():
+            raise serializers.ValidationError("Verification code expired.")
+
+        if reset_code.status:
+            raise serializers.ValidationError("Verification code already used.")
+
+        return data

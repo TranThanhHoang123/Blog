@@ -9,6 +9,7 @@ router.register(r'comment', views.CommentViewSet, basename='comment')  # Specify
 router.register(r'company', views.CompanyViewSet, basename='company')  # Specify the basename here
 router.register(r'recruitment', views.RecruitmentViewSet, basename='recruitment')  # Specify the basename here
 router.register(r'job-application', views.JobApplicationViewSet, basename='job-application')  # Specify the basename here
+router.register(r'password', views.ChangePasswordViewSet, basename='password')  # Specify the basename here
 
 urlpatterns = [
     path('', include(router.urls)),

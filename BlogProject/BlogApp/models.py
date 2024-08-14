@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxLengthValidator
+from django.contrib.auth.models import Group
 
 
 class BaseModel(models.Model):
@@ -84,7 +85,7 @@ class Company(models.Model):
 
 
 class Recruitment(BaseModel):
-    company = models.ForeignKey(Company, related_name='recruitments', on_delete=models.CASCADE)
+    # company = models.ForeignKey(Company, related_name='recruitments', on_delete=models.CASCADE)
     owner = models.ForeignKey(User, related_name='recruitments', on_delete=models.SET_NULL,null=True,blank=True)# người tạo
     job_title = models.CharField(max_length=255)
     job_description = models.TextField()
@@ -112,3 +113,43 @@ class JobApplication(BaseModel):
 
     def __str__(self):
         return f'{self.job_title} - {self.user.username}'
+
+
+from datetime import timedelta
+from django.utils import timezone
+class PasswordResetCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    expires_at = models.DateTimeField()
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=3)
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+
+# class CompanyGroup(models.Model):
+#     company = models.ForeignKey(Company, related_name='groups', on_delete=models.CASCADE)
+#     group = models.OneToOneField(Group, related_name='company_group', on_delete=models.CASCADE)
+#     def __str__(self):
+#         return f"{self.company.name} - {self.group.name}"
+#     #thêm các quyền
+#     class Meta:
+#         permissions = [
+#             ("edit_company", "Can edit company"),
+#             ("add_user_to_group", "Can add user to group"),
+#             ("remove_user_from_group", "Can remove user from group"),
+#             ("add_recruitment", "Can add recruitment"),
+#             ("delete_recruitment", "Can delete recruitment"),
+#             ("change_recruitment", "Can change recruitment"),
+#             ("full_access_recruitment", "Full access to recruitment"),
+#             ("create_job_application", "Can create job application"),
+#             ("delete_job_application", "Can delete job application"),
+#             ("change_job_application_status", "Can change job application status"),
+#             ("full_access_job_application", "Full access to job application"),
+#         ]
