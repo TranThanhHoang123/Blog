@@ -14,3 +14,22 @@ def send_verification_email(to_email, subject, message):
         [to_email],
         fail_silently=False,
     )
+
+
+from django.contrib.auth.models import Group
+
+
+def get_group_permissions(group_name):
+    try:
+        # Lấy đối tượng nhóm theo tên
+        group = Group.objects.get(name=group_name)
+
+        # Lấy tất cả quyền gán cho nhóm
+        permissions = group.permissions.all()
+
+        # Trả về danh sách tên của quyền
+        return [permission.name for permission in permissions]
+
+    except Group.DoesNotExist:
+        # Trả về thông báo nếu nhóm không tồn tại
+        return None

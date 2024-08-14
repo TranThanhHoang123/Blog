@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxLengthValidator
 from django.contrib.auth.models import Group
 
-
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True,null=True)
     updated_date = models.DateTimeField(auto_now=True,null=True)
@@ -18,9 +17,9 @@ class User(AbstractUser):
     profile_image = models.ImageField(upload_to='user/%Y/%m', null=True, blank=True)
     profile_bg = models.ImageField(upload_to='user/%Y/%m', null=True, blank=True)
     link = models.CharField(max_length=100,null=True)
-
     def __str__(self):
         return self.username
+
 
 class Blog(BaseModel):
     VISIBILITY_CHOICES = [
@@ -131,6 +130,30 @@ class PasswordResetCode(models.Model):
 
     def is_expired(self):
         return timezone.now() > self.expires_at
+
+
+from django.db import models
+
+
+class JobPost(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    WORK_TYPE_CHOICES = [
+        ('full-time', 'full-time'),
+        ('part-time', 'part-time'),
+    ]
+    work = models.CharField(max_length=10, choices=WORK_TYPE_CHOICES, default='full-time')
+    location = models.CharField(max_length=255)
+    mail = models.EmailField(max_length=255)
+    phone_number = models.CharField(max_length=15)
+    link = models.URLField(max_length=255, blank=True, null=True)
+    date = models.DateTimeField()
+    experience = models.CharField(max_length=255)
+    quantity = models.IntegerField()
+    job_detail = models.TextField()
+    salary = models.CharField(max_length=255)
+    content = models.CharField(max_length=255,null=False,blank=False)
+
+
 
 
 # class CompanyGroup(models.Model):

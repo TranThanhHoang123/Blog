@@ -140,28 +140,6 @@ class BlogDetailWithCommentsSerializer(serializers.Serializer):
         return representation
 
 
-class CompanySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = ['name','founding_date', 'workers_number', 'location', 'mail', 'phone_number', 'link']
-
-class CompanyDetailSerializer(CompanySerializer):
-    founder = UserListSerializer()
-    class Meta(CompanySerializer.Meta):
-        fields = ['id','founder'] + CompanySerializer.Meta.fields + ['status']
-
-class CompanyListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = ['id','name','founding_date', 'workers_number', 'location','status']
-
-
-class CompanyStatusUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Company
-        fields = ['status']
-
-
 class RecruitmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recruitment
@@ -169,17 +147,15 @@ class RecruitmentSerializer(serializers.ModelSerializer):
         read_only_fields = ['owner','company','status']
 
 class RecruitmentDetailSerializer(serializers.ModelSerializer):
-    company = CompanyListSerializer()
     class Meta:
         model = Recruitment
         fields = '__all__'
 
 
 class RecruitmentListSerializer(serializers.ModelSerializer):
-    company = CompanyListSerializer()
     class Meta:
         model = Recruitment
-        fields = ['id','company','job_title','salary_range','status','created_date','updated_date']
+        fields = ['id','job_title','salary_range','status','created_date','updated_date']
 
 
 class JobApplicationSerializer(serializers.ModelSerializer):
@@ -190,7 +166,6 @@ class JobApplicationSerializer(serializers.ModelSerializer):
 
 
 class JobApplicationDetailSerializer(serializers.ModelSerializer):
-    company = CompanyListSerializer()
     user = UserSerializer()
     cv = serializers.SerializerMethodField()
 
@@ -264,3 +239,51 @@ class VerifyCodeSerializer(serializers.Serializer):
             raise serializers.ValidationError("Verification code already used.")
 
         return data
+
+
+class JobPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JobPost
+        fields = "__all__"
+        extra_kwargs = {
+            'user': {'read_only': True},
+        }
+
+class JobPostDetailSerializer(serializers.ModelSerializer):
+    user = UserListSerializer()
+    class Meta:
+        model = JobPost
+        fields = "__all__"
+
+
+class JobPostListSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)  # Hiển thị thông tin người dùng, chỉ đọc
+
+    class Meta:
+        model = JobPost
+        exclude = ['job_detail']  # Loại bỏ trường `job_detail`
+
+
+
+
+
+# class CompanySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Company
+#         fields = ['name','founding_date', 'workers_number', 'location', 'mail', 'phone_number', 'link']
+#
+# class CompanyDetailSerializer(CompanySerializer):
+#     founder = UserListSerializer()
+#     class Meta(CompanySerializer.Meta):
+#         fields = ['id','founder'] + CompanySerializer.Meta.fields + ['status']
+#
+# class CompanyListSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Company
+#         fields = ['id','name','founding_date', 'workers_number', 'location','status']
+#
+#
+# class CompanyStatusUpdateSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Company
+#         fields = ['status']

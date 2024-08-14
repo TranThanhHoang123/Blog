@@ -96,7 +96,7 @@ def custom_refresh_token(request):
     return JsonResponse(response_data)
 
 
-class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPIView):
+class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -346,75 +346,7 @@ class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPI
         return Response({"message":"Comment deleted successfully"},status=status.HTTP_204_NO_CONTENT)
 
 
-class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView):
-    queryset = Company.objects.all().order_by('-workers_number')
-    serializer_class = serializers.CompanySerializer
-    permission_classes = [permissions.IsAuthenticated]
-    pagination_class = my_paginations.CompanyPagination
 
-    def get_permissions(self):
-        if self.action in ['list','retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-
-    def get_serializer_class(self):
-        if self.action in ['list']:
-            return serializers.CompanyListSerializer
-        if self.action in ['retrieve']:
-            return serializers.CompanyDetailSerializer
-        return self.serializer_class
-
-    def create(self, request):
-        serializer = self.serializer_class(data=request.data)
-        if serializer.is_valid():
-            company = serializer.save(founder=request.user)  # Gán người dùng hiện tại là người tạo công ty
-            return Response(serializers.CompanyDetailSerializer(company, context={'request': request}).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(methods=['patch'],url_path='status',detail=True)
-    def update_status(self,request,pk=None):
-        company = Company.objects.get(pk=pk)
-        company_status = self.request.data.get('status')
-        company.status = company_status
-        company.save()
-        return Response({"detail": "Status update successfully."}, status=status.HTTP_200_OK)
-
-    @action(detail=True, methods=['post','get'],url_path='recruitments')
-    def add_recruitment(self, request, pk=None):
-        company = self.get_object()
-        owner = request.user
-        if request.method == 'POST':
-            serializer = serializers.RecruitmentSerializer(data=request.data)
-            if serializer.is_valid():
-                instance = serializer.save(company=company, owner=owner, status=True)
-                return Response(serializers.RecruitmentDetailSerializer(instance,context={'request':request}).data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        elif request.method == 'GET':
-            recruitments = Recruitment.objects.filter(company=company).order_by('-created_date')
-            paginator = my_paginations.RecruitmentPagination()
-            paginated_recruitments = paginator.paginate_queryset(recruitments, request)
-            serializer = serializers.RecruitmentListSerializer(paginated_recruitments, many=True, context={'request': request})
-            return paginator.get_paginated_response(serializer.data)
-
-    @action(detail=True, methods=['post','get'], url_path='job-applications')
-    def add_job_application(self, request, pk=None):
-        company = self.get_object()
-        user = request.user
-        if request.method == 'POST':
-            serializer = serializers.JobApplicationSerializer(data=request.data)
-            if serializer.is_valid():
-                # Lưu đơn xin việc với công ty và người dùng hiện tại
-                instance = serializer.save(company=company, user=user, status='pending')
-                return Response(serializers.JobApplicationDetailSerializer(instance, context={'request': request}).data,
-                                status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        elif request.method == 'GET':
-            job_applications = JobApplication.objects.filter(company=company).order_by('-created_date')
-            paginator = my_paginations.JobApplicationPagination()
-            paginated_applications = paginator.paginate_queryset(job_applications, request)
-            serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
-                                                                  context={'request': request})
-            return paginator.get_paginated_response(serializer.data)
 
 
 class RecruitmentViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
@@ -533,3 +465,147 @@ class ChangePasswordViewSet(viewsets.ViewSet):
         reset_code.save()
 
         return Response({"message": "Password has been updated successfully"}, status=status.HTTP_200_OK)
+
+
+
+
+class JobPostViewSet(viewsets.ViewSet,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView,generics.CreateAPIView):
+    queryset = JobPost.objects.all()
+    serializer_class = serializers.JobPostSerializer
+    pagination_class = my_paginations.JobPostPagination
+    permission_classes = [permissions.IsAuthenticated]  # Yêu cầu người dùng phải đăng nhập
+
+    def get_permissions(self):
+        if self.action in ['list','retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.action in ['retrieve']:
+            return serializers.JobPostDetailSerializer
+        elif self.action in ['list']:
+            return serializers.JobPostListSerializer
+        return self.serializer_class
+
+    def update(self, request, *args, **kwargs):
+        job_post = self.get_object()
+
+        # Kiểm tra quyền chỉnh sửa: Chỉ cho phép người tạo bài đăng sửa đổi nó
+        if job_post.user != request.user:
+            return Response({'detail': 'You do not have permission to edit this job post.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        # Loại bỏ trường không cho phép chỉnh sửa nếu cần
+        data = request.data.copy()
+        if 'user' in data:  # Không cho phép chỉnh sửa người dùng
+            data.pop('user')
+
+        partial = True  # Cho phép cập nhật một phần
+        serializer = self.get_serializer(job_post, data=data, partial=partial)
+
+        if serializer.is_valid():
+            updated_job_post = serializer.save()  # Lưu các thay đổi
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def create(self, request):
+        user = request.user
+
+        data = request.data.copy()
+        data['user'] = user.id  # Gán user hiện tại vào dữ liệu
+
+        serializer = serializers.JobPostSerializer(data=data)
+
+        if serializer.is_valid():
+            instance = serializer.save(user=user)
+            return Response(serializers.JobPostDetailSerializer(instance,context={'request': request}).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView):
+#     queryset = Company.objects.all().order_by('-workers_number')
+#     serializer_class = serializers.CompanySerializer
+#     permission_classes = [permissions.IsAuthenticated]
+#     pagination_class = my_paginations.CompanyPagination
+#
+#     def get_permissions(self):
+#         if self.action in ['list','retrieve']:
+#             return [permissions.AllowAny()]
+#         return [permissions.IsAuthenticated()]
+#
+#     def get_serializer_class(self):
+#         if self.action in ['list']:
+#             return serializers.CompanyListSerializer
+#         if self.action in ['retrieve']:
+#             return serializers.CompanyDetailSerializer
+#         return self.serializer_class
+#
+#     def create(self, request):
+#         serializer = self.serializer_class(data=request.data)
+#         if serializer.is_valid():
+#             company = serializer.save(founder=request.user)  # Gán người dùng hiện tại là người tạo công ty
+#             return Response(serializers.CompanyDetailSerializer(company, context={'request': request}).data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#     @action(methods=['patch'],url_path='status',detail=True)
+#     def update_status(self,request,pk=None):
+#         company = Company.objects.get(pk=pk)
+#         company_status = self.request.data.get('status')
+#         company.status = company_status
+#         company.save()
+#         return Response({"detail": "Status update successfully."}, status=status.HTTP_200_OK)
+#
+#     @action(detail=True, methods=['post','get'],url_path='recruitments')
+#     def add_recruitment(self, request, pk=None):
+#         company = self.get_object()
+#         owner = request.user
+#         if request.method == 'POST':
+#             serializer = serializers.RecruitmentSerializer(data=request.data)
+#             if serializer.is_valid():
+#                 instance = serializer.save(company=company, owner=owner, status=True)
+#                 return Response(serializers.RecruitmentDetailSerializer(instance,context={'request':request}).data, status=status.HTTP_201_CREATED)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         elif request.method == 'GET':
+#             recruitments = Recruitment.objects.filter(company=company).order_by('-created_date')
+#             paginator = my_paginations.RecruitmentPagination()
+#             paginated_recruitments = paginator.paginate_queryset(recruitments, request)
+#             serializer = serializers.RecruitmentListSerializer(paginated_recruitments, many=True, context={'request': request})
+#             return paginator.get_paginated_response(serializer.data)
+#
+#     @action(detail=True, methods=['post','get'], url_path='job-applications')
+#     def add_job_application(self, request, pk=None):
+#         company = self.get_object()
+#         user = request.user
+#         if request.method == 'POST':
+#             serializer = serializers.JobApplicationSerializer(data=request.data)
+#             if serializer.is_valid():
+#                 # Lưu đơn xin việc với công ty và người dùng hiện tại
+#                 instance = serializer.save(company=company, user=user, status='pending')
+#                 return Response(serializers.JobApplicationDetailSerializer(instance, context={'request': request}).data,
+#                                 status=status.HTTP_201_CREATED)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         elif request.method == 'GET':
+#             job_applications = JobApplication.objects.filter(company=company).order_by('-created_date')
+#             paginator = my_paginations.JobApplicationPagination()
+#             paginated_applications = paginator.paginate_queryset(job_applications, request)
+#             serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
+#                                                                   context={'request': request})
+#             return paginator.get_paginated_response(serializer.data)
