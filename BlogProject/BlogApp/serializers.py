@@ -247,6 +247,11 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'user': {'read_only': True},
             'status': {'required': False,'read_only': True},
+            'fullname': {'required': True},
+            'phone_number': {'required': True},
+            'email': {'required': True},
+            'sex': {'required': True},
+            'age': {'required': True},
         }
 
 
@@ -275,7 +280,7 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
             return self.context['request'].build_absolute_uri(f"/static/{cv}")
     class Meta:
         model = JobApplication
-        fields = ['id', 'user', 'job_title', 'cv', 'status']
+        fields = ['id', 'user','fullname','job_title', 'cv', 'status','created_date']
 
 
 

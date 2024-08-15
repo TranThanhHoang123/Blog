@@ -142,13 +142,9 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
         serializer = serializers.UserDetailSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['get'], url_path='job-applications')
+    @action(detail=False, methods=['get'], url_path='job-applications')
     def job_applications(self, request, pk=None):
-        current_user = request.user
-        user = self.get_object()
-        if user != current_user:
-            return Response({"detail": "You do not have permission to view theses job application."},
-                            status=status.HTTP_403_FORBIDDEN)
+        user = request.user
         # người dung của blog
         job_application = JobApplication.objects.filter(user=user).order_by('-created_date')
         paginator = my_paginations.JobApplicationPagination()
@@ -395,26 +391,26 @@ class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.D
     queryset = JobApplication.objects.all().order_by('-created_date')
     serializer_class = serializers.JobApplicationSerializer
 
-    def update(self, request, *args, **kwargs):
-        job_application = self.get_object()
-        # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
-        if request.user != job_application.user:
-            return Response({"detail": "You do not have permission to update this job application."},
-                            status=status.HTTP_403_FORBIDDEN)
-        serializer = serializers.JobApplicationSerializer(job_application, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"detail": "Job application updated successfully."},status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request, pk=None):
-        job_application = self.get_object()
-        # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
-        if request.user != job_application.user:
-            return Response({"detail": "You do not have permission to delete this job application."},
-                            status=status.HTTP_403_FORBIDDEN)
-        job_application.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    # def update(self, request, *args, **kwargs):
+    #     job_application = self.get_object()
+    #     # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
+    #     if request.user != job_application.user:
+    #         return Response({"detail": "You do not have permission to update this job application."},
+    #                         status=status.HTTP_403_FORBIDDEN)
+    #     serializer = serializers.JobApplicationSerializer(job_application, data=request.data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response({"detail": "Job application updated successfully."},status=status.HTTP_200_OK)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #
+    # def destroy(self, request, pk=None):
+    #     job_application = self.get_object()
+    #     # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
+    #     if request.user != job_application.user:
+    #         return Response({"detail": "You do not have permission to delete this job application."},
+    #                         status=status.HTTP_403_FORBIDDEN)
+    #     job_application.delete()
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['patch'], url_path='status')
     def update_status(self, request, pk=None):

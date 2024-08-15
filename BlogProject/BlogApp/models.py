@@ -108,6 +108,11 @@ class JobApplication(BaseModel):
     user = models.ForeignKey(User, related_name='job_applications', on_delete=models.CASCADE)
     job_title = models.CharField(max_length=255)
     cv = models.FileField(upload_to='cv/%Y/%m')
+    fullname = models.CharField(max_length=50,null=True,blank=False)
+    phone_number = models.CharField(max_length=11,null=True,blank=False)
+    email = models.EmailField(null=True,blank=False)
+    sex = models.BooleanField(default=True)
+    age = models.CharField(max_length=4,null=True,blank=False)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
