@@ -137,10 +137,24 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'], url_path='details')
-    def retrieve_user(self, request, *args, **kwargs):
+    def retrieve_user(self, request):
         user = self.get_object()
         serializer = serializers.UserDetailSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='job-applications')
+    def job_applications(self, request, pk=None):
+        current_user = request.user
+        user = self.get_object()
+        if user != current_user:
+            return Response({"detail": "You do not have permission to view theses job application."},
+                            status=status.HTTP_403_FORBIDDEN)
+        # người dung của blog
+        job_application = JobApplication.objects.filter(user=user).order_by('-created_date')
+        paginator = my_paginations.JobApplicationPagination()
+        result_page = paginator.paginate_queryset(job_application, request)
+        serializer = serializers.JobApplicationListSerializer(result_page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         user_id = kwargs.get('pk')  # Lấy ID từ URL
