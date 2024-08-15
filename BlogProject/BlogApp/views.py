@@ -113,7 +113,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
         #     return filters.UserFilter
         return self.filterset_class
     def get_permissions(self):
-        if self.action in ['create','list']:
+        if self.action in ['create','list','blog']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -153,13 +153,10 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], url_path='blog', permission_classes=[permissions.IsAuthenticated])
-    def my_blogs(self, request, pk=None):
-        user = request.user
-        if pk == str(user.id):
-            blogs = Blog.objects.filter(user=user).order_by('-created_date')
-        else:
-            blogs = Blog.objects.filter(user_id=pk, visibility='public').order_by('-created_date')
-
+    def blog(self, request, pk=None):
+        #người dung của blog
+        user_blog = User.objects.get(pk=pk)
+        blogs = utils.get_blog_list_of_user(user_blog=user_blog,user=request.user)
         paginator = my_paginations.BlogPagination()
         result_page = paginator.paginate_queryset(blogs, request)
         serializer = serializers.BlogDetailSerializer(result_page, many=True, context={'request': request})

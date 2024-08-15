@@ -30,6 +30,19 @@ def get_blog_list(user):
             likes_user=Count('like', filter=Q(like__user=user))
         ).order_by('-created_date')
 
+def get_blog_list_of_user(user_blog,user):
+    if user.is_anonymous:
+        return Blog.objects.filter(visibility='public',user=user_blog).annotate(
+            likes_count=Count('like'),
+            comment_count=Count('comment')
+        ).order_by('-created_date')
+    else:
+        return Blog.objects.filter(Q(visibility='public',user=user_blog)|Q(user=user)).annotate(
+            likes_count=Count('like'),
+            comment_count=Count('comment'),
+            likes_user=Count('like', filter=Q(like__user=user))
+        ).order_by('-created_date')
+
 
 def check_client_secret(stored_secret, provided_secret):
     return check_password(provided_secret, stored_secret)
