@@ -26,11 +26,6 @@ def delete_old_files(sender, instance, **kwargs):
             if os.path.isfile(old_profile_bg_path):
                 os.remove(old_profile_bg_path)
 
-@receiver(post_delete, sender=Comment)
-def delete_comment_file(sender, instance, **kwargs):
-    if instance.file:
-        instance.file.delete(False)
-
 
 @receiver(post_delete, sender=Comment)
 def delete_comment_file(sender, instance, **kwargs):

@@ -30,8 +30,8 @@ class Blog(BaseModel):
     content = models.CharField(max_length=255)
     description = models.TextField(validators=[MaxLengthValidator(1000)])  # Giới hạn 1000 ký tự
     visibility = models.CharField(max_length=9, choices=VISIBILITY_CHOICES, default='public')
-    likes_count = models.PositiveIntegerField(default=0)
-    comments_count = models.PositiveIntegerField(default=0)
+    # likes_count = models.PositiveIntegerField(default=0)
+    # comments_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.content

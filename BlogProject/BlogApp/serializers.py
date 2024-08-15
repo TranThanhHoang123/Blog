@@ -74,29 +74,58 @@ class BlogMediaSerializer(serializers.ModelSerializer):
 
 class BlogSerializer(serializers.ModelSerializer):
     media = BlogMediaSerializer(many=True, required=False)
-    class Meta:
-        model = Blog
-        fields = ['id','content', 'description', 'visibility', 'likes_count', 'comments_count','media']
-        extra_kwargs = {
-            'content': {'required': True},
-            'description': {'required': True},
-            'status': {'required': True},
-            'likes_count': {'read_only': True},
-            'comments_count': {'read_only': True},
-        }
-
-class BlogDetailSerializer(BlogSerializer):
     user = UserListSerializer()
     liked = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+    class Meta:
+        model = Blog
+        fields = ['user', 'id', 'content', 'description', 'visibility', 'likes_count', 'comment_count', 'media', 'liked']
+        extra_kwargs = {
+            'user':{'readonly': True},
+            'content': {'required': True},
+            'description': {'required': True},
+            'likes_count': {'readonly': True},
+            'comment_count': {'readonly': True},
+            'liked': {'readonly': True},
+        }
 
-    class Meta(BlogSerializer.Meta):
-        fields = ['user'] + BlogSerializer.Meta.fields + ['created_date', 'updated_date', 'liked']
+    def get_likes_count(self, obj):
+        return Like.objects.filter(blog=obj).count()
+
+    def get_comment_count(self, obj):
+        return Comment.objects.filter(blog=obj).count()
 
     def get_liked(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             user = request.user
             return Like.objects.filter(blog=obj, user=user).exists()
+        return False
+
+class BlogDetailSerializer(BlogSerializer):
+    user = UserListSerializer()
+    liked = serializers.SerializerMethodField()
+    likes_count = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Blog
+        fields = ['user', 'id', 'content', 'description', 'visibility', 'likes_count', 'comment_count', 'media', 'created_date', 'updated_date', 'liked']
+
+    def get_likes_count(self, obj):
+        # Đã được tính trong QuerySet, không cần thiết phải làm lại ở đây
+        return obj.likes_count
+
+    def get_comment_count(self, obj):
+        # Đã được tính trong QuerySet, không cần thiết phải làm lại ở đây
+        return obj.comment_count
+
+    def get_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            user = request.user
+            return obj.likes_user > 0  # `likes_user` được tính trong QuerySet
         return False
 
 

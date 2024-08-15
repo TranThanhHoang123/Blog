@@ -4,7 +4,7 @@ from oauth2_provider.models import Application, AccessToken, RefreshToken
 from rest_framework import viewsets, generics, status, permissions
 from django.db.models import Q
 from rest_framework.response import Response
-from . import serializers, my_paginations, my_generics,filters
+from . import serializers, my_paginations, my_generics,filters,utils
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
@@ -23,6 +23,7 @@ from rest_framework import status
 from .models import *
 from django.contrib.auth.models import Group, Permission
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db import transaction
 
 # Create your views here.
 class CustomTokenView(TokenView):
@@ -174,11 +175,13 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
     def get_queryset(self):
         if self.action in ['list']:
-            queryset = Blog.objects.filter(visibility='public').order_by('-created_date')
+            queryset = utils.get_blog_list(self.request.user)
             return queryset
 
     def get_permissions(self):
         if self.action in ['list','retrieve']:
+            return [permissions.AllowAny()]
+        if self.action in ['comment'] and self.request.method == 'GET':
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -188,38 +191,45 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         return self.serializer_class
 
     def retrieve(self, request, pk=None):
-        blog = get_object_or_404(Blog, pk=pk)
-        # Check for private blog visibility
-        if blog.visibility == 'private' and blog.user != request.user:
-            return Response({'detail': 'You do not have permission to view this blog.'}, status=status.HTTP_403_FORBIDDEN)
-        serializer = serializers.BlogDetailWithCommentsSerializer(instance=blog, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def create(self, request, *args, **kwargs):
         user = request.user
-        content = request.data.get('content')
-        description = request.data.get('description')
-        visibility = request.data.get('visibility')
-        medias = request.FILES.getlist('media')
+        blog = utils.get_blog_details(pk, user)
+        # Check for private blog visibility
+        if blog.visibility == 'private' and blog.user != user:
+            return Response({'detail': 'You do not have permission to view this blog.'}, status=status.HTTP_403_FORBIDDEN)
+        if blog:
+            serializer = serializers.BlogDetailSerializer(blog, context={'request': request})
+            return Response(serializer.data)
+        return Response({'detail': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Validate and create blog instance
-        blog = Blog.objects.create(
-            user=user,
-            content=content,
-            description=description,
-            visibility=visibility
-        )
+    with transaction.atomic():
+        def create(self, request, *args, **kwargs):
+            user = request.user
+            content = request.data.get('content')
+            description = request.data.get('description')
+            visibility = request.data.get('visibility')
+            medias = request.FILES.getlist('media')
 
-        # Handle media files
-        for file in medias:
-            BlogMedia.objects.create(blog=blog, file=file)
+            # Validate and create blog instance
+            blog = Blog.objects.create(
+                user=user,
+                content=content,
+                description=description,
+                visibility=visibility
+            )
 
-        # Serialize the response data
-        serializer = serializers.BlogDetailSerializer(blog, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            # Handle media files
+            for file in medias:
+                BlogMedia.objects.create(blog=blog, file=file)
+
+            # Serialize the response data
+            serializer = serializers.BlogSerializer(blog, context={'request': request})
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, pk=None):
         blog = get_object_or_404(Blog, pk=pk, user=request.user)
+        if request.user != blog.user:
+            return Response({"detail": "You do not have permission to update this blog."},
+                            status=status.HTTP_403_FORBIDDEN)
         serializer = self.get_serializer(blog, data=request.data, partial=True)
         if serializer.is_valid():
             updated_blog = serializer.save()
@@ -232,8 +242,12 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
     def destroy(self, request, pk=None):
         blog = get_object_or_404(Blog, pk=pk, user=request.user)
+        if request.user != blog.user:
+            return Response({"detail": "You do not have permission to delete this blog."},
+                            status=status.HTTP_403_FORBIDDEN)
+
         blog.delete()  # Xóa comment và tệp tin đính kèm
-        return Response({'message': 'Blog deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['post', 'delete', 'get'], url_path='like')
     def like(self, request, pk=None):
@@ -247,8 +261,6 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             if Like.objects.filter(blog=blog, user=user).exists():
                 return Response({"detail": "You have already liked this blog."}, status=status.HTTP_400_BAD_REQUEST)
             Like.objects.create(blog=blog, user=user)
-            blog.likes_count += 1
-            blog.save()
             return Response({"detail": "Blog liked successfully."}, status=status.HTTP_200_OK)
 
         elif request.method == 'DELETE':
@@ -257,8 +269,6 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                                 status=status.HTTP_403_FORBIDDEN)
             like = get_object_or_404(Like, blog=blog, user=user)
             like.delete()
-            blog.likes_count -= 1
-            blog.save()
             return Response({"detail": "Blog unliked successfully."}, status=status.HTTP_200_OK)
 
         if blog.visibility == 'private' and blog.user != user:
@@ -276,7 +286,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             return paginator.get_paginated_response(serializer.data)
 
     @action(detail=True, methods=['post', 'get'], url_path='comment')
-    def add_comment(self, request, pk=None):
+    def comment(self, request, pk=None):
         blog = get_object_or_404(Blog, pk=pk)
         user = request.user
 
@@ -297,13 +307,11 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
             if serializer.is_valid():
                 serializer.save(user=user)
-                blog.comments_count += 1
-                blog.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'GET':
-            comments = Comment.objects.filter(blog=blog).order_by('-created_date')
+            comments = Comment.objects.filter(blog=blog,parent=None).order_by('-created_date')
 
             paginator = my_paginations.CommentPagination()
 
@@ -318,7 +326,24 @@ class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPI
     queryset = Comment.objects.all().order_by('-created_date')
     serializer_class = serializers.CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = my_paginations.CommentPagination
+    def get_permissions(self):
+        if self.action in ['get_replies']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+    @action(detail=True, methods=['get'], url_path='replies')
+    def get_replies(self, request, pk=None):
+        # Lấy comment cha dựa trên ID
+        parent_comment = self.get_object()
 
+        # Lấy danh sách các replies của comment cha
+        replies = parent_comment.replies.all().order_by('-created_date')
+
+        # Sử dụng pagination nếu cần
+        page = self.paginate_queryset(replies)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
     def update(self, request, *args, **kwargs):
         comment = self.get_object()
 
@@ -348,11 +373,11 @@ class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPI
 
     def destroy(self, request, *args, **kwargs):
         comment = self.get_object()
-        blog = comment.blog
-        response = super().destroy(request, *args, **kwargs)
-        blog.comments_count -= 1
-        blog.save()
-        return Response({"message":"Comment deleted successfully"},status=status.HTTP_204_NO_CONTENT)
+        if comment.user != request.user:
+            return Response({'detail': 'You do not have permission to edit this comment.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAPIView):
@@ -378,7 +403,7 @@ class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.D
             return Response({"detail": "You do not have permission to delete this job application."},
                             status=status.HTTP_403_FORBIDDEN)
         job_application.delete()
-        return Response({"detail": "Job application deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=['patch'], url_path='status')
     def update_status(self, request, pk=None):
@@ -544,7 +569,7 @@ class JobPostViewSet(viewsets.ViewSet,generics.ListAPIView,generics.RetrieveAPIV
             return Response({'detail': 'You do not have permission to delete this job post.'},
                             status=status.HTTP_403_FORBIDDEN)
         job_post.delete()
-        return Response({'detail': 'Job post deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
