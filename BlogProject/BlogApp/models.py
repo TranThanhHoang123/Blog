@@ -136,10 +136,6 @@ class PasswordResetCode(models.Model):
     def is_expired(self):
         return timezone.now() > self.expires_at
 
-
-from django.db import models
-
-
 class JobPost(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
     WORK_TYPE_CHOICES = [
@@ -159,6 +155,54 @@ class JobPost(models.Model):
     content = models.CharField(max_length=255,null=False,blank=False)
 
 
+class Category(BaseModel):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Product(BaseModel):
+    CONDITION_CHOICES = [
+        ('new', 'New'),
+        ('used', 'Used'),
+    ]
+
+    FETTLE_CHOICES = [
+        ('in_stock', 'In Stock'),
+        ('out_of_stock', 'Out of Stock'),
+    ]
+
+    title = models.CharField(max_length=60,null=False,blank=False)
+    description = models.CharField(max_length=3000,null=False,blank=False)
+    quantity = models.PositiveSmallIntegerField(null=False,blank=False)
+    file = models.ImageField(upload_to='products/%Y/%m',null=False,blank=False)
+    condition = models.CharField(max_length=10, choices=CONDITION_CHOICES,default='new')
+    fettle = models.CharField(max_length=20, choices=FETTLE_CHOICES,default='in_stock')
+    location = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    class Meta:
+        unique_together = ('title', 'file')  # Unique together constraint
+
+    def __str__(self):
+        return self.title
+
+
+class Banner(BaseModel):
+    STATUS_CHOICES = [
+        ('show', 'Show'),
+        ('hide', 'Hide'),
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='banners/%Y/%m')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES,default='hide')
+    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return self.title
 
 
 # class CompanyGroup(models.Model):

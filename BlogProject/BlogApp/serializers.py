@@ -283,6 +283,10 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
         fields = ['id', 'user','fullname','job_title', 'cv', 'status','created_date']
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
 
 
 

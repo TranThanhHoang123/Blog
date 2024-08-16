@@ -47,6 +47,13 @@ def get_blog_list_of_user(user_blog,user):
 def check_client_secret(stored_secret, provided_secret):
     return check_password(provided_secret, stored_secret)
 
+def has_admin_or_manager_permission(user):
+    """
+    Kiểm tra quyền của người dùng dựa trên nhóm.
+    """
+        # Kiểm tra xem người dùng có thuộc nhóm 'admin' hoặc 'manager' không
+    return Group.objects.filter(user=user, name__in=['admin', 'manager']).exists()
+
 from django.conf import settings
 
 def send_verification_email(to_email, subject, message):

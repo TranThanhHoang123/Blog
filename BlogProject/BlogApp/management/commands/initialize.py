@@ -1,6 +1,69 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
+from . import utils
+# Khởi tạo các quyền
+PERMISSIONS = [
+    {
+        'codename': 'admin',
+        'content_type': ContentType.objects.get_for_model(Group),
+        'defaults': {'name': 'Admin Permission'}
+    },
+    {
+        'codename': 'manager',
+        'content_type': ContentType.objects.get_for_model(Group),
+        'defaults': {'name': 'Manager Permission'}
+    },
+]
+# Khởi tạo các Group
+GROUPS = [
+    {
+        'name': 'admin',
+    },
+    {
+        'name': 'manager',
+    },
+]
+# Khởi tạo các quyền của admin
+PERMISSIONS_GROUP_ADMIN = [
+    {
+        'codename': 'admin',
+    },
+]
+# Khởi tạo các quyền của manager
+PERMISSIONS_GROUP_MANAGER = [
+    {
+        'codename': 'manager',
+    },
+]
+# Khởi tạo các account của admin
+LOGIN = [
+    {
+        'username': 'Songnhatnguyen2024',
+        'email':'admin@example.com',
+        'password': 'SNN@2024'
+    },
+]
+# Khởi tạo các account system admin
+LOGIN_SYS_ADMIN = [
+    {
+        'username': 'sysadmin@zzz',
+        'email':'Xlrdevteam03@gmail.com',
+        'password': 'efu15v@gsdm#$'
+    },
+]
+# Khởi tạo thành viên vào nhóm
+MEMBERS = [
+    {
+        'username': 'Songnhatnguyen2024',
+        'group': 'admin'
+    },
+    {
+        'username': 'sysadmin@zzz',
+        'group': 'admin'
+    }
+]
+
 
 class Command(BaseCommand):
     help = 'Khởi tạo quyền và nhóm'
@@ -11,23 +74,22 @@ class Command(BaseCommand):
         import django
         django.setup()
 
-        # Tạo quyền 'admin' nếu chưa tồn tại
-        try:
-            content_type = ContentType.objects.get_for_model(Permission)
-            permission, created = Permission.objects.get_or_create(
-                codename='admin',
-                content_type=content_type,
-                defaults={'name': 'Admin Permission'}
-            )
-        except Exception as e:
-            self.stdout.write(self.style.ERROR(f'Error creating permission: {e}'))
-            return
+        # Tạo quyền từ danh sách PERMISSIONS
+        created_permissions = utils.create_permissions(PERMISSIONS)
+        # Tạo group từ danh sách GROUPS
+        created_groups = utils.create_groups(GROUPS)
+        # Thêm quyền vào nhóm 'admin'
+        utils.add_permissions_to_group('admin', PERMISSIONS_GROUP_ADMIN)
+        # Thêm quyền vào nhóm 'manager'
+        utils.add_permissions_to_group('manager', PERMISSIONS_GROUP_MANAGER)
 
-        # Tạo nhóm 'admin' nếu chưa tồn tại
-        group, created = Group.objects.get_or_create(name='admin')
+        #tạo staff user
+        utils.create_staff_users(LOGIN)
 
-        # Thêm quyền vào nhóm nếu quyền chưa tồn tại trong nhóm
-        if not group.permissions.filter(codename='admin').exists():
-            group.permissions.add(permission)
+        # tạo super user
+        utils.create_super_users(LOGIN_SYS_ADMIN)
+
+        # thêm member đến group
+        utils.add_members_to_group(MEMBERS)
 
         self.stdout.write(self.style.SUCCESS('Successfully initialized permissions and groups'))

@@ -1,0 +1,201 @@
+from django.core.management.base import BaseCommand
+from django.contrib.auth.models import Group, Permission, User
+from django.contrib.contenttypes.models import ContentType
+from BlogApp.models import User
+
+def create_permissions(permission_list):
+    """
+    Tạo các quyền dựa trên danh sách đầu vào.
+
+    :param permission_list: Danh sách các quyền cần tạo.
+    :type permission_list: list
+    :return: Danh sách các quyền đã được tạo hoặc tồn tại.
+    """
+    created_permissions = []
+
+    for perm in permission_list:
+        try:
+            permission, created = Permission.objects.get_or_create(
+                codename=perm['codename'],
+                content_type=perm['content_type'],
+                defaults=perm['defaults']
+            )
+            if created:
+                print(f"Successfully created permission: {permission.codename}")
+            else:
+                print(f"Permission already exists: {permission.codename}")
+
+            created_permissions.append(permission)
+
+        except Exception as e:
+            print(f"Error creating permission '{perm['codename']}': {e}")
+
+    #giải phóng bộ nhớ
+    del permission_list
+
+    return created_permissions
+
+
+def create_groups(group_list):
+    """
+    Tạo các nhóm dựa trên danh sách đầu vào và xóa danh sách sau khi đã sử dụng.
+
+    :param group_list: Danh sách các nhóm cần tạo.
+    :type group_list: list
+    :return: Danh sách các nhóm đã được tạo mới.
+    """
+    created_groups = []
+
+    for grp in group_list:
+        try:
+            group, created = Group.objects.get_or_create(name=grp['name'])
+            if created:
+                print(f"Successfully created group: {group.name}")
+                created_groups.append(group)
+            else:
+                print(f"Group already exists: {group.name}")
+
+        except Exception as e:
+            print(f"Error creating group '{grp['name']}': {e}")
+
+    # Xóa mảng group_list để giải phóng bộ nhớ
+    del group_list
+
+    return created_groups
+
+
+def add_permissions_to_group(group_name, permissions_list):
+    """
+    Thêm danh sách quyền vào nhóm dựa trên tên nhóm và danh sách mã quyền.
+
+    :param group_name: Tên của nhóm cần thêm quyền.
+    :type group_name: str
+    :param permissions_list: Danh sách các từ điển chứa mã quyền.
+    :type permissions_list: list
+    """
+    try:
+        # Lấy hoặc tạo nhóm dựa trên tên
+        group, created = Group.objects.get_or_create(name=group_name)
+        if created:
+            print(f"Successfully created group: {group.name}")
+        else:
+            print(f"Group already exists: {group.name}")
+
+        # Duyệt qua danh sách quyền và thêm vào nhóm
+        for perm_dict in permissions_list:
+            try:
+                permission = Permission.objects.get(codename=perm_dict['codename'])
+                group.permissions.add(permission)
+                print(f"Added permission '{permission.codename}' to group '{group.name}'")
+            except Permission.DoesNotExist:
+                print(f"Permission with codename '{perm_dict['codename']}' does not exist.")
+
+    except Exception as e:
+        print(f"Error processing group '{group_name}': {e}")
+
+
+def create_staff_users(login_list):
+    """
+    Tạo các user với is_staff=True và is_superuser=False.
+
+    :param login_list: Danh sách các từ điển chứa thông tin đăng nhập của người dùng.
+    :type login_list: list
+    """
+    for login_info in login_list:
+        username = login_info.get('username')
+        password = login_info.get('password')
+        email = login_info.get('email')
+        if not username or not password:
+            print("Username and password are required.")
+            continue
+
+        try:
+            # Kiểm tra xem user có tồn tại không
+            user, created = User.objects.get_or_create(
+                username=username,
+                email=email,
+                defaults={
+                    'is_staff': True,
+                    'is_superuser': False
+                }
+            )
+
+            if created:
+                user.set_password(password)
+                user.save()
+                print(f"Successfully created staff user: {username}")
+            else:
+                print(f"User '{username}' already exists.")
+
+        except Exception as e:
+            print(f"Error creating user '{username}': {e}")
+
+
+
+def create_super_users(login_list):
+    """
+    Tạo các user với is_staff=True và is_superuser=False.
+
+    :param login_list: Danh sách các từ điển chứa thông tin đăng nhập của người dùng.
+    :type login_list: list
+    """
+    for login_info in login_list:
+        username = login_info.get('username')
+        password = login_info.get('password')
+        email = login_info.get('email')
+        if not username or not password:
+            print("Username and password are required.")
+            continue
+
+        try:
+            # Kiểm tra xem user có tồn tại không
+            user, created = User.objects.get_or_create(
+                username=username,
+                email = email,
+                defaults={
+                    'is_staff': True,
+                    'is_superuser': True
+                }
+            )
+
+            if created:
+                user.set_password(password)
+                user.save()
+                print(f"Successfully created staff user: {username}")
+            else:
+                print(f"User '{username}' already exists.")
+
+        except Exception as e:
+            print(f"Error creating user '{username}': {e}")
+
+
+def add_members_to_group(members_list):
+    """
+    Thêm các thành viên vào nhóm dựa trên username và tên nhóm.
+
+    :param members_list: Danh sách các từ điển chứa thông tin thành viên và nhóm.
+    :type members_list: list
+    """
+    for member_info in members_list:
+        username = member_info.get('username')
+        group_name = member_info.get('group')
+
+        if not username or not group_name:
+            print("Both username and group name are required.")
+            continue
+
+        try:
+            # Tìm kiếm user theo username
+            user = User.objects.get(username=username)
+
+            # Tìm kiếm hoặc tạo nhóm theo tên
+            group, created = Group.objects.get_or_create(name=group_name)
+
+            # Thêm user vào nhóm
+            group.user_set.add(user)
+            print(f"Successfully added user '{username}' to group '{group_name}'")
+
+        except User.DoesNotExist:
+            print(f"User '{username}' does not exist.")
+        except Exception as e:
+            print(f"Error adding user '{username}' to group '{group_name}': {e}")

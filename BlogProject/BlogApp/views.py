@@ -580,7 +580,31 @@ class JobPostViewSet(viewsets.ViewSet,generics.ListAPIView,generics.RetrieveAPIV
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class CategoryViewSet(viewsets.ViewSet,generics.ListAPIView,generics.DestroyAPIView,generics.UpdateAPIView,generics.CreateAPIView):
+    queryset = Category.objects.all().order_by('-created_date')
+    serializer_class = serializers.CategorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = my_paginations.CategoryPagination
 
+    def get_permissions(self):
+        if self.action in ['list']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def create(self, request, *args, **kwargs):
+        if not utils.has_admin_or_manager_permission(request.user):
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+        return super().create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        if not utils.has_admin_or_manager_permission(request.user):
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        if not utils.has_admin_or_manager_permission(request.user):
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
 
 
 
