@@ -207,6 +207,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             serializer = serializers.BlogDetailSerializer(blog, context={'request': request})
             return Response(serializer.data)
         return Response({'detail': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
+    
 
     with transaction.atomic():
         def create(self, request, *args, **kwargs):
