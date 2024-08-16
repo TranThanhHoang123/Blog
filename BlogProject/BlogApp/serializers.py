@@ -1,6 +1,16 @@
 from rest_framework import serializers
 from .models import *
 from . import my_paginations
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = '__all__'
+
+class GroupListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ['id','name']
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -39,6 +49,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 class UserDetailSerializer(UserSerializer):
     profile_image = serializers.SerializerMethodField()
     profile_bg = serializers.SerializerMethodField()
+    groups = GroupListSerializer(many=True)
 
     def get_profile_image(self, obj):
         if obj.profile_image:
@@ -53,7 +64,7 @@ class UserDetailSerializer(UserSerializer):
             return self.context['request'].build_absolute_uri(f"/static/{profile_bg}")
 
     class Meta(UserSerializer.Meta):
-        pass
+        fields = UserSerializer.Meta.fields+['groups']
 
 class UserListSerializer(UserDetailSerializer):
     class Meta(UserDetailSerializer.Meta):
