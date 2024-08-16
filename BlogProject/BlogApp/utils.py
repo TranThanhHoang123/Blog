@@ -7,39 +7,39 @@ from .models import *
 def get_blog_details(blog_id, user):
     if user.is_anonymous:
         return Blog.objects.filter(id=blog_id).annotate(
-            likes_count=Count('like'),
-            comment_count=Count('comment')
+            likes_count=Count('like',distinct=True),
+            comment_count=Count('comment',distinct=True)
         ).first()
     else:
         return Blog.objects.filter(id=blog_id).annotate(
-            likes_count=Count('like'),
-            comment_count=Count('comment'),
+            likes_count=Count('like',distinct=True),
+            comment_count=Count('comment',distinct=True),
             likes_user=Count('like', filter=Q(like__user=user))
         ).first()
 
 def get_blog_list(user):
     if user.is_anonymous:
         return Blog.objects.filter(visibility='public').annotate(
-            likes_count=Count('like'),
-            comment_count=Count('comment')
+            likes_count=Count('like',distinct=True),
+            comment_count=Count('comment',distinct=True)
         ).order_by('-created_date')
     else:
         return Blog.objects.filter(Q(visibility='public') | Q(user=user)).annotate(
-            likes_count=Count('like'),
-            comment_count=Count('comment'),
+            likes_count=Count('like',distinct=True),
+            comment_count=Count('comment',distinct=True),
             likes_user=Count('like', filter=Q(like__user=user))
         ).order_by('-created_date')
 
 def get_blog_list_of_user(user_blog,user):
     if user.is_anonymous:
         return Blog.objects.filter(visibility='public',user=user_blog).annotate(
-            likes_count=Count('like'),
-            comment_count=Count('comment')
+            likes_count=Count('like',distinct=True),
+            comment_count=Count('comment',distinct=True)
         ).order_by('-created_date')
     else:
         return Blog.objects.filter(Q(visibility='public',user=user_blog)|Q(user=user)).annotate(
-            likes_count=Count('like'),
-            comment_count=Count('comment'),
+            likes_count=Count('like',distinct=True),
+            comment_count=Count('comment',distinct=True),
             likes_user=Count('like', filter=Q(like__user=user))
         ).order_by('-created_date')
 
@@ -62,17 +62,27 @@ def send_verification_email(to_email, subject, message):
 from django.contrib.auth.models import Group
 
 
-def get_group_permissions(group_name):
-    try:
-        # Lấy đối tượng nhóm theo tên
-        group = Group.objects.get(name=group_name)
+def get_user_permissions_codes(user: User, group_id=None):
+    """
+    Trả về danh sách mã quyền từ nhóm mà người dùng thuộc về.
+    :param user: Người dùng mà bạn muốn lấy quyền.
+    :param group_id: ID của nhóm (Group) mà bạn muốn lấy quyền. Nếu không cung cấp, sẽ lấy quyền từ tất cả các nhóm mà người dùng thuộc về.
+    :return: Danh sách các mã quyền (codename).
+    """
+    if not user.is_authenticated:
+        return []
 
-        # Lấy tất cả quyền gán cho nhóm
-        permissions = group.permissions.all()
-
-        # Trả về danh sách tên của quyền
-        return [permission.name for permission in permissions]
-
-    except Group.DoesNotExist:
-        # Trả về thông báo nếu nhóm không tồn tại
-        return None
+    if group_id:
+        # Lấy quyền từ một nhóm cụ thể
+        try:
+            group = Group.objects.get(id=group_id)
+            return list(group.permissions.values_list('codename', flat=True))
+        except Group.DoesNotExist:
+            return []  # Nếu nhóm không tồn tại, trả về danh sách rỗng
+    else:
+        # Lấy quyền từ tất cả các nhóm mà người dùng thuộc về
+        user_groups = user.groups.all()
+        permissions = set()
+        for group in user_groups:
+            permissions.update(group.permissions.values_list('codename', flat=True))
+        return list(permissions)
