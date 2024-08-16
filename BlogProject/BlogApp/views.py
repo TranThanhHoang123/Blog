@@ -350,7 +350,7 @@ class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPI
         # Sử dụng pagination nếu cần
         page = self.paginate_queryset(replies)
         if page is not None:
-            serializer = serializers.CommentListSerializer(page, many=True)
+            serializer = serializers.CommentListSerializer(page, many=True,context={'request': request})
             return self.get_paginated_response(serializer.data)
     def update(self, request, *args, **kwargs):
         comment = self.get_object()
