@@ -300,6 +300,57 @@ class CategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class CategoryListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id','name']
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'title': {'required':True},
+            'quantity': {'required': True},
+            'file': {'required': True},
+            'location': {'required': True},
+            'category': {'required': True},
+            'description': {'required': True},
+            'price': {'required': True},
+        }
+
+class ProductUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    file = serializers.SerializerMethodField()
+    categories = serializers.SerializerMethodField()
+    user = UserListSerializer()
+    def get_file(self, obj):
+        if obj.file:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            file = obj.file.name
+            return self.context['request'].build_absolute_uri(f"/static/{file}")
+
+    def get_categories(self, obj):
+        # Lấy danh sách categories liên kết với sản phẩm thông qua ProductCategory
+        categories = Category.objects.filter(productcategory__product=obj)
+        return CategoryListSerializer(categories, many=True, context=self.context).data
+    class Meta:
+        model = Product
+        fields = ['user','id', 'title', 'quantity','price','description', 'file', 'condition', 'fettle','location','created_date','updated_date','categories']
+
+
+class ProductListSerializer(ProductDetailSerializer):
+    class Meta(ProductDetailSerializer.Meta):
+        fields = ['user', 'id', 'title','price', 'file', 'created_date','updated_date', 'categories']
+
+
+
+
 
 # class CompanySerializer(serializers.ModelSerializer):
 #     class Meta:

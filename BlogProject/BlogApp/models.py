@@ -181,12 +181,23 @@ class Product(BaseModel):
     fettle = models.CharField(max_length=20, choices=FETTLE_CHOICES,default='in_stock')
     location = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-
+    price = models.FloatField(null=True,blank=True)
     class Meta:
         unique_together = ('title', 'file')  # Unique together constraint
 
     def __str__(self):
         return self.title
+
+
+class ProductCategory(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('product', 'category')  # Unique together constraint
+
+    def __str__(self):
+        return f'{self.product.title} - {self.category.name}'
 
 
 class Banner(BaseModel):

@@ -587,7 +587,7 @@ class CategoryViewSet(viewsets.ViewSet,generics.ListAPIView,generics.DestroyAPIV
     pagination_class = my_paginations.CategoryPagination
 
     def get_permissions(self):
-        if self.action in ['list']:
+        if self.action in ['list','product']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -606,8 +606,117 @@ class CategoryViewSet(viewsets.ViewSet,generics.ListAPIView,generics.DestroyAPIV
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
         return super().destroy(request, *args, **kwargs)
 
+    @action(methods=['get'], detail=True, url_path='products')
+    def product(self, request, pk=None):
+        # Lấy danh mục dựa vào pk
+        category = get_object_or_404(Category, pk=pk)
+
+        # Lấy danh sách sản phẩm thuộc về danh mục đó
+        products = Product.objects.filter(productcategory__category=category)
+
+        # Phân trang danh sách sản phẩm
+        paginator = my_paginations.ProductPagination()
+        page = paginator.paginate_queryset(products, request, view=self)
+
+        # Serialize danh sách sản phẩm
+        serializer = serializers.ProductListSerializer(page, many=True, context={'request': request})
+
+        # Trả về danh sách sản phẩm đã phân trang
+        return paginator.get_paginated_response(serializer.data)
 
 
+
+
+class ProductViewSet(viewsets.ViewSet,generics.RetrieveAPIView,generics.CreateAPIView,generics.UpdateAPIView,generics.DestroyAPIView,generics.ListAPIView):
+    queryset = Product.objects.all().order_by('-created_date')
+    serializer_class = serializers.ProductSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = my_paginations.ProductPagination
+
+    def get_queryset(self):
+        query = self.queryset
+        title = self.request.query_params.get('title')
+        if title:
+            query = query.filter(title__icontains=title)
+        return query
+
+
+    def get_permissions(self):
+        if self.action in ['list','retrieve']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def get_serializer_class(self):
+        if self.action in ['retrieve']:
+            return serializers.ProductDetailSerializer
+        if self.action in ['list']:
+            return serializers.ProductListSerializer
+        if self.action in ['partial_update']:
+            return serializers.ProductUpdateSerializer
+        return self.serializer_class
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    # Tạo sản phẩm và lưu trữ
+                    product = serializer.save(user=request.user)
+
+                    # Thêm các category vào product
+                    categories = request.data.getlist('category', None)
+                    if categories:
+                        for cat in categories:
+                            obj = Category.objects.get(pk=cat)
+                            ProductCategory.objects.create(product=product, category=obj)
+
+                    # Serialize the response data
+                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+            except Category.DoesNotExist:
+                return Response({'error': 'Category does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        product = get_object_or_404(Product, pk=pk, user=request.user)
+
+        if request.user != product.user:
+            return Response({"detail": "You do not have permission to update this product."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(product, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            try:
+                with transaction.atomic():
+                    # Cập nhật sản phẩm
+                    product = serializer.save()
+
+                    # Cập nhật categories
+                    categories = request.data.getlist('category', None)
+                    if categories:
+                        # Xóa các category hiện có của sản phẩm
+                        ProductCategory.objects.filter(product=product).delete()
+
+                        # Thêm các category mới vào sản phẩm
+                        for cat in categories:
+                            obj = Category.objects.get(pk=cat)  # Nếu không tìm thấy, sẽ gây ra Category.DoesNotExist
+                            ProductCategory.objects.create(product=product, category=obj)
+
+                    return Response({'Message': 'Updated product successfully.'}, status=status.HTTP_200_OK)
+
+            except Category.DoesNotExist:
+                return Response({'detail': 'One or more categories do not exist.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            except Exception as e:
+                return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
