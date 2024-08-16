@@ -207,7 +207,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
             serializer = serializers.BlogDetailSerializer(blog, context={'request': request})
             return Response(serializer.data)
         return Response({'detail': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
-    
+
 
     with transaction.atomic():
         def create(self, request, *args, **kwargs):
@@ -350,7 +350,7 @@ class CommentViewSet(viewsets.ViewSet,generics.UpdateAPIView,generics.DestroyAPI
         # Sử dụng pagination nếu cần
         page = self.paginate_queryset(replies)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = serializers.CommentListSerializer(page, many=True)
             return self.get_paginated_response(serializer.data)
     def update(self, request, *args, **kwargs):
         comment = self.get_object()
