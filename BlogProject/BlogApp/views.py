@@ -200,10 +200,10 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def retrieve(self, request, pk=None):
         user = request.user
         blog = utils.get_blog_details(pk, user)
-        # Check for private blog visibility
-        if blog.visibility == 'private' and blog.user != user:
-            return Response({'detail': 'You do not have permission to view this blog.'}, status=status.HTTP_403_FORBIDDEN)
         if blog:
+            # Check for private blog visibility
+            if blog.visibility == 'private' and blog.user != user:
+                return Response({'detail': 'You do not have permission to view this blog.'}, status=status.HTTP_403_FORBIDDEN)
             serializer = serializers.BlogDetailSerializer(blog, context={'request': request})
             return Response(serializer.data)
         return Response({'detail': 'Blog not found'}, status=status.HTTP_404_NOT_FOUND)
