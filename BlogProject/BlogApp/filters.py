@@ -8,7 +8,7 @@ class UserFilterBase(filters.FilterSet):
         model = User
         fields = ['first_name', 'last_name']
 
-class UserFilter(UserFilterBase):
+class UserAdminFilter(UserFilterBase):
     # Các bộ lọc bổ sung cho admin
     email = filters.CharFilter(field_name='email', lookup_expr='icontains')
     id = filters.NumberFilter(field_name='id')

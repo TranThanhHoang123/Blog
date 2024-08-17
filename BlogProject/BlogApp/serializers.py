@@ -350,6 +350,34 @@ class ProductListSerializer(ProductDetailSerializer):
 
 
 
+class BannerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Banner
+        fields = '__all__'
+        extra_kwargs = {
+            'user': {'read_only': True},
+            'title': {'required':True},
+            'image': {'required': True},
+            'status': {'required': False},
+            'description': {'required': True},
+        }
+
+
+class BannerDetailSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    def get_image(self, obj):
+        if obj.image:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            image = obj.image.name
+            return self.context['request'].build_absolute_uri(f"/static/{image}")
+    class Meta(BannerSerializer.Meta):
+        pass
+
+
+class BannerListSerializer(BannerDetailSerializer):
+    class Meta(BannerDetailSerializer.Meta):
+        fields = ['id','title','image']
+
 
 
 # class CompanySerializer(serializers.ModelSerializer):

@@ -107,11 +107,6 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
     filterset_class = filters.UserFilterBase
     filter_backends = [DjangoFilterBackend]
     # Thêm filter_backends và filterset_fields
-    def get_filterset_class(self):
-        # user = self.get_object()
-        # if user là admin thì:
-        #     return filters.UserFilter
-        return self.filterset_class
     def get_permissions(self):
         if self.action in ['create','list','blog']:
             return [permissions.AllowAny()]
@@ -616,7 +611,7 @@ class CategoryViewSet(viewsets.ViewSet,generics.ListAPIView,generics.DestroyAPIV
 
         # Phân trang danh sách sản phẩm
         paginator = my_paginations.ProductPagination()
-        page = paginator.paginate_queryset(products, request, view=self)
+        page = paginator.paginate_queryset(products, request)
 
         # Serialize danh sách sản phẩm
         serializer = serializers.ProductListSerializer(page, many=True, context={'request': request})
@@ -719,6 +714,91 @@ class ProductViewSet(viewsets.ViewSet,generics.RetrieveAPIView,generics.CreateAP
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class BannerViewSet(viewsets.ViewSet,generics.ListAPIView,generics.UpdateAPIView,generics.CreateAPIView,generics.DestroyAPIView):
+    queryset = Banner.objects.filter(status='show').order_by('-created_date')
+    serializer_class = serializers.BannerSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = my_paginations.BannerPagination
+
+    def get_permissions(self):
+        if self.action in ['list']:
+            return [permissions.AllowAny()]
+        return [permissions.IsAuthenticated()]
+
+    def get_serializer_class(self):
+        if self.action in ['list']:
+            return serializers.BannerListSerializer
+        return self.serializer_class
+
+    def create(self, request, *args, **kwargs):
+        if not utils.has_admin_or_manager_permission(request.user):
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                # Lưu banner với người dùng hiện tại
+                banner = serializer.save(user=request.user)
+                # Trả về dữ liệu chi tiết của banner mới tạo
+                return Response(serializers.BannerDetailSerializer(banner, context={'request': request}).data,
+                                status=status.HTTP_201_CREATED)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        if not utils.has_admin_or_manager_permission(request.user):
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+        # Lấy đối tượng Banner cần cập nhật
+        banner = get_object_or_404(Banner, pk=pk)
+
+        # Tạo serializer với dữ liệu từ request và đối tượng banner đã có
+        serializer = self.get_serializer(banner, data=request.data, partial=True)
+
+        # Kiểm tra tính hợp lệ của dữ liệu
+        if serializer.is_valid():
+            try:
+                # Cập nhật thông tin banner
+                banner = serializer.save()
+                # Trả về dữ liệu chi tiết của banner sau khi cập nhật
+                return Response(serializers.BannerDetailSerializer(banner, context={'request': request}).data,
+                                status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Nếu dữ liệu không hợp lệ, trả về lỗi với thông báo chi tiết
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        # Lấy đối tượng Banner cần xóa
+        banner = get_object_or_404(Banner, pk=pk)
+
+        # Kiểm tra quyền của người dùng trước khi xóa (tùy chọn)
+        if not utils.has_admin_or_manager_permission(request.user):
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            # Thực hiện xóa banner
+            banner.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['get'], url_path='list', detail=False)
+    def list_banner(self, request):
+        # Kiểm tra quyền truy cập
+        if not utils.has_admin_or_manager_permission(request.user):
+            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+
+        # Lấy danh sách banner và phân trang
+        queryset = Banner.objects.all().order_by('-created_date')
+        page = self.paginate_queryset(queryset)
+
+        if page is not None:
+            serializer = serializers.BannerSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = serializers.BannerSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 

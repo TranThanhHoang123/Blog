@@ -210,7 +210,7 @@ class Banner(BaseModel):
     description = models.CharField(max_length=255)
     image = models.ImageField(upload_to='banners/%Y/%m')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,default='hide')
-    created_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.title
