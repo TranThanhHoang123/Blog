@@ -215,6 +215,18 @@ class Banner(BaseModel):
     def __str__(self):
         return self.title
 
+class GroupPriority(models.Model):
+    group = models.OneToOneField(Group, on_delete=models.CASCADE)
+    priority = models.IntegerField(
+        default=3,
+        help_text="Priority level: 3 (lowest) to 0 (highest)"
+    )
+
+    class Meta:
+        ordering = ['priority']
+
+    def __str__(self):
+        return f"{self.group.name} (Priority: {self.priority})"
 
 # class CompanyGroup(models.Model):
 #     company = models.ForeignKey(Company, related_name='groups', on_delete=models.CASCADE)
