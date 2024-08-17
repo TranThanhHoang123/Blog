@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
-from BlogApp.models import User
+from BlogApp.models import User,GroupPriority
 
 def create_permissions(permission_list):
     """
@@ -33,8 +33,6 @@ def create_permissions(permission_list):
     #giải phóng bộ nhớ
     del permission_list
 
-    return created_permissions
-
 
 def create_groups(group_list):
     """
@@ -44,24 +42,31 @@ def create_groups(group_list):
     :type group_list: list
     :return: Danh sách các nhóm đã được tạo mới.
     """
-    created_groups = []
-
     for grp in group_list:
         try:
+            # Tạo hoặc lấy nhóm dựa trên tên
             group, created = Group.objects.get_or_create(name=grp['name'])
+
             if created:
-                print(f"Successfully created group: {group.name}")
-                created_groups.append(group)
+                # Nếu nhóm mới được tạo, tạo và lưu priority cho nhóm đó
+                GroupPriority.objects.create(group=group, priority=grp['priority'])
+                print(f"Successfully created group: {group.name} with priority {grp['priority']}")
             else:
-                print(f"Group already exists: {group.name}")
+                # Nếu nhóm đã tồn tại, kiểm tra và cập nhật priority nếu cần
+                group_priority, created = GroupPriority.objects.get_or_create(group=group)
+                if group_priority.priority != grp['priority']:
+                    group_priority.priority = grp['priority']
+                    group_priority.save()
+                    print(f"Updated priority for group: {group.name} to {grp['priority']}")
+                else:
+                    print(f"Group already exists with correct priority: {group.name}")
 
         except Exception as e:
-            print(f"Error creating group '{grp['name']}': {e}")
+            print(f"Error creating or updating group '{grp['name']}': {e}")
 
     # Xóa mảng group_list để giải phóng bộ nhớ
     del group_list
-
-    return created_groups
+    return
 
 
 def add_permissions_to_group(group_name, permissions_list):
@@ -89,10 +94,9 @@ def add_permissions_to_group(group_name, permissions_list):
                 print(f"Added permission '{permission.codename}' to group '{group.name}'")
             except Permission.DoesNotExist:
                 print(f"Permission with codename '{perm_dict['codename']}' does not exist.")
-
+        del permissions_list
     except Exception as e:
         print(f"Error processing group '{group_name}': {e}")
-
 
 def create_staff_users(login_list):
     """
@@ -134,7 +138,7 @@ def create_staff_users(login_list):
 
 def create_super_users(login_list):
     """
-    Tạo các user với is_staff=True và is_superuser=False.
+    Tạo các user với is_staff=True và is_superuser=True.
 
     :param login_list: Danh sách các từ điển chứa thông tin đăng nhập của người dùng.
     :type login_list: list

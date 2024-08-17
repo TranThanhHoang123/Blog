@@ -19,9 +19,11 @@ PERMISSIONS = [
 GROUPS = [
     {
         'name': 'admin',
+        'priority':0
     },
     {
         'name': 'manager',
+        'priority':1
     },
 ]
 # Khởi tạo các quyền của admin
@@ -75,9 +77,9 @@ class Command(BaseCommand):
         django.setup()
 
         # Tạo quyền từ danh sách PERMISSIONS
-        created_permissions = utils.create_permissions(PERMISSIONS)
+        utils.create_permissions(PERMISSIONS)
         # Tạo group từ danh sách GROUPS
-        created_groups = utils.create_groups(GROUPS)
+        utils.create_groups(GROUPS)
         # Thêm quyền vào nhóm 'admin'
         utils.add_permissions_to_group('admin', PERMISSIONS_GROUP_ADMIN)
         # Thêm quyền vào nhóm 'manager'

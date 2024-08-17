@@ -28,6 +28,11 @@ class ProductPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100  # Số mục tối đa trên mỗi trang
 
+class GroupPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class BannerPagination(PageNumberPagination):
     page_size = 4  # Số mục trên mỗi trang
     page_size_query_param = 'page_size'

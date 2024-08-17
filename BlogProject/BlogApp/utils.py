@@ -93,3 +93,21 @@ def get_user_permissions_codes(user: User, group_id=None):
         for group in user_groups:
             permissions.update(group.permissions.values_list('codename', flat=True))
         return list(permissions)
+
+
+def has_permission_to_modify_group(user, group):
+    """
+    Kiểm tra xem người dùng hiện tại có quyền chỉnh sửa nhóm hay không.
+
+    :param user: Đối tượng người dùng hiện tại.
+    :param group: Đối tượng nhóm cần kiểm tra quyền.
+    :return: True nếu người dùng có quyền, False nếu không có quyền.
+    """
+    user_groups_priority = GroupPriority.objects.filter(group__user=user)
+
+    if user_groups_priority.exists():
+        # Nếu người dùng đã thuộc nhóm nào đó, kiểm tra mức độ ưu tiên
+        user_highest_priority = user_groups_priority.order_by('priority').first().priority
+        return user_highest_priority < group.grouppriority.priority
+
+    return False  # Nếu người dùng không thuộc nhóm nào, mặc định không có quyền

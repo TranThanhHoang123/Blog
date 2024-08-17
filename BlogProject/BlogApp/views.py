@@ -4,7 +4,7 @@ from oauth2_provider.models import Application, AccessToken, RefreshToken
 from rest_framework import viewsets, generics, status, permissions
 from django.db.models import Q
 from rest_framework.response import Response
-from . import serializers, my_paginations, my_generics,filters,utils
+from . import serializers, my_paginations, my_generics, filters, utils, my_permissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
@@ -281,7 +281,6 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         elif request.method == 'GET':
             likes = Like.objects.filter(blog=blog).order_by('-created_date')
             paginator = my_paginations.LikePagination()
-            paginator.page_size = 10  # Số lượng người dùng trên mỗi trang
             result_page = paginator.paginate_queryset(likes, request)
             serializer = serializers.UserListSerializer([like.user for like in result_page], many=True,
                                                         context={'request': request})
@@ -801,10 +800,88 @@ class BannerViewSet(viewsets.ViewSet,generics.ListAPIView,generics.UpdateAPIView
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class GroupViewSet(viewsets.ViewSet,generics.ListAPIView):
+    queryset = Group.objects.all()
+    serializer_class = serializers.GroupSerializer  # Bạn cần định nghĩa serializer này
+    permission_classes = [my_permissions.IsAdminOrManager]
+    pagination_class = my_paginations.GroupPagination  # Sử dụng phân trang có sẵn của bạn
+
+    @action(methods=['post'], detail=True, url_path='add-user')
+    def add_user(self, request, pk=None):
+        group = self.get_object()
+        user_ids = request.data.getlist('id')
+
+        # Kiểm tra quyền của người dùng hiện tại đối với nhóm
+        if not has_permission_to_modify_group(request.user, group):
+            return Response({"error": "You do not have permission to add users to this group."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        # Bắt đầu một giao dịch để đảm bảo tính toàn vẹn của quá trình thêm người dùng
+        try:
+            with transaction.atomic():
+                for user_id in user_ids:
+                    try:
+                        user = User.objects.get(pk=user_id)
+
+                        # Kiểm tra xem người dùng đã thuộc nhóm nào chưa
+                        if user.groups.exists():
+                            return Response({"error": f"User with ID {user_id} is already in a group."},
+                                            status=status.HTTP_400_BAD_REQUEST)
+
+                        # Thêm người dùng vào nhóm
+                        group.user_set.add(user)
+                    except User.DoesNotExist:
+                        return Response({"error": f"User with ID {user_id} not found."},
+                                        status=status.HTTP_404_NOT_FOUND)
+
+            return Response({"message": "Users have been added to the group."},
+                            status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['post'], detail=True, url_path='remove-user')
+    def remove_user(self, request, pk=None):
+        group = self.get_object()
+        user_ids = request.data.getlist('id')
+
+        # Kiểm tra quyền của người dùng hiện tại đối với nhóm
+        if not has_permission_to_modify_group(request.user, group):
+            return Response({"error": "You do not have permission to remove users to this group."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        # Bắt đầu một giao dịch để đảm bảo tính toàn vẹn của quá trình xóa người dùng
+        try:
+            with transaction.atomic():
+                for user_id in user_ids:
+                    try:
+                        user = User.objects.get(pk=user_id)
+
+                        # Kiểm tra xem người dùng có thuộc nhóm này không
+                        if not group.user_set.filter(pk=user_id).exists():
+                            return Response({"error": f"User with ID {user_id} is not in the group."},
+                                            status=status.HTTP_400_BAD_REQUEST)
+
+                        # Xóa người dùng khỏi nhóm
+                        group.user_set.remove(user)
+                    except User.DoesNotExist:
+                        return Response({"error": f"User with ID {user_id} not found."},
+                                        status=status.HTTP_404_NOT_FOUND)
+
+            return Response({"message": "Users have been removed from the group."},
+                            status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": f"An unexpected error occurred: {str(e)}"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
+    @action(methods=['get'], detail=False, url_path='list')
+    def list_groups(self, request):
+        groups = self.get_queryset()
+        paginator = my_paginations.GroupPagination()
+        paginated_groups = paginator.paginate_queryset(groups, request)
+        serializer = serializers.GroupListSerializer(paginated_groups, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
 
 

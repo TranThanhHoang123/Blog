@@ -380,6 +380,8 @@ class BannerListSerializer(BannerDetailSerializer):
 
 
 
+
+
 # class CompanySerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Company
