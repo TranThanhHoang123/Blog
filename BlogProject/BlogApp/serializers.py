@@ -318,6 +318,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'category': {'required': True},
             'description': {'required': True},
             'price': {'required': True},
+            'phone_number': {'required': True}
         }
 
 class ProductUpdateSerializer(serializers.ModelSerializer):
@@ -341,7 +342,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         return CategoryListSerializer(categories, many=True, context=self.context).data
     class Meta:
         model = Product
-        fields = ['user','id', 'title', 'quantity','price','description', 'file', 'condition', 'fettle','location','created_date','updated_date','categories']
+        fields = ['user','id', 'title', 'phone_number','quantity','price','description', 'file', 'condition', 'fettle','location','created_date','updated_date','categories']
 
 
 class ProductListSerializer(ProductDetailSerializer):
