@@ -111,3 +111,31 @@ def has_permission_to_modify_group(user, group):
         return user_highest_priority < group.grouppriority.priority
 
     return False  # Nếu người dùng không thuộc nhóm nào, mặc định không có quyền
+import re
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+import os
+import io
+
+def sanitize_filename(filename):
+    """Xóa các ký tự đặc biệt và giữ lại các ký tự an toàn trong tên tập tin."""
+    return re.sub(r'[^\w\s.-]', '', filename)
+
+def convert_to_jpeg(file):
+    try:
+        # Mở tập tin hình ảnh
+        image = Image.open(file)
+        image = image.convert('RGB')
+
+        # Tạo bộ đệm để lưu tập tin JPEG
+        buffer = BytesIO()
+        image.save(buffer, format='JPEG')
+        buffer.seek(0)
+
+        return ContentFile(buffer.read(), name=f"{os.path.splitext(file.name)[0]}.jpeg")
+    except Exception as e:
+        # Xử lý lỗi và giữ tập tin gốc với phần mở rộng .jpeg
+        print(f"Error converting file to JPEG: {e}")
+        file.seek(0)
+        return ContentFile(file.read(), name=f"{os.path.splitext(file.name)[0]}.jpeg")

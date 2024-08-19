@@ -182,6 +182,7 @@ class Product(BaseModel):
     location = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     price = models.FloatField(null=True,blank=True)
+    phone_number = models.CharField(max_length=11,null=True,blank=True)
     class Meta:
         unique_together = ('title', 'file')  # Unique together constraint
 

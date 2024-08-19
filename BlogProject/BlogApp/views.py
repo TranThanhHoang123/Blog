@@ -24,6 +24,8 @@ from .models import *
 from django.contrib.auth.models import Group, Permission
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
+from django.core.files.base import ContentFile
+import os
 
 # Create your views here.
 class CustomTokenView(TokenView):
@@ -222,7 +224,11 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
             # Handle media files
             for file in medias:
-                BlogMedia.objects.create(blog=blog, file=file)
+                #xóa tất cả các ký tự đặc biệt trong file
+                sanitize_filename(file.name)
+                # Chuyển đổi file thành định dạng jpeg
+                jpeg_file = convert_to_jpeg(file)
+                BlogMedia.objects.create(blog=blog, file=jpeg_file)
 
             # Serialize the response data
             serializer = serializers.BlogSerializer(blog, context={'request': request})
