@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxLengthValidator
 from django.contrib.auth.models import Group
+from django.core.validators import FileExtensionValidator
 
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True,null=True)
@@ -51,7 +52,7 @@ class Comment(BaseModel):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=255)
-    file = models.FileField(upload_to='comment/%Y/%m', null=True, blank=True)
+    file = models.ImageField(upload_to='comment/%Y/%m', null=True, blank=True)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -107,7 +108,8 @@ class JobApplication(BaseModel):
     job_post = models.ForeignKey('JobPost', related_name='job_applications', on_delete=models.CASCADE,null=True)
     user = models.ForeignKey(User, related_name='job_applications', on_delete=models.CASCADE)
     job_title = models.CharField(max_length=255)
-    cv = models.FileField(upload_to='cv/%Y/%m')
+    cv = models.FileField(upload_to='cv/%Y/%m',
+                          validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
     fullname = models.CharField(max_length=50,null=True,blank=False)
     phone_number = models.CharField(max_length=11,null=True,blank=False)
     email = models.EmailField(null=True,blank=False)

@@ -67,6 +67,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware', #oauth2
     'corsheaders.middleware.CorsMiddleware',  # Cấu hình cors cho phép người dùng có thể fetapi dù khác domain
+    'BlogApp.middleware.FileSizeLimitMiddleware',
+    'BlogApp.middleware.SanitizeFilenameMiddleware',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -176,3 +178,4 @@ EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'taxhuy2001@gmail.com'
 EMAIL_HOST_PASSWORD = 'owum fexk zmuh gddj'  # Use the App Password here
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB

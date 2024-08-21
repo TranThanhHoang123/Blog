@@ -68,7 +68,7 @@ class UserDetailSerializer(UserSerializer):
 
 class UserListSerializer(UserDetailSerializer):
     class Meta(UserDetailSerializer.Meta):
-        fields = ['id','username','first_name','last_name','profile_image','profile_bg']
+        fields = ['id','username','first_name','last_name','profile_image','profile_bg','groups']
 
 class BlogMediaSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
