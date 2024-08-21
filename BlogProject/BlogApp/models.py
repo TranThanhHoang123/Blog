@@ -11,13 +11,14 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 class User(AbstractUser):
-    phone_number = models.CharField(max_length=11,unique=True,null=True)
-    email = models.CharField(max_length=40, unique=True)
+    phone_number = models.CharField(max_length=11,unique=False,null=True)
+    email = models.CharField(max_length=40, unique=False)
     location = models.CharField(max_length=85,null=True)
     about = models.CharField(max_length=255,null=True,blank=True)
     profile_image = models.ImageField(upload_to='user/%Y/%m', null=True, blank=True)
     profile_bg = models.ImageField(upload_to='user/%Y/%m', null=True, blank=True)
     link = models.CharField(max_length=100,null=True)
+    is_active = models.BooleanField(default=False)
     def __str__(self):
         return self.username
 
@@ -124,6 +125,22 @@ class JobApplication(BaseModel):
 from datetime import timedelta
 from django.utils import timezone
 class PasswordResetCode(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    expires_at = models.DateTimeField()
+    updated_at = models.DateTimeField(auto_now=True)
+    status = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timedelta(minutes=3)
+        super().save(*args, **kwargs)
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
+
+
+class EmailVerificationCode(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     code = models.CharField(max_length=6)
     expires_at = models.DateTimeField()

@@ -32,3 +32,9 @@ class IsAdmin(BasePermission):
 
         # Kiểm tra xem người dùng có thuộc nhóm 'admin' hoặc 'manager' không
         return Group.objects.filter(user=request.user, name='admin').exists()
+
+
+class IsActiveUser(BasePermission):
+    def has_permission(self, request, view):
+        # Kiểm tra xem người dùng đã xác thực và is_active là True
+        return bool(request.user and request.user.is_authenticated and request.user.is_active)

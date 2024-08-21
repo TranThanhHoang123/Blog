@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.utils.crypto import get_random_string
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from rest_framework import viewsets, generics, status, permissions
@@ -26,7 +26,9 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
 from django.core.files.base import ContentFile
 import os
-
+from django.utils.http import urlsafe_base64_decode
+from django.utils.encoding import force_str
+from django.conf import settings
 
 # Create your views here.
 class CustomTokenView(TokenView):
@@ -41,7 +43,7 @@ class CustomTokenView(TokenView):
                 expires=settings.OAUTH2_PROVIDER['REFRESH_TOKEN_EXPIRE_SECONDS'],
                 secure=False,
                 httponly=True,
-                samesite='Lax'
+                samesite='Strict'
             )
         return response
 
@@ -101,7 +103,7 @@ def custom_refresh_token(request):
     return JsonResponse(response_data)
 
 
-class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPIView, generics.ListAPIView):
+class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -112,7 +114,7 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
 
     # Thêm filter_backends và filterset_fields
     def get_permissions(self):
-        if self.action in ['create', 'list', 'blog']:
+        if self.action in ['create', 'list', 'blog','register','register']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -123,6 +125,35 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
 
     def get_object(self):
         return self.request.user
+
+    @action(detail=False, methods=['post'], url_path='register')
+    def register(self, request):
+        serializer = serializers.UserRegistrationSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"detail": "Registration successful. Please check your email for the activation link."},
+                        status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'], url_path=r'activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<code>.+)')
+    def activate(self, request, uidb64=None, code=None):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            user = None
+
+        if user is not None and EmailVerificationCode.objects.filter(user=user, code=code, status=False).exists():
+            user.is_active = True
+            user.save()
+
+            verification_code = EmailVerificationCode.objects.get(user=user, code=code)
+            verification_code.status = True
+            verification_code.save()            # Redirect to a specific page after successful activation
+            return redirect(settings.LOGIN_SUCCESSFULLY_URL)  # 'login' should be the name of your login URL pattern
+        else:
+            # If the activation fails, you can redirect to an error page or render an error template
+            return redirect(settings.LOGIN_FAIL_URL)
+
 
     @action(detail=False, methods=['patch'], url_path='update-profile')
     def update_profile(self, request, *args, **kwargs):
@@ -531,7 +562,6 @@ class ChangePasswordViewSet(viewsets.ViewSet):
             reset_code = PasswordResetCode(user=user)
 
         reset_code.code = code
-        reset_code.expires_at = timezone.now() + timedelta(minutes=3)
         reset_code.status = False
         reset_code.save()
 
@@ -980,11 +1010,6 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
         paginated_groups = paginator.paginate_queryset(groups, request)
         serializer = serializers.GroupListSerializer(paginated_groups, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
-
-
-class AdminViewSet(viewsets.ViewSet, generics.ListAPIView):
-    queryset = Group.objects.all()
-    serializer_class = serializers.GroupSerializer  # Bạn cần định nghĩa serializer này
 
 
 

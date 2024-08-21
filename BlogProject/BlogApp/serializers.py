@@ -1,20 +1,27 @@
+from django.db.models import Q
+from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from .models import *
 from . import my_paginations
+
+
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = '__all__'
 
+
 class GroupListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
-        fields = ['id','name']
+        fields = ['id', 'name']
+
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id','username', 'password','first_name','last_name','email', 'phone_number', 'location', 'about', 'profile_image', 'profile_bg', 'link']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'email', 'phone_number', 'location', 'about',
+                  'profile_image', 'profile_bg', 'link']
         extra_kwargs = {
             'password': {'write_only': True},
             'location': {'required': False},
@@ -25,17 +32,74 @@ class UserSerializer(serializers.ModelSerializer):
             'form': {'required': False},
         }
 
+
+from rest_framework import serializers
+from .models import User, EmailVerificationCode
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_bytes
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'email', 'phone_number', 'location', 'about',
+                  'profile_image', 'profile_bg', 'link']
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'location': {'required': False},
+            'about': {'required': False},
+            'profile_image': {'required': False},
+            'profile_bg': {'required': False},
+            'link': {'required': False},
+            'form': {'required': False},
+        }
+
+
     def create(self, validated_data):
-        data = validated_data.copy()
-        user = User(**data)
-        user.set_password(data['password'])
-        user.save()
-        return user
+            user = User.objects.create_user(**validated_data)
+            user.is_active = False  # Set is_active to False by default
+            user.save()
+
+            # Create verification code
+            code = get_random_string(length=6, allowed_chars='0123456789')
+            EmailVerificationCode.objects.create(
+                user=user,
+                code=code,
+                expires_at=timezone.now() + timedelta(minutes=3)
+            )
+
+            # Send activation email
+            from . import utils
+            utils.send_activation_email(user, code)
+
+            return user
+
+class ActivationSerializer(serializers.Serializer):
+    uid = serializers.CharField()
+    code = serializers.CharField()
+
+    def validate(self, data):
+        try:
+            uid = force_bytes(urlsafe_base64_decode(data['uid']))
+            user = User.objects.get(pk=uid)
+            verification_code = EmailVerificationCode.objects.get(user=user, code=data['code'])
+
+            if verification_code.is_expired():
+                raise serializers.ValidationError({"code": "The activation code has expired."})
+            if verification_code.status:
+                raise serializers.ValidationError({"code": "The activation code has already been used."})
+        except User.DoesNotExist:
+            raise serializers.ValidationError({"uid": "Invalid user ID."})
+        except EmailVerificationCode.DoesNotExist:
+            raise serializers.ValidationError({"code": "Invalid activation code."})
+
+        return data
+
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name','last_name','phone_number', 'location', 'about', 'profile_image', 'profile_bg', 'link']
+        fields = ['first_name', 'last_name', 'phone_number', 'location', 'about', 'profile_image', 'profile_bg', 'link']
         extra_kwargs = {
             'first_name': {'required': False},
             'last_name': {'required': False},
@@ -46,6 +110,8 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'profile_bg': {'required': False},
             'link': {'required': False},
         }
+
+
 class UserDetailSerializer(UserSerializer):
     profile_image = serializers.SerializerMethodField()
     profile_bg = serializers.SerializerMethodField()
@@ -64,11 +130,13 @@ class UserDetailSerializer(UserSerializer):
             return self.context['request'].build_absolute_uri(f"/static/{profile_bg}")
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields+['groups']
+        fields = UserSerializer.Meta.fields + ['groups']
+
 
 class UserListSerializer(UserDetailSerializer):
     class Meta(UserDetailSerializer.Meta):
-        fields = ['id','username','first_name','last_name','profile_image','profile_bg','groups']
+        fields = ['id', 'username', 'first_name', 'last_name', 'profile_image', 'profile_bg', 'groups']
+
 
 class BlogMediaSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
@@ -83,17 +151,20 @@ class BlogMediaSerializer(serializers.ModelSerializer):
         model = BlogMedia
         fields = ['id', 'file']
 
+
 class BlogSerializer(serializers.ModelSerializer):
     media = BlogMediaSerializer(many=True, required=False)
     user = UserListSerializer()
     liked = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     comment_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Blog
-        fields = ['user', 'id', 'content', 'description', 'visibility', 'likes_count', 'comment_count', 'media', 'liked']
+        fields = ['user', 'id', 'content', 'description', 'visibility', 'likes_count', 'comment_count', 'media',
+                  'liked']
         extra_kwargs = {
-            'user':{'readonly': True},
+            'user': {'readonly': True},
             'content': {'required': True},
             'description': {'required': True},
             'likes_count': {'readonly': True},
@@ -114,6 +185,7 @@ class BlogSerializer(serializers.ModelSerializer):
             return Like.objects.filter(blog=obj, user=user).exists()
         return False
 
+
 class BlogDetailSerializer(BlogSerializer):
     user = UserListSerializer()
     liked = serializers.SerializerMethodField()
@@ -122,7 +194,8 @@ class BlogDetailSerializer(BlogSerializer):
 
     class Meta:
         model = Blog
-        fields = ['user', 'id', 'content', 'description', 'visibility', 'likes_count', 'comment_count', 'media', 'created_date', 'updated_date', 'liked']
+        fields = ['user', 'id', 'content', 'description', 'visibility', 'likes_count', 'comment_count', 'media',
+                  'created_date', 'updated_date', 'liked']
 
     def get_likes_count(self, obj):
         # Đã được tính trong QuerySet, không cần thiết phải làm lại ở đây
@@ -135,7 +208,6 @@ class BlogDetailSerializer(BlogSerializer):
     def get_liked(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            user = request.user
             return obj.likes_user > 0  # `likes_user` được tính trong QuerySet
         return False
 
@@ -145,6 +217,7 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'blog', 'user', 'content', 'file', 'parent', 'created_date', 'updated_date']
         read_only_fields = ['user', 'created_date', 'updated_date']
+
 
 class CommentListSerializer(CommentSerializer):
     user = UserListSerializer()
@@ -157,7 +230,7 @@ class CommentListSerializer(CommentSerializer):
             return self.context['request'].build_absolute_uri(f"/static/{file}")
 
     class Meta(CommentSerializer.Meta):
-       pass
+        pass
 
 
 class BlogDetailWithCommentsSerializer(serializers.Serializer):
@@ -183,6 +256,7 @@ class BlogDetailWithCommentsSerializer(serializers.Serializer):
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
+
     def validate_old_password(self, value):
         user = self.context['request'].user
         if not user.check_password(value):
@@ -236,8 +310,10 @@ class JobPostSerializer(serializers.ModelSerializer):
             'user': {'read_only': True},
         }
 
+
 class JobPostDetailSerializer(serializers.ModelSerializer):
     user = UserListSerializer()
+
     class Meta:
         model = JobPost
         fields = "__all__"
@@ -257,7 +333,7 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             'user': {'read_only': True},
-            'status': {'required': False,'read_only': True},
+            'status': {'required': False, 'read_only': True},
             'fullname': {'required': True},
             'phone_number': {'required': True},
             'email': {'required': True},
@@ -270,11 +346,13 @@ class JobApplicationDetailSerializer(serializers.ModelSerializer):
     user = UserSerializer()
     cv = serializers.SerializerMethodField()
     job_post = JobPostListSerializer()
+
     def get_cv(self, obj):
         if obj.cv:
             # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
             cv = obj.cv.name
             return self.context['request'].build_absolute_uri(f"/static/{cv}")
+
     class Meta:
         model = JobApplication
         fields = '__all__'
@@ -289,9 +367,10 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
             # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
             cv = obj.cv.name
             return self.context['request'].build_absolute_uri(f"/static/{cv}")
+
     class Meta:
         model = JobApplication
-        fields = ['id', 'user','fullname','job_title', 'cv', 'status','created_date']
+        fields = ['id', 'user', 'fullname', 'job_title', 'cv', 'status', 'created_date']
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -303,7 +382,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class CategoryListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id','name']
+        fields = ['id', 'name']
+
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -311,7 +391,7 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'user': {'read_only': True},
-            'title': {'required':True},
+            'title': {'required': True},
             'quantity': {'required': True},
             'file': {'required': True},
             'location': {'required': True},
@@ -321,15 +401,18 @@ class ProductSerializer(serializers.ModelSerializer):
             'phone_number': {'required': True}
         }
 
+
 class ProductUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
 
+
 class ProductDetailSerializer(serializers.ModelSerializer):
     file = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
     user = UserListSerializer()
+
     def get_file(self, obj):
         if obj.file:
             # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
@@ -340,15 +423,16 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         # Lấy danh sách categories liên kết với sản phẩm thông qua ProductCategory
         categories = Category.objects.filter(productcategory__product=obj)
         return CategoryListSerializer(categories, many=True, context=self.context).data
+
     class Meta:
         model = Product
-        fields = ['user','id', 'title', 'phone_number','quantity','price','description', 'file', 'condition', 'fettle','location','created_date','updated_date','categories']
+        fields = ['user', 'id', 'title', 'phone_number', 'quantity', 'price', 'description', 'file', 'condition',
+                  'fettle', 'location', 'created_date', 'updated_date', 'categories']
 
 
 class ProductListSerializer(ProductDetailSerializer):
     class Meta(ProductDetailSerializer.Meta):
-        fields = ['user', 'id', 'title','price', 'file', 'created_date','updated_date', 'categories']
-
+        fields = ['user', 'id', 'title', 'price', 'file', 'created_date', 'updated_date', 'categories']
 
 
 class BannerSerializer(serializers.ModelSerializer):
@@ -357,7 +441,7 @@ class BannerSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {
             'user': {'read_only': True},
-            'title': {'required':True},
+            'title': {'required': True},
             'image': {'required': True},
             'status': {'required': False},
             'description': {'required': True},
@@ -366,22 +450,27 @@ class BannerSerializer(serializers.ModelSerializer):
 
 class BannerDetailSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+
     def get_image(self, obj):
         if obj.image:
             # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
             image = obj.image.name
             return self.context['request'].build_absolute_uri(f"/static/{image}")
+
     class Meta(BannerSerializer.Meta):
         pass
 
 
 class BannerListSerializer(BannerDetailSerializer):
     class Meta(BannerDetailSerializer.Meta):
-        fields = ['id','title','image']
+        fields = ['id', 'title', 'image']
 
 
-
-
+class EmailVerificationCodeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmailVerificationCode
+        fields = ['code', 'expires_at', 'status']
+        read_only_fields = ['expires_at', 'status']
 
 # class CompanySerializer(serializers.ModelSerializer):
 #     class Meta:

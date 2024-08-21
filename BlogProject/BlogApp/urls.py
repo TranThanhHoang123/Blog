@@ -15,7 +15,6 @@ router.register(r'category', views.CategoryViewSet, basename='category')  # Spec
 router.register(r'product', views.ProductViewSet, basename='product')  # Specify the basename here
 router.register(r'banner', views.BannerViewSet, basename='banner')  # Specify the basename here
 router.register(r'group', views.GroupViewSet, basename='group')  # Specify the basename here
-
 urlpatterns = [
     path('', include(router.urls)),
     path('o/token/', CustomTokenView.as_view(), name='token'),
