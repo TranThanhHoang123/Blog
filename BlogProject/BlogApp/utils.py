@@ -1,4 +1,6 @@
 from django.contrib.auth.hashers import check_password
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from oauth2_provider.models import AccessToken, RefreshToken
 from django.core.mail import send_mail
 from django.db.models import Count, Q
@@ -58,41 +60,26 @@ from django.conf import settings
 
 def send_verification_email(to_email, subject, message):
     send_mail(
+        #Tiêu đề
         subject,
+        #Nội dung
         message,
+        #thangf gửi
         settings.EMAIL_HOST_USER,
+        #thằng nhận
         [to_email],
         fail_silently=False,
     )
 
+def send_activation_email(user, code):
+    subject = 'Activate Your Account'
+    message = f"Hi {user.username},\n\nPlease click the link below to activate your account:\n\n" \
+              f"{settings.DOMAIN}/user/activate/{urlsafe_base64_encode(force_bytes(user.pk))}/{code}/\n\n" \
+              f"The activation link will expire in 3 minutes.\n\nBest regards,\nThe Team"
+    send_mail(subject, message, settings.EMAIL_HOST_USER, [user.email])
+
 
 from django.contrib.auth.models import Group
-
-
-def get_user_permissions_codes(user: User, group_id=None):
-    """
-    Trả về danh sách mã quyền từ nhóm mà người dùng thuộc về.
-    :param user: Người dùng mà bạn muốn lấy quyền.
-    :param group_id: ID của nhóm (Group) mà bạn muốn lấy quyền. Nếu không cung cấp, sẽ lấy quyền từ tất cả các nhóm mà người dùng thuộc về.
-    :return: Danh sách các mã quyền (codename).
-    """
-    if not user.is_authenticated:
-        return []
-
-    if group_id:
-        # Lấy quyền từ một nhóm cụ thể
-        try:
-            group = Group.objects.get(id=group_id)
-            return list(group.permissions.values_list('codename', flat=True))
-        except Group.DoesNotExist:
-            return []  # Nếu nhóm không tồn tại, trả về danh sách rỗng
-    else:
-        # Lấy quyền từ tất cả các nhóm mà người dùng thuộc về
-        user_groups = user.groups.all()
-        permissions = set()
-        for group in user_groups:
-            permissions.update(group.permissions.values_list('codename', flat=True))
-        return list(permissions)
 
 
 def has_permission_to_modify_group(user, group):
