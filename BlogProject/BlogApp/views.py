@@ -114,7 +114,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
     # Thêm filter_backends và filterset_fields
     def get_permissions(self):
-        if self.action in ['create', 'list', 'blog','register','register']:
+        if self.action in ['create', 'list', 'blog','activate','register']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
