@@ -121,6 +121,8 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def get_serializer_class(self):
         if self.action in ['retrieve']:
             return serializers.UserDetailSerializer
+        if self.action in ['list']:
+            return serializers.UserListSerializer
         return self.serializer_class
 
     def get_object(self):
