@@ -230,7 +230,7 @@ class Banner(BaseModel):
     description = models.CharField(max_length=255)
     image = models.ImageField(upload_to='banners/%Y/%m')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,default='hide')
-    link = models.URLField()
+    link = models.URLField(max_length=255, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):

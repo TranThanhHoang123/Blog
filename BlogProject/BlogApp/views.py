@@ -114,7 +114,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
     # Thêm filter_backends và filterset_fields
     def get_permissions(self):
-        if self.action in ['create', 'list', 'blog','activate','register']:
+        if self.action in ['create', 'list', 'blog','activate','register','retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -901,10 +901,10 @@ class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIVi
         page = self.paginate_queryset(queryset)
 
         if page is not None:
-            serializer = serializers.BannerSerializer(page, many=True, context={'request': request})
+            serializer = serializers.BannerListSerializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = serializers.BannerSerializer(queryset, many=True, context={'request': request})
+        serializer = serializers.BannerListSerializer(queryset, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

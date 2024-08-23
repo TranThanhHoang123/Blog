@@ -463,7 +463,7 @@ class BannerDetailSerializer(serializers.ModelSerializer):
 
 class BannerListSerializer(BannerDetailSerializer):
     class Meta(BannerDetailSerializer.Meta):
-        fields = ['id', 'title', 'image']
+        fields = ['id', 'title','description','image','link']
 
 
 class EmailVerificationCodeSerializer(serializers.ModelSerializer):
