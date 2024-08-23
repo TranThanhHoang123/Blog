@@ -104,7 +104,7 @@ def custom_refresh_token(request):
 
 
 class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
-    queryset = User.objects.all()
+    queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = my_paginations.UserPagination
@@ -186,7 +186,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def retrieve(self, request, *args, **kwargs):
         user_id = kwargs.get('pk')  # Lấy ID từ URL
         try:
-            user = User.objects.get(id=user_id)
+            user = User.objects.get(id=user_id,is_active=True)
         except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -196,7 +196,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     @action(detail=True, methods=['get'], url_path='blog', permission_classes=[permissions.IsAuthenticated])
     def blog(self, request, pk=None):
         # người dung của blog
-        user_blog = User.objects.get(pk=pk)
+        user_blog = User.objects.get(pk=pk,is_active=True)
         blogs = utils.get_blog_list_of_user(user_blog=user_blog, user=request.user)
         paginator = my_paginations.BlogPagination()
         result_page = paginator.paginate_queryset(blogs, request)
@@ -530,7 +530,7 @@ class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.D
 
 
 class ChangePasswordViewSet(viewsets.ViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.ChangePasswordSerializer
 
     def get_permissions(self):
@@ -553,7 +553,7 @@ class ChangePasswordViewSet(viewsets.ViewSet):
         serializer = serializers.PasswordResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
-        user = User.objects.get(email=email)
+        user = User.objects.get(email=email,is_active=True)
         code = get_random_string(length=6, allowed_chars='0123456789')
 
         try:
@@ -577,7 +577,7 @@ class ChangePasswordViewSet(viewsets.ViewSet):
         serializer = serializers.VerifyCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = User.objects.get(email=serializer.validated_data['email'])
+        user = User.objects.get(email=serializer.validated_data['email'],is_active=True)
         reset_code = PasswordResetCode.objects.get(user=user, code=serializer.validated_data['code'])
 
         if reset_code.is_expired():
@@ -597,7 +597,7 @@ class ChangePasswordViewSet(viewsets.ViewSet):
 
 class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView,
                      generics.CreateAPIView, generics.DestroyAPIView):
-    queryset = JobPost.objects.all()
+    queryset = JobPost.objects.all().order_by('-created_date')
     serializer_class = serializers.JobPostSerializer
     pagination_class = my_paginations.JobPostPagination
     permission_classes = [permissions.IsAuthenticated]  # Yêu cầu người dùng phải đăng nhập
@@ -918,7 +918,7 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
     # API để lấy tất cả thành viên nào có group
     @action(methods=['get'], detail=False, url_path='all-users-with-group')
     def all_users_with_group(self, request):
-        users_with_group = User.objects.filter(groups__isnull=False).distinct()
+        users_with_group = User.objects.filter(groups__isnull=False,is_active=True).distinct()
         filtered_users = filters.UserAdminFilter(request.GET, queryset=users_with_group).qs  # Áp dụng bộ lọc
         paginator = my_paginations.UserPagination()
         paginated_users = paginator.paginate_queryset(filtered_users, request)
@@ -952,7 +952,7 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
             with transaction.atomic():
                 for user_id in user_ids:
                     try:
-                        user = User.objects.get(pk=user_id)
+                        user = User.objects.get(pk=user_id,is_active=True)
 
                         # Kiểm tra xem người dùng đã thuộc nhóm nào chưa
                         if user.groups.exists():
@@ -986,7 +986,7 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
             with transaction.atomic():
                 for user_id in user_ids:
                     try:
-                        user = User.objects.get(pk=user_id)
+                        user = User.objects.get(pk=user_id,is_active=True)
 
                         # Kiểm tra xem người dùng có thuộc nhóm này không
                         if not group.user_set.filter(pk=user_id).exists():
@@ -1012,8 +1012,6 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
         paginated_groups = paginator.paginate_queryset(groups, request)
         serializer = serializers.GroupListSerializer(paginated_groups, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
-
-
 
 # class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView):
 #     queryset = Company.objects.all().order_by('-workers_number')

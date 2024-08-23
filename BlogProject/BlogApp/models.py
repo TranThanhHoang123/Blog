@@ -155,7 +155,7 @@ class EmailVerificationCode(models.Model):
     def is_expired(self):
         return timezone.now() > self.expires_at
 
-class JobPost(models.Model):
+class JobPost(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
     WORK_TYPE_CHOICES = [
         ('full-time', 'full-time'),
@@ -230,6 +230,7 @@ class Banner(BaseModel):
     description = models.CharField(max_length=255)
     image = models.ImageField(upload_to='banners/%Y/%m')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,default='hide')
+    link = models.URLField()
     user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     def __str__(self):

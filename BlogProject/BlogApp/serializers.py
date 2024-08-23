@@ -370,7 +370,7 @@ class JobApplicationListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = JobApplication
-        fields = ['id', 'user', 'fullname', 'job_title', 'cv', 'status', 'created_date']
+        fields = ['id', 'user', 'fullname', 'job_title','phone_number','email', 'cv', 'status', 'created_date']
 
 
 class CategorySerializer(serializers.ModelSerializer):

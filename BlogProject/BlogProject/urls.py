@@ -16,11 +16,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from django.conf import settings
 urlpatterns = [
     path('', include('BlogApp.urls')),
     # path('notification', include('NotificationApp.urls')),
-    path('admin/', admin.site.urls),
+    path(f'{settings.ADMIN_ENDPOINT}', admin.site.urls),
     path('o/', include('oauth2_provider.urls',
                        namespace='oauth2_provider')),
 ]

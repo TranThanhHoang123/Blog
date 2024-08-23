@@ -5,6 +5,7 @@ from oauth2_provider.models import AccessToken, RefreshToken
 from django.core.mail import send_mail
 from django.db.models import Count, Q
 from .models import *
+from django.conf import settings
 
 def get_blog_details(blog_id, user):
     if user.is_anonymous:
@@ -55,8 +56,6 @@ def has_admin_or_manager_permission(user):
     """
         # Kiểm tra xem người dùng có thuộc nhóm 'admin' hoặc 'manager' không
     return Group.objects.filter(user=user, name__in=['admin', 'manager']).exists()
-
-from django.conf import settings
 
 def send_verification_email(to_email, subject, message):
     send_mail(
