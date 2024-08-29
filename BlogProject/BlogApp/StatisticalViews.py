@@ -1,4 +1,4 @@
-from django.db.models import Sum,Count
+from django.db.models import Sum, Count, Max, Min, Avg
 from rest_framework import viewsets, generics, status, permissions
 from rest_framework.response import Response
 from . import serializers, my_paginations, my_generics, filters, utils, my_permissions
@@ -74,7 +74,9 @@ class StatsView(viewsets.ViewSet):
     def product_general(self, request):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-
+        # Chuyển đổi thành timezone-aware datetime
+        start_date = timezone.make_aware(parse_datetime(start_date))
+        end_date = timezone.make_aware(parse_datetime(end_date))
         # Tính tổng số sản phẩm, tổng tiền, và số lượng sản phẩm theo fettle và condition
         stats = Product.objects.filter(
             created_date__range=[start_date, end_date]
@@ -93,7 +95,9 @@ class StatsView(viewsets.ViewSet):
     def product_category_general(self, request):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-
+        # Chuyển đổi thành timezone-aware datetime
+        start_date = timezone.make_aware(parse_datetime(start_date))
+        end_date = timezone.make_aware(parse_datetime(end_date))
         # Tính tổng số lượng sản phẩm và tổng tiền trong mỗi danh mục, kể cả khi không có sản phẩm nào
         category_stats = Category.objects.annotate(
             total_products=Count(
@@ -113,7 +117,9 @@ class StatsView(viewsets.ViewSet):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         category_name = request.query_params.get('category_name')
-
+        # Chuyển đổi thành timezone-aware datetime
+        start_date = timezone.make_aware(parse_datetime(start_date))
+        end_date = timezone.make_aware(parse_datetime(end_date))
         if not category_name:
             return Response({"detail": "category_name is required"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -127,3 +133,33 @@ class StatsView(viewsets.ViewSet):
         )
 
         return Response(category_stats, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path='job-application-general', detail=False)
+    def job_application_stats(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        start_date = timezone.make_aware(parse_datetime(start_date))
+        end_date = timezone.make_aware(parse_datetime(end_date))
+
+        # Tính số lượng theo các trạng thái
+        job_application_total_stats = JobApplication.objects.filter(created_date__range=[start_date, end_date]).aggregate(
+            total_pending=Count('id', filter=Q(status='pending')),
+            total_approved=Count('id', filter=Q(status='approved')),
+            total_rejected=Count('id', filter=Q(status='rejected')),
+        )
+
+        # Tổng số lượng JobApplication bằng cách cộng ba trạng thái
+        job_application_total_stats['total_applications'] = job_application_total_stats['total_pending'] + job_application_total_stats['total_approved'] + job_application_total_stats['total_rejected']
+        # Trả về kết quả thống kê
+        return Response(job_application_total_stats, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path='job-post-general', detail=False)
+    def job_post_general(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        start_date = timezone.make_aware(parse_datetime(start_date))
+        end_date = timezone.make_aware(parse_datetime(end_date))
+
+        data=None
+
+        return Response(data, status=status.HTTP_200_OK)
