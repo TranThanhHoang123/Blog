@@ -1013,6 +1013,7 @@ class WebsiteViewSet(viewsets.ViewSet,generics.RetrieveAPIView,generics.UpdateAP
         if self.action in ['retrieve']:
             return [permissions.AllowAny()]
         return [my_permissions.IsAdmin()]
+
     def get_serializer_class(self):
         if self.action in ['retrieve']:
             return serializers.WebsiteDetailSerializer
