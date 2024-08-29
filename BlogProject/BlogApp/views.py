@@ -911,7 +911,7 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
         filtered_users = filters.UserAdminFilter(request.GET, queryset=users_with_group).qs  # Áp dụng bộ lọc
         paginator = my_paginations.UserPagination()
         paginated_users = paginator.paginate_queryset(filtered_users, request)
-        serializer = serializers.UserListSerializer(paginated_users, many=True, context={'request': request})
+        serializer = serializers.UserListForAdminSerializer(paginated_users, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
     # API để lấy thành viên có trong một group cụ thể
@@ -1008,6 +1008,11 @@ class WebsiteViewSet(viewsets.ViewSet,generics.RetrieveAPIView,generics.UpdateAP
     queryset = Website.objects.all()
     serializer_class = serializers.WebsiteSerializer
     permission_classes = [my_permissions.IsAdmin]
+
+    def get_permissions(self):
+        if self.action in ['retrieve']:
+            return [permissions.AllowAny()]
+        return [my_permissions.IsAdmin()]
     def get_serializer_class(self):
         if self.action in ['retrieve']:
             return serializers.WebsiteDetailSerializer

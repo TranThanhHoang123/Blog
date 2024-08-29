@@ -135,7 +135,11 @@ class UserDetailSerializer(UserSerializer):
 
 class UserListSerializer(UserDetailSerializer):
     class Meta(UserDetailSerializer.Meta):
-        fields = ['id', 'username', 'first_name', 'last_name', 'profile_image', 'profile_bg']
+        fields = ['id', 'username', 'first_name', 'last_name', 'profile_image', 'profile_bg','phone_number','']
+
+class UserListForAdminSerializer(UserDetailSerializer):
+    class Meta(UserDetailSerializer.Meta):
+        fields = ['id', 'username', 'first_name', 'last_name', 'profile_image', 'profile_bg','phone_number','email']
 
 
 class BlogMediaSerializer(serializers.ModelSerializer):
