@@ -65,7 +65,15 @@ MEMBERS = [
         'group': 'admin'
     }
 ]
-
+#khởi tạo website
+WEBSITE = {
+    'img':'ico/default.ico',
+    'about':'Công ty',
+    'phone_number':'00000',
+    'mail':'example@example.com',
+    'location':'hehe',
+    'link':'hehe'
+}
 
 class Command(BaseCommand):
     help = 'Khởi tạo quyền và nhóm'
@@ -93,5 +101,8 @@ class Command(BaseCommand):
 
         # thêm member đến group
         utils.add_members_to_group(MEMBERS)
+
+        # khởi tạo website
+        utils.initialize_website()
 
         self.stdout.write(self.style.SUCCESS('Successfully initialized permissions and groups'))

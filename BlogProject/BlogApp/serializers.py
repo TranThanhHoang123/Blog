@@ -472,6 +472,25 @@ class EmailVerificationCodeSerializer(serializers.ModelSerializer):
         fields = ['code', 'expires_at', 'status']
         read_only_fields = ['expires_at', 'status']
 
+
+class WebsiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Website
+        fields = '__all__'
+
+class WebsiteDetailSerializer(serializers.ModelSerializer):
+    img = serializers.SerializerMethodField()
+
+    def get_img(self, obj):
+        if obj.img:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            img = obj.img.name
+            return self.context['request'].build_absolute_uri(f"/static/{img}")
+    class Meta:
+        model = Website
+        fields = ['id','img', 'about', 'phone_number', 'mail', 'location', 'link']
+
+
 # class CompanySerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Company

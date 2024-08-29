@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
-from BlogApp.models import User,GroupPriority
+from BlogApp.models import User,GroupPriority,Website
 
 def create_permissions(permission_list):
     """
@@ -203,3 +203,22 @@ def add_members_to_group(members_list):
             print(f"User '{username}' does not exist.")
         except Exception as e:
             print(f"Error adding user '{username}' to group '{group_name}': {e}")
+
+
+def initialize_website():
+    WEBSITE = {
+        'img': 'ico/default.ico',
+        'about': 'Công ty',
+        'phone_number': '00000',
+        'mail': 'example@example.com',
+        'location': 'hehe',
+        'link': 'hehe'
+    }
+
+    # Kiểm tra xem một đối tượng Website đã tồn tại chưa
+    if not Website.objects.exists():
+        # Nếu chưa, tạo một đối tượng mới
+        Website.objects.create(**WEBSITE)
+        print("Website initialized.")
+    else:
+        print("Website already exists.")

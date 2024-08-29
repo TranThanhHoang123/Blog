@@ -1002,6 +1002,44 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
         serializer = serializers.GroupListSerializer(paginated_groups, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
+
+
+class WebsiteViewSet(viewsets.ViewSet,generics.RetrieveAPIView,generics.UpdateAPIView):
+    queryset = Website.objects.all()
+    serializer_class = serializers.WebsiteSerializer
+    permission_classes = [my_permissions.IsAdmin]
+    def get_serializer_class(self):
+        if self.action in ['retrieve']:
+            return serializers.WebsiteDetailSerializer
+        return serializers.WebsiteSerializer
+
+    @action(detail=True, methods=['GET'])
+    def detail(self, request, pk=None):
+        website = self.get_object()
+        serializer = serializers.WebsiteDetailSerializer(website, context={'request':request})
+        return Response(serializer.data)
+
+    def update(self, request, *args, **kwargs):
+        # Tạo serializer với dữ liệu từ request và đối tượng banner đã có
+        website = self.get_object()
+        serializer = self.get_serializer(website, data=request.data, partial=True)
+
+        # Kiểm tra tính hợp lệ của dữ liệu
+        if serializer.is_valid():
+            try:
+                # Cập nhật thông tin banner
+                website = serializer.save()
+                # Trả về dữ liệu chi tiết của banner sau khi cập nhật
+                return Response(serializers.WebsiteDetailSerializer(website, context={'request': request}).data,
+                                status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Nếu dữ liệu không hợp lệ, trả về lỗi với thông báo chi tiết
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 # class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView):
 #     queryset = Company.objects.all().order_by('-workers_number')
 #     serializer_class = serializers.CompanySerializer

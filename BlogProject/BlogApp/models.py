@@ -40,7 +40,7 @@ class Blog(BaseModel):
     ]
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=255)
-    description = models.TextField(validators=[MaxLengthValidator(1000)])  # Giới hạn 1000 ký tự
+    description = models.TextField(validators=[MaxLengthValidator(4000)])  # Giới hạn 1000 ký tự
     visibility = models.CharField(max_length=9, choices=VISIBILITY_CHOICES, default='public')
     # likes_count = models.PositiveIntegerField(default=0)
     # comments_count = models.PositiveIntegerField(default=0)
@@ -83,6 +83,21 @@ class BlogMedia(models.Model):
     )
     def __str__(self):
         return f'Media for blog {self.blog.id}'
+
+
+class Website(models.Model):
+    img = models.FileField(
+        upload_to='icon/%Y/%m',
+        validators=[FileExtensionValidator(allowed_extensions=['ico'])]
+    )
+    about = models.TextField(validators=[MaxLengthValidator(4000)])
+    phone_number = models.CharField(max_length=20)
+    mail = models.EmailField(max_length=255)
+    location = models.CharField(max_length=255)
+    link = models.URLField(max_length=255)
+
+    def __str__(self):
+        return f"Website: {self.about}"
 
 
 # class Company(models.Model):
