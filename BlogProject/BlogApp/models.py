@@ -15,8 +15,18 @@ class User(AbstractUser):
     email = models.CharField(max_length=40, unique=False)
     location = models.CharField(max_length=85,null=True)
     about = models.CharField(max_length=255,null=True,blank=True)
-    profile_image = models.ImageField(upload_to='user/%Y/%m', null=True, blank=True)
-    profile_bg = models.ImageField(upload_to='user/%Y/%m', null=True, blank=True)
+    profile_image = models.ImageField(
+        upload_to='user/%Y/%m',
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
+    )
+    profile_bg = models.ImageField(
+        upload_to='user/%Y/%m',
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
+    )
     link = models.CharField(max_length=100,null=True)
     is_active = models.BooleanField(default=False)
     def __str__(self):
@@ -53,7 +63,12 @@ class Comment(BaseModel):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=255)
-    file = models.ImageField(upload_to='comment/%Y/%m', null=True, blank=True)
+    file = models.FileField(
+        upload_to='comment/%Y/%m',
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png', 'gif'])]
+    )
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
     def __str__(self):
@@ -62,8 +77,10 @@ class Comment(BaseModel):
 
 class BlogMedia(models.Model):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='media')
-    file = models.FileField(upload_to='blog_media/%Y/%m')
-
+    file = models.FileField(
+        upload_to='blog_media/%Y/%m',
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png', 'gif'])]
+    )
     def __str__(self):
         return f'Media for blog {self.blog.id}'
 
@@ -109,8 +126,10 @@ class JobApplication(BaseModel):
     job_post = models.ForeignKey('JobPost', related_name='job_applications', on_delete=models.CASCADE,null=True)
     user = models.ForeignKey(User, related_name='job_applications', on_delete=models.CASCADE)
     job_title = models.CharField(max_length=255)
-    cv = models.FileField(upload_to='cv/%Y/%m',
-                          validators=[FileExtensionValidator(allowed_extensions=['pdf'])])
+    cv = models.FileField(
+        upload_to='cv/%Y/%m',
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])]
+    )
     fullname = models.CharField(max_length=50,null=True,blank=False)
     phone_number = models.CharField(max_length=11,null=True,blank=False)
     email = models.EmailField(null=True,blank=False)
@@ -132,8 +151,7 @@ class PasswordResetCode(models.Model):
     status = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        if not self.expires_at:
-            self.expires_at = timezone.now() + timedelta(minutes=3)
+        self.expires_at = timezone.now() + timedelta(minutes=3)  # Luôn cập nhật expires_at
         super().save(*args, **kwargs)
 
     def is_expired(self):
@@ -195,7 +213,12 @@ class Product(BaseModel):
     title = models.CharField(max_length=60,null=False,blank=False)
     description = models.CharField(max_length=3000,null=False,blank=False)
     quantity = models.PositiveSmallIntegerField(null=False,blank=False)
-    file = models.ImageField(upload_to='products/%Y/%m',null=False,blank=False)
+    file = models.ImageField(
+        upload_to='products/%Y/%m',
+        null=False,
+        blank=False,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
+    )
     condition = models.CharField(max_length=10, choices=CONDITION_CHOICES,default='new')
     fettle = models.CharField(max_length=20, choices=FETTLE_CHOICES,default='in_stock')
     location = models.CharField(max_length=255)
@@ -228,7 +251,10 @@ class Banner(BaseModel):
 
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='banners/%Y/%m')
+    image = models.ImageField(
+        upload_to='banners/%Y/%m',
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
+    )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,default='hide')
     link = models.URLField(max_length=255, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -248,6 +274,9 @@ class GroupPriority(models.Model):
 
     def __str__(self):
         return f"{self.group.name} (Priority: {self.priority})"
+
+
+
 
 # class CompanyGroup(models.Model):
 #     company = models.ForeignKey(Company, related_name='groups', on_delete=models.CASCADE)

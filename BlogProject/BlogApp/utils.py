@@ -104,42 +104,42 @@ from django.core.files.base import ContentFile
 import os
 import io
 
-def sanitize_filename(filename):
-    """Xóa các ký tự đặc biệt và giữ lại các ký tự an toàn trong tên tập tin."""
-    return re.sub(r'[^\w\s.-]', '', filename)
+# def sanitize_filename(filename):
+#     """Xóa các ký tự đặc biệt và giữ lại các ký tự an toàn trong tên tập tin."""
+#     return re.sub(r'[^\w\s.-]', '', filename)
 
-def convert_to_jpeg(file):
-    try:
-        # Mở tập tin hình ảnh
-        image = Image.open(file)
-        image = image.convert('RGB')
-
-        # Tạo bộ đệm để lưu tập tin JPEG
-        buffer = BytesIO()
-        image.save(buffer, format='JPEG')
-        buffer.seek(0)
-
-        return ContentFile(buffer.read(), name=f"{os.path.splitext(file.name)[0]}.jpeg")
-    except Exception as e:
-        # Xử lý lỗi và giữ tập tin gốc với phần mở rộng .jpeg
-        print(f"Error converting file to JPEG: {e}")
-        file.seek(0)
-        return ContentFile(file.read(), name=f"{os.path.splitext(file.name)[0]}.jpeg")
-
-from PyPDF2 import PdfFileReader, PdfFileWriter
-def convert_to_pdf(file):
-    try:
-        # Đọc nội dung file
-        buffer = BytesIO(file.read())
-
-        # Đặt tên file với phần mở rộng .pdf
-        pdf_filename = f"{os.path.splitext(file.name)[0]}.pdf"
-
-        # Trả về file dưới dạng ContentFile với phần mở rộng .pdf
-        return ContentFile(buffer.getvalue(), name=pdf_filename)
-
-    except Exception as e:
-        # Xử lý lỗi và giữ tập tin gốc với phần mở rộng .pdf
-        print(f"Error converting file to PDF: {e}")
-        file.seek(0)
-        return ContentFile(file.read(), name=f"{os.path.splitext(file.name)[0]}.pdf")
+# def convert_to_jpeg(file):
+#     try:
+#         # Mở tập tin hình ảnh
+#         image = Image.open(file)
+#         image = image.convert('RGB')
+#
+#         # Tạo bộ đệm để lưu tập tin JPEG
+#         buffer = BytesIO()
+#         image.save(buffer, format='JPEG')
+#         buffer.seek(0)
+#
+#         return ContentFile(buffer.read(), name=f"{os.path.splitext(file.name)[0]}.jpeg")
+#     except Exception as e:
+#         # Xử lý lỗi và giữ tập tin gốc với phần mở rộng .jpeg
+#         print(f"Error converting file to JPEG: {e}")
+#         file.seek(0)
+#         return ContentFile(file.read(), name=f"{os.path.splitext(file.name)[0]}.jpeg")
+#
+# from PyPDF2 import PdfFileReader, PdfFileWriter
+# def convert_to_pdf(file):
+#     try:
+#         # Đọc nội dung file
+#         buffer = BytesIO(file.read())
+#
+#         # Đặt tên file với phần mở rộng .pdf
+#         pdf_filename = f"{os.path.splitext(file.name)[0]}.pdf"
+#
+#         # Trả về file dưới dạng ContentFile với phần mở rộng .pdf
+#         return ContentFile(buffer.getvalue(), name=pdf_filename)
+#
+#     except Exception as e:
+#         # Xử lý lỗi và giữ tập tin gốc với phần mở rộng .pdf
+#         print(f"Error converting file to PDF: {e}")
+#         file.seek(0)
+#         return ContentFile(file.read(), name=f"{os.path.splitext(file.name)[0]}.pdf")

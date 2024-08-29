@@ -288,7 +288,7 @@ class VerifyCodeSerializer(serializers.Serializer):
 
     def validate(self, data):
         try:
-            user = User.objects.get(email=data['email'])
+            user = User.objects.get(email=data['email'],is_active=True)
             reset_code = PasswordResetCode.objects.get(user=user, code=data['code'])
         except (User.DoesNotExist, PasswordResetCode.DoesNotExist):
             raise serializers.ValidationError("Invalid email or code.")

@@ -268,18 +268,9 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                 description=description,
                 visibility=visibility
             )
-            if file_type is not None:
-                if file_type == 'pdf':
-                    for file in medias:
-                        pdf_file = convert_to_pdf(file)
-                        BlogMedia.objects.create(blog=blog, file=pdf_file)
-
-                if file_type == 'image':
-                    # Handle media files
-                    for file in medias:
-                        # Chuyển đổi file thành định dạng jpeg
-                        jpeg_file = convert_to_jpeg(file)
-                        BlogMedia.objects.create(blog=blog, file=jpeg_file)
+            for file in medias:
+                # Chuyển đổi file thành định dạng jpeg
+                BlogMedia.objects.create(blog=blog, file=file)
 
             # Serialize the response data
             serializer = serializers.BlogSerializer(blog, context={'request': request})
@@ -325,8 +316,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                             return Response({'detail': 'You can only have up to 1 PDF file.'},
                                             status=status.HTTP_400_BAD_REQUEST)
                         for file in new_media:
-                            pdf_file = convert_to_pdf(file)
-                            BlogMedia.objects.create(blog=updated_blog, file=pdf_file)
+                            BlogMedia.objects.create(blog=updated_blog, file=file)
 
                     elif file_type == 'image':
                         # Kiểm tra xem blog có chứa file PDF không
@@ -337,8 +327,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                             return Response({'detail': 'You can have up to 4 images total.'},
                                             status=status.HTTP_400_BAD_REQUEST)
                         for file in new_media:
-                            jpeg_file = convert_to_jpeg(file)
-                            BlogMedia.objects.create(blog=updated_blog, file=jpeg_file)
+                            BlogMedia.objects.create(blog=updated_blog, file=file)
 
                 return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -406,11 +395,11 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                 parent_comment = get_object_or_404(Comment, id=parent_id)
                 data['parent'] = parent_comment.id
 
-            serializer = serializers.CommentSerializer(data=data, context={'request': request})
+            serializer = serializers.CommentSerializer(data=data)
 
             if serializer.is_valid():
-                serializer.save(user=user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                instance = serializer.save(user=user)
+                return Response(serializers.CommentListSerializer(instance,context={'request': request}).data, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'GET':
