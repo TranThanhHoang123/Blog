@@ -116,17 +116,17 @@ class StatsView(viewsets.ViewSet):
     def product_category_specific(self, request):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-        category_name = request.query_params.get('category_name')
+        category_id = request.query_params.get('category_id')
         # Chuyển đổi thành timezone-aware datetime
         start_date = timezone.make_aware(parse_datetime(start_date))
         end_date = timezone.make_aware(parse_datetime(end_date))
-        if not category_name:
-            return Response({"detail": "category_name is required"}, status=status.HTTP_400_BAD_REQUEST)
+        if not category_id:
+            return Response({"detail": "category_id is required"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Tính tổng số lượng sản phẩm và tổng tiền trong danh mục cụ thể theo khoảng thời gian
         category_stats = ProductCategory.objects.filter(
             product__created_date__range=[start_date, end_date],
-            category__name=category_name
+            category__id=category_id
         ).aggregate(
             total_products=Count('product_id'),
             total_price=Sum('product__price')

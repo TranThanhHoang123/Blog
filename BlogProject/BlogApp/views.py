@@ -203,6 +203,27 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         serializer = serializers.BlogDetailSerializer(result_page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
+    @action(detail=False, methods=['get'], url_path='job-post/job-applications')
+    def job_application(self, request):
+        user = request.user
+
+        # Lấy tất cả các JobPost của user
+        job_posts = JobPost.objects.filter(user=user)
+
+        # Lấy tất cả các JobApplication liên quan đến các JobPost này
+        job_applications = JobApplication.objects.filter(job_post__in=job_posts).order_by('-created_date')
+
+        # Phân trang các kết quả
+        paginator = my_paginations.JobApplicationPagination()
+        paginated_applications = paginator.paginate_queryset(job_applications, request)
+
+        # Serialize các kết quả
+        serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
+                                                              context={'request': request})
+
+        # Trả về phản hồi có phân trang
+        return paginator.get_paginated_response(serializer.data)
+
 
 class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Blog.objects.all().order_by('-created_date')
