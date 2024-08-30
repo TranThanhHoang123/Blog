@@ -17,6 +17,7 @@ from django.utils import timezone
 from datetime import timedelta
 from rest_framework.permissions import AllowAny
 from oauth2_provider.settings import oauth2_settings
+from django.db.utils import IntegrityError
 import json
 import uuid
 from rest_framework import status
@@ -281,6 +282,16 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
             if file_type == 'image' and len(medias) > 4:
                 return Response({'detail': 'You can upload up to 4 images.'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Kiểm tra các tệp tin dựa trên loại tệp
+            for file in medias:
+                extension = file.name.split('.')[-1].lower()
+                if file_type == 'pdf' and extension != 'pdf':
+                    return Response({'detail': 'All uploaded files must be PDF when file_type is pdf.'},
+                                    status=status.HTTP_400_BAD_REQUEST)
+                if file_type == 'image' and extension == 'pdf':
+                    return Response({'detail': 'PDF files are not allowed when file_type is image.'},
+                                    status=status.HTTP_400_BAD_REQUEST)
 
             # Validate and create blog instance
             blog = Blog.objects.create(
@@ -768,7 +779,6 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-
         if serializer.is_valid():
             try:
                 with transaction.atomic():
@@ -782,8 +792,19 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
                             obj = Category.objects.get(pk=cat)
                             ProductCategory.objects.create(product=product, category=obj)
 
+                    # Thêm các media vào product
+                    medias = request.FILES.getlist('media', None)
+                    # kiểm tra số file có lớn hơn 4 không
+                    if medias:
+                        if len(medias) > 4:
+                            return Response({'detail': 'You can upload up to 4 media files.'},
+                                            status=status.HTTP_400_BAD_REQUEST)
+                        for media_file in medias:
+                            ProductMedia.objects.create(product=product, media=media_file)
+
                     # Serialize the response data
-                    return Response(serializer.data, status=status.HTTP_201_CREATED)
+                    response_serializer = serializers.ProductDetailSerializer(product,context={'request':request})
+                    return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
             except Category.DoesNotExist:
                 return Response({'error': 'Category does not exist.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -792,10 +813,11 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def partial_update(self, request, pk=None):
+        # Lấy đối tượng sản phẩm hoặc trả về lỗi 404 nếu không tìm thấy
         product = get_object_or_404(Product, pk=pk, user=request.user)
 
+        # Kiểm tra quyền truy cập
         if request.user != product.user:
             return Response({"detail": "You do not have permission to update this product."},
                             status=status.HTTP_403_FORBIDDEN)
@@ -808,16 +830,42 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
                     # Cập nhật sản phẩm
                     product = serializer.save()
 
-                    # Cập nhật categories
-                    categories = request.data.getlist('category', None)
-                    if categories:
-                        # Xóa các category hiện có của sản phẩm
-                        ProductCategory.objects.filter(product=product).delete()
-
+                    # Xử lý các category_id: thêm mới các category
+                    category_ids = request.data.getlist('category_id', None)
+                    if category_ids:
                         # Thêm các category mới vào sản phẩm
-                        for cat in categories:
-                            obj = Category.objects.get(pk=cat)  # Nếu không tìm thấy, sẽ gây ra Category.DoesNotExist
-                            ProductCategory.objects.create(product=product, category=obj)
+                        for cat_id in category_ids:
+                            try:
+                                obj = Category.objects.get(pk=cat_id)
+                                ProductCategory.objects.create(product=product, category=obj)
+                            except Category.DoesNotExist:
+                                return Response({'detail': f'Category with id {cat_id} does not exist.'},
+                                                status=status.HTTP_400_BAD_REQUEST)
+                            except IntegrityError:
+                                return Response({
+                                                    'detail': f'ProductCategory with product {product.id} and category {cat_id} already exists.'},
+                                                status=status.HTTP_400_BAD_REQUEST)
+
+                    # Xử lý các remove_product_category_id: xóa các category
+                    remove_category_ids = request.data.getlist('remove_product_category_id', None)
+                    if remove_category_ids:
+                        ProductCategory.objects.filter(product=product, category__id__in=remove_category_ids).delete()
+
+                    # Xử lý các media: thêm mới các media
+                    media_files = request.FILES.getlist('media', None)
+                    if media_files:
+                        if len(media_files) > 4:
+                            return Response({'detail': 'You can upload up to 4 media files.'},
+                                            status=status.HTTP_400_BAD_REQUEST)
+
+                        # Thêm các media mới vào sản phẩm
+                        for media_file in media_files:
+                            ProductMedia.objects.create(product=product, media=media_file)
+
+                    # Xử lý các remove_product_media_id: xóa các media
+                    remove_media_ids = request.data.getlist('remove_product_media_id', None)
+                    if remove_media_ids:
+                        ProductMedia.objects.filter(id__in=remove_media_ids).delete()
 
                     return Response({'Message': 'Updated product successfully.'}, status=status.HTTP_200_OK)
 
@@ -828,7 +876,6 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
                 return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.CreateAPIView,
                     generics.DestroyAPIView):

@@ -7,6 +7,9 @@ from django.contrib.auth.models import Group,Permission
 
 @receiver(post_delete, sender=BlogMedia)
 def delete_media_file(sender, instance, **kwargs):
+    """
+       Tín hiệu xóa tệp tin khi một đối tượng BlogMedia bị xóa.
+    """
     instance.file.delete(False)
 
 @receiver(pre_save, sender=User)
@@ -43,3 +46,13 @@ def handle_comment_file_update(sender, instance, **kwargs):
 
         if old_instance and old_instance.file and old_instance.file != instance.file:
             old_instance.file.delete(save=False)
+
+
+@receiver(post_delete, sender=ProductMedia)
+def delete_file_on_product_media_delete(sender, instance, **kwargs):
+    """
+    Tín hiệu xóa tệp tin khi một đối tượng ProductMedia bị xóa.
+    """
+    if instance.media:
+        # Xóa tệp tin từ hệ thống tập tin
+        instance.media.delete(save=False)

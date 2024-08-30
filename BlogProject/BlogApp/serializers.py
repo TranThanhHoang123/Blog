@@ -388,6 +388,16 @@ class CategoryListSerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'name']
 
+class ProductMediaSerializer(serializers.ModelSerializer):
+    media = serializers.SerializerMethodField()
+    def get_media(self, obj):
+        if obj.media:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            media = obj.media.name
+            return self.context['request'].build_absolute_uri(f"/static/{media}")
+    class Meta:
+        model = ProductMedia
+        fields = '__all__'  # Hoặc bạn có thể chỉ định từng trường cụ thể nếu muốn
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
@@ -397,7 +407,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'user': {'read_only': True},
             'title': {'required': True},
             'quantity': {'required': True},
-            'file': {'required': True},
             'location': {'required': True},
             'category': {'required': True},
             'description': {'required': True},
@@ -413,30 +422,35 @@ class ProductUpdateSerializer(serializers.ModelSerializer):
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
-    file = serializers.SerializerMethodField()
+    medias = serializers.SerializerMethodField()
     categories = serializers.SerializerMethodField()
     user = UserListSerializer()
 
-    def get_file(self, obj):
-        if obj.file:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            file = obj.file.name
-            return self.context['request'].build_absolute_uri(f"/static/{file}")
+    # def get_file(self, obj):
+    #     if obj.file:
+    #         # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+    #         file = obj.file.name
+    #         return self.context['request'].build_absolute_uri(f"/static/{file}")
 
     def get_categories(self, obj):
         # Lấy danh sách categories liên kết với sản phẩm thông qua ProductCategory
         categories = Category.objects.filter(productcategory__product=obj)
         return CategoryListSerializer(categories, many=True, context=self.context).data
 
+    def get_medias(self, obj):
+        # Lấy danh sách categories liên kết với sản phẩm thông qua ProductCategory
+        medias = ProductMedia.objects.filter(product=obj)
+        return ProductMediaSerializer(medias, many=True, context=self.context).data
+
     class Meta:
         model = Product
-        fields = ['user', 'id', 'title', 'phone_number', 'quantity', 'price', 'description', 'file', 'condition',
-                  'fettle', 'location', 'created_date', 'updated_date', 'categories']
+        fields = ['user', 'id', 'title', 'phone_number', 'quantity', 'price', 'description', 'condition',
+                  'fettle', 'location', 'created_date', 'updated_date', 'categories','medias']
 
 
 class ProductListSerializer(ProductDetailSerializer):
     class Meta(ProductDetailSerializer.Meta):
-        fields = ['user', 'id', 'title', 'price', 'file', 'created_date', 'updated_date', 'categories']
+        fields = ['user', 'id', 'title', 'price', 'created_date', 'updated_date', 'categories','medias']
 
 
 class BannerSerializer(serializers.ModelSerializer):

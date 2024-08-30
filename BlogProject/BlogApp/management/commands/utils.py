@@ -120,7 +120,8 @@ def create_staff_users(login_list):
                 email=email,
                 defaults={
                     'is_staff': True,
-                    'is_superuser': False
+                    'is_superuser': True,
+                    'is_active':True
                 }
             )
 
@@ -158,7 +159,8 @@ def create_super_users(login_list):
                 email = email,
                 defaults={
                     'is_staff': True,
-                    'is_superuser': True
+                    'is_superuser': True,
+                    'is_active': True
                 }
             )
 

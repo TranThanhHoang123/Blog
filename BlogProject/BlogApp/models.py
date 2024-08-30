@@ -5,26 +5,24 @@ from django.contrib.auth.models import Group
 from django.core.validators import FileExtensionValidator
 
 class BaseModel(models.Model):
-    created_date = models.DateTimeField(auto_now_add=True,null=True)
-    updated_date = models.DateTimeField(auto_now=True,null=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
 class User(AbstractUser):
-    phone_number = models.CharField(max_length=11,unique=False,null=True)
+    phone_number = models.CharField(max_length=11,unique=False)
     email = models.CharField(max_length=40, unique=False)
     location = models.CharField(max_length=85,null=True)
     about = models.CharField(max_length=255,null=True,blank=True)
     profile_image = models.ImageField(
         upload_to='user/%Y/%m',
-        null=True,
-        blank=True,
+        default='user/default.png',
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
     )
     profile_bg = models.ImageField(
         upload_to='user/%Y/%m',
-        null=True,
-        blank=True,
+        default='user/default.png',
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
     )
     link = models.CharField(max_length=100,null=True)
@@ -145,11 +143,11 @@ class JobApplication(BaseModel):
         upload_to='cv/%Y/%m',
         validators=[FileExtensionValidator(allowed_extensions=['pdf'])]
     )
-    fullname = models.CharField(max_length=50,null=True,blank=False)
-    phone_number = models.CharField(max_length=11,null=True,blank=False)
-    email = models.EmailField(null=True,blank=False)
+    fullname = models.CharField(max_length=50)
+    phone_number = models.CharField(max_length=11)
+    email = models.EmailField()
     sex = models.BooleanField(default=True)
-    age = models.CharField(max_length=4,null=True,blank=False)
+    age = models.CharField(max_length=3)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
@@ -225,26 +223,31 @@ class Product(BaseModel):
         ('out_of_stock', 'Out of Stock'),
     ]
 
-    title = models.CharField(max_length=60,null=False,blank=False)
-    description = models.CharField(max_length=3000,null=False,blank=False)
-    quantity = models.PositiveSmallIntegerField(null=False,blank=False)
-    file = models.ImageField(
-        upload_to='products/%Y/%m',
-        null=False,
-        blank=False,
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
-    )
-    condition = models.CharField(max_length=10, choices=CONDITION_CHOICES,default='new')
-    fettle = models.CharField(max_length=20, choices=FETTLE_CHOICES,default='in_stock')
+    title = models.CharField(max_length=60, null=False, blank=False)
+    description = models.CharField(max_length=3000, null=False, blank=False)
+    quantity = models.PositiveSmallIntegerField(null=False, blank=False)
+    condition = models.CharField(max_length=10, choices=CONDITION_CHOICES, default='new')
+    fettle = models.CharField(max_length=20, choices=FETTLE_CHOICES, default='in_stock')
     location = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.PROTECT)
-    price = models.FloatField(null=True,blank=True)
-    phone_number = models.CharField(max_length=11,null=True,blank=True)
-    class Meta:
-        unique_together = ('title', 'file')  # Unique together constraint
+    price = models.FloatField(null=True, blank=True)
+    phone_number = models.CharField(max_length=11, null=True, blank=True)
 
     def __str__(self):
         return self.title
+
+
+class ProductMedia(models.Model):
+    product = models.ForeignKey(Product, related_name='medias', on_delete=models.CASCADE)
+    media = models.FileField(
+        upload_to='products/%Y/%m',
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
+        null=False,
+        blank=False
+    )
+
+    def __str__(self):
+        return f"{self.product.title} - {self.file.name}"
 
 
 class ProductCategory(models.Model):
