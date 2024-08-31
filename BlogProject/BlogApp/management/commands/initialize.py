@@ -74,6 +74,17 @@ WEBSITE = {
     'location':'hehe',
     'link':'hehe'
 }
+TAGS = [
+    {
+        'name':'full-time'
+    },
+    {
+        'name':'part-time'
+    },
+    {
+        'name':'remote'
+    }
+]
 
 class Command(BaseCommand):
     help = 'Khởi tạo quyền và nhóm'
@@ -101,8 +112,12 @@ class Command(BaseCommand):
 
         # thêm member đến group
         utils.add_members_to_group(MEMBERS)
+        self.stdout.write(self.style.SUCCESS('Successfully initialized permissions and groups'))
 
         # khởi tạo website
         utils.initialize_website()
+        self.stdout.write(self.style.SUCCESS('Successfully initialized website'))
 
-        self.stdout.write(self.style.SUCCESS('Successfully initialized permissions and groups'))
+        #khởi tạo tag
+        utils.create_initial_tags(TAGS)
+        self.stdout.write(self.style.SUCCESS('Successfully initialized tags'))

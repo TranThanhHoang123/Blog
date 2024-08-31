@@ -30,6 +30,7 @@ import os
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.conf import settings
+from rest_framework.exceptions import ValidationError
 
 # Create your views here.
 class CustomTokenView(TokenView):
@@ -645,30 +646,59 @@ class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAP
 
         # Loại bỏ trường không cho phép chỉnh sửa nếu cần
         data = request.data.copy()
-        if 'user' in data:  # Không cho phép chỉnh sửa người dùng
-            data.pop('user')
 
-        partial = True  # Cho phép cập nhật một phần
-        serializer = self.get_serializer(job_post, data=data, partial=partial)
+        # Xử lý danh sách tag_id để thêm tag mới vào JobPost
+        tag_ids = request.data.getlist('tag_id')
+        for tag_id in tag_ids:
+            tag, created = Tag.objects.get_or_create(id=tag_id)
+            JobPostTag.objects.get_or_create(job_post=job_post, tag=tag)
+
+        # Xử lý danh sách remove_jobpost_tag_id để xóa các JobPostTag hiện có
+        remove_jobpost_tag_ids = request.data.getlist('remove_jobpost_tag_id')
+        JobPostTag.objects.filter(id__in=remove_jobpost_tag_ids, job_post=job_post).delete()
+
+        # Cập nhật JobPost với các thay đổi khác
+        serializer = self.get_serializer(job_post, data=data, partial=True)
 
         if serializer.is_valid():
             updated_job_post = serializer.save()  # Lưu các thay đổi
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializers.JobPostDetailSerializer(updated_job_post,context={'request':request}).data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def create(self, request):
         user = request.user
-
         data = request.data.copy()
         data['user'] = user.id  # Gán user hiện tại vào dữ liệu
+
+        # Lấy danh sách tag_id từ request data
+        tag_ids = request.data.getlist('tag_id', [])
 
         serializer = serializers.JobPostSerializer(data=data)
 
         if serializer.is_valid():
-            instance = serializer.save(user=user)
-            return Response(serializers.JobPostDetailSerializer(instance, context={'request': request}).data,
-                            status=status.HTTP_201_CREATED)
+            try:
+                with transaction.atomic():
+                    # Tạo JobPost
+                    instance = serializer.save(user=user)
+
+                    # Thêm các tag vào JobPost
+                    for tag_id in tag_ids:
+                        try:
+                            tag = Tag.objects.get(id=tag_id)
+                            JobPostTag.objects.create(job_post=instance, tag=tag)
+                        except Tag.DoesNotExist:
+                            raise ValidationError({'tag_id': f'Tag with id {tag_id} does not exist.'})
+                        except IntegrityError:
+                            raise ValidationError({'tag_id': f'Tag with id {tag_id} already exists for this job post.'})
+
+                    # Trả về response với chi tiết JobPost
+                    return Response(serializers.JobPostDetailSerializer(instance, context={'request': request}).data,
+                                    status=status.HTTP_201_CREATED)
+
+            except ValidationError as e:
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post', 'get'], url_path='job-applications')
@@ -1112,6 +1142,42 @@ class WebsiteViewSet(viewsets.ViewSet,generics.RetrieveAPIView,generics.UpdateAP
         # Nếu dữ liệu không hợp lệ, trả về lỗi với thông báo chi tiết
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class TagViewSet(viewsets.ViewSet,generics.ListAPIView,generics.CreateAPIView,generics.UpdateAPIView,generics.DestroyAPIView):
+    queryset = Tag.objects.all()
+    serializer_class = serializers.TagSerializer
+    permission_classes = [my_permissions.IsAdmin]
+    def get_permissions(self):
+        if self.action in ['list']:
+            return [permissions.AllowAny()]
+        return [my_permissions.IsAdmin()]
+
+    def list(self, request):
+        tags = Tag.objects.all().order_by('id')
+        paginator = my_paginations.TagPagination()
+        paginated_tags = paginator.paginate_queryset(tags, request)
+        serializer = serializers.TagSerializer(paginated_tags, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    def create(self, request):
+        serializer = serializers.TagSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def partial_update(self, request, pk=None):
+        tag = get_object_or_404(Tag, pk=pk)
+        serializer = serializers.TagSerializer(tag, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, pk=None):
+        tag = get_object_or_404(Tag, pk=pk)
+        tag.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 # class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView):

@@ -188,11 +188,6 @@ class EmailVerificationCode(models.Model):
 
 class JobPost(BaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
-    WORK_TYPE_CHOICES = [
-        ('full-time', 'full-time'),
-        ('part-time', 'part-time'),
-    ]
-    work = models.CharField(max_length=10, choices=WORK_TYPE_CHOICES, default='full-time')
     location = models.CharField(max_length=255)
     mail = models.EmailField(max_length=255)
     phone_number = models.CharField(max_length=15)
@@ -204,6 +199,22 @@ class JobPost(BaseModel):
     salary = models.CharField(max_length=255)
     content = models.CharField(max_length=255,null=False,blank=False)
 
+
+class Tag(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+class JobPostTag(models.Model):
+    job_post = models.ForeignKey(JobPost, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('job_post', 'tag')
+
+    def __str__(self):
+        return f'{self.job_post.content} - {self.tag.name}'
 
 class Category(BaseModel):
     name = models.CharField(max_length=100, unique=True)

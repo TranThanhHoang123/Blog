@@ -306,6 +306,17 @@ class VerifyCodeSerializer(serializers.Serializer):
         return data
 
 
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ['id', 'name']
+
+class JobPostTagSerializer(serializers.ModelSerializer):
+    tag = TagSerializer()
+    class Meta:
+        model = JobPostTag
+        fields = ['id', 'tag']
+
 class JobPostSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobPost
@@ -315,12 +326,16 @@ class JobPostSerializer(serializers.ModelSerializer):
         }
 
 
-class JobPostDetailSerializer(serializers.ModelSerializer):
+class JobPostDetailSerializer(JobPostSerializer):
     user = UserListSerializer()
+    tags = serializers.SerializerMethodField()
 
-    class Meta:
-        model = JobPost
-        fields = "__all__"
+    def get_tags(self, obj):
+        # Return the tags related to the JobPost instance
+        return JobPostTagSerializer(obj.jobposttag_set.all().select_related('tag'), many=True).data
+
+    class Meta(JobPostSerializer.Meta):
+        fields = ['id','user','location','mail','phone_number','link','date','experience','quantity','job_detail','salary','content','tags']
 
 
 class JobPostListSerializer(serializers.ModelSerializer):
@@ -507,7 +522,6 @@ class WebsiteDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Website
         fields = ['id','img', 'about', 'phone_number', 'mail', 'location', 'link']
-
 
 # class CompanySerializer(serializers.ModelSerializer):
 #     class Meta:

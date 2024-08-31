@@ -17,6 +17,7 @@ router.register(r'banner', views.BannerViewSet, basename='banner')  # Specify th
 router.register(r'group', views.GroupViewSet, basename='group')  # Specify the basename here
 router.register(r'statical', StatisticalViews.StatsView, basename='statical')
 router.register(r'website', views.WebsiteViewSet, basename='website')
+router.register(r'tag', views.TagViewSet, basename='tag')
 
 urlpatterns = [
     path('', include(router.urls)),

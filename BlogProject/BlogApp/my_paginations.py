@@ -33,6 +33,12 @@ class GroupPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+
+class TagPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 class BannerPagination(PageNumberPagination):
     page_size = 4  # Số mục trên mỗi trang
     page_size_query_param = 'page_size'

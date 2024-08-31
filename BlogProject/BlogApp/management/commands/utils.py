@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
-from BlogApp.models import User,GroupPriority,Website
+from BlogApp.models import *
 
 def create_permissions(permission_list):
     """
@@ -224,3 +224,8 @@ def initialize_website():
         print("Website initialized.")
     else:
         print("Website already exists.")
+
+
+def create_initial_tags(TAGS):
+    for tag_data in TAGS:
+        Tag.objects.get_or_create(**tag_data)
