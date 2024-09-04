@@ -147,7 +147,7 @@ class JobApplication(BaseModel):
     phone_number = models.CharField(max_length=11)
     email = models.EmailField()
     sex = models.BooleanField(default=True)
-    age = models.CharField(max_length=3)
+    age = models.CharField(max_length=5) # ngày sinh
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
