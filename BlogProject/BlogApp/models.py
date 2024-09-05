@@ -150,6 +150,9 @@ class JobApplication(BaseModel):
     age = models.CharField(max_length=5) # ngày sinh
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
+    class Meta:
+        unique_together = ('job_post', 'user')
+
     def __str__(self):
         return f'{self.job_title} - {self.user.username}'
 

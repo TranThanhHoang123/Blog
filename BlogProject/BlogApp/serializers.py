@@ -352,6 +352,7 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         fields = "__all__"
         extra_kwargs = {
             'user': {'read_only': True},
+            'job_post': {'read_only': True},
             'status': {'required': False, 'read_only': True},
             'fullname': {'required': True},
             'phone_number': {'required': True},
