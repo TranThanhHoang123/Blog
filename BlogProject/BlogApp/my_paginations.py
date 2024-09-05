@@ -40,7 +40,7 @@ class TagPagination(PageNumberPagination):
     max_page_size = 100
 
 class BannerPagination(PageNumberPagination):
-    page_size = 4  # Số mục trên mỗi trang
+    page_size = 20  # Số mục trên mỗi trang
     page_size_query_param = 'page_size'
     max_page_size = 100
 

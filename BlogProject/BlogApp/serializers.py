@@ -226,15 +226,20 @@ class CommentSerializer(serializers.ModelSerializer):
 class CommentListSerializer(CommentSerializer):
     user = UserListSerializer()
     file = serializers.SerializerMethodField()
+    reply_count = serializers.SerializerMethodField()  # Thêm trường đếm số phản hồi
 
     def get_file(self, obj):
         if obj.file:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường file
             file = obj.file.name
             return self.context['request'].build_absolute_uri(f"/static/{file}")
 
+    def get_reply_count(self, obj):
+        # Đếm số lượng phản hồi của comment
+        return obj.replies.count()
+
     class Meta(CommentSerializer.Meta):
-        pass
+        fields = CommentSerializer.Meta.fields + ['reply_count']  # Thêm trường mới vào Meta.fields
 
 
 class BlogDetailWithCommentsSerializer(serializers.Serializer):
