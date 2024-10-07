@@ -23,15 +23,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-l=ildokp$!efu15v@gsdm#$al^tpypxwj)p61o06zb@4bnj%ao'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+if not DEBUG:  # Chỉ trong production
+    REST_FRAMEWORK = {
+        'DEFAULT_RENDERER_CLASSES': (
+            'rest_framework.renderers.JSONRenderer',
+        ),
+    }
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'your-production-domain.com', '103.20.102.42']
+DOMAIN = 'http://127.0.0.1:8000'
 
 # Application definition
 
 INSTALLED_APPS = [
     'daphne',
+    'channels', #django chanel
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,14 +50,18 @@ INSTALLED_APPS = [
     'corsheaders',
     'oauth2_provider',
     'BlogApp.apps.BlogappConfig',
+    'ChatApp.apps.ChatappConfig',
+    'rest_framework_mongoengine',
     'django_filters',
-    # 'NotificationApp.apps.NotificationappConfig',
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -67,10 +79,20 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'oauth2_provider.middleware.OAuth2TokenMiddleware', #oauth2
     'corsheaders.middleware.CorsMiddleware',  # Cấu hình cors cho phép người dùng có thể fetapi dù khác domain
+    # 'BlogApp.middleware.RequestLoggingMiddleware',
     'BlogApp.middleware.FileSizeLimitMiddleware',
     'BlogApp.middleware.SanitizeFilenameMiddleware',
+    'BlogApp.middleware.FileExtensionWhitelistMiddleware',
+    # 'BlogApp.middleware.FileValidationMiddleware',
+    # 'BlogApp.middleware.CustomCSRFMiddleware',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1:8000',  # Local domain
+    'http://103.20.102.42:8000',  # Production domain
+]
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000', 'http://103.20.102.42/']
+
 
 ROOT_URLCONF = 'BlogProject.urls'
 
@@ -92,24 +114,35 @@ TEMPLATES = [
 MEDIA_ROOT = '%s/BlogApp/static/' % BASE_DIR
 
 WSGI_APPLICATION = 'BlogProject.wsgi.application'
-ASGI_APPLICATION = "BlogProject.asgi.application"
+#cấu hình django chanel
+ASGI_APPLICATION = 'BlogProject.asgi.application'
 
-
+import os
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 import pymysql
 pymysql.install_as_MySQLdb()
 # DATABASE_ROUTERS = ['NotificationApp.routers.NotificationRouter']
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'blogdb',
+#         'USER': 'AnonymusUser',  # Cập nhật tên người dùng tương ứng
+#         'PASSWORD': 'Admin@123',  # Cập nhật mật khẩu tương ứng
+#         'HOST': 'db',  # Sử dụng tên dịch vụ 'db' như đã định nghĩa trong docker-compose.yml
+#         'PORT': '3306',  # Cổng MySQL mặc định là 3306
+#     },
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'blogdb',
-        'USER': 'root',
-        'PASSWORD': 'Admin@123',
-        'HOST': '',
+        'USER': 'root',  # Cập nhật tên người dùng tương ứng
+        'PASSWORD': 'Admin@123',  # Cập nhật mật khẩu tương ứng
+        'HOST': '',  # Sử dụng tên dịch vụ 'db' như đã định nghĩa trong docker-compose.yml
+        # 'PORT': '3306',  # Cổng MySQL mặc định là 3306
     },
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 AUTH_USER_MODEL = 'BlogApp.User'
@@ -135,7 +168,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Ho_Chi_Minh'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -163,14 +196,14 @@ OAUTH2_PROVIDER = {
 }
 #id:FX4glR4JIGLryn5EaXp4cjh21n8sZvuaqMqTrU1S
 #sc:L2DWvzpcf6OW7MFiFanE0y3sEQN6dBxGF93QcAQO8LEZqpUevFwGDbqVxUECr70Iy0BbODuysHAKICax3CkgOSWT6wpVbHd6TSInh4rotyQmMBpdZO9iDUy2l2wODimD
-# CHANNEL_LAYERS = {
-#     "default": {
-#         "BACKEND": "channels_redis.core.RedisChannelLayer",
-#         "CONFIG": {
-#             "hosts": [("127.0.0.1", 6379)],
-#         },
-#     },
-# }
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
@@ -179,3 +212,88 @@ EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'taxhuy2001@gmail.com'
 EMAIL_HOST_PASSWORD = 'owum fexk zmuh gddj'  # Use the App Password here
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
+LOGIN_SUCCESSFULLY_URL = 'https://songnhatnguyen.vn/'
+LOGIN_FAIL_URL = 'https://songnhatnguyen.vn/'
+#ENDPOINT để đăng nhập trang admin
+ADMIN_ENDPOINT = 'aids@u-uf@82d!31/'
+#CSRF_TOKEN
+CSRF_COOKIE_NAME = 'csrftoken'
+"""
+gi lại log
+"""
+import os
+
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': False,
+#     'formatters': {
+#         'verbose': {
+#             'format': '{levelname} {asctime} {module} {process} {thread} {message}',
+#             'style': '{',
+#         },
+#         'simple': {
+#             'format': '{levelname} {message}',
+#             'style': '{',
+#         },
+#     },
+#     'handlers': {
+#         'file': {
+#             'level': 'DEBUG',
+#             'class': 'logging.FileHandler',
+#             'filename': os.path.join(BASE_DIR, 'requests.log'),
+#             'formatter': 'verbose',
+#         },
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#             'formatter': 'simple',
+#         },
+#     },
+#     'loggers': {
+#         '': {
+#             'handlers': ['file', 'console'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }
+
+#redis setting
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django_redis.cache.RedisCache',
+#         'LOCATION': 'redis://:Admin@123@reids:6379/1',
+#         'OPTIONS': {
+#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+#             'PASSWORD': 'Admin@123',  # Mật khẩu Redis
+#         }
+#     }
+# }
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Địa chỉ Redis local
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            # Không cần mật khẩu vì Redis local không yêu cầu
+        }
+    }
+}
+
+STATICAL_CACHE_TIME = 60*5 #5 phút
+CATEGORY_CACHE_TIME = 60*60*24 #24 tiếng
+PRODUCT_CACHE_TIME = 60*10 #10 phút
+
+#mongo
+from mongoengine import connect, disconnect
+
+# Ngắt kết nối cũ (nếu có)
+disconnect(alias='default')
+
+# Tạo kết nối mới mongodb
+connect(
+    db='chatdb',
+    host='localhost',
+    port=27017,
+    alias='default'
+)

@@ -3,7 +3,9 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxLengthValidator
 from django.contrib.auth.models import Group
 from django.core.validators import FileExtensionValidator
-
+from datetime import timedelta
+from django.utils import timezone
+import requests
 class BaseModel(models.Model):
     created_date = models.DateTimeField(auto_now_add=True)
     updated_date = models.DateTimeField(auto_now=True)
@@ -15,21 +17,34 @@ class User(AbstractUser):
     email = models.CharField(max_length=40, unique=False)
     location = models.CharField(max_length=85,null=True)
     about = models.CharField(max_length=255,null=True,blank=True)
-    profile_image = models.ImageField(
-        upload_to='user/%Y/%m',
-        default='user/default.png',
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
+    profile_image = models.URLField(
+        max_length=600,
+        default="https://hcm03.vstorage.vngcloud.vn/v1/AUTH_f2ecf7a1f0494cdf954303888b0e5df1/MediaOfBlogApp/UserAvatar/default.png"
     )
-    profile_bg = models.ImageField(
-        upload_to='user/%Y/%m',
-        default='user/default.png',
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
+    profile_bg = models.URLField(
+        max_length=600,
+        default='https://hcm03.vstorage.vngcloud.vn/v1/AUTH_f2ecf7a1f0494cdf954303888b0e5df1/MediaOfBlogApp/UserBackground/default.png'
     )
     link = models.CharField(max_length=100,null=True)
     is_active = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('username','email','is_active')
     def __str__(self):
         return self.username
 
+class Follow(models.Model):
+    from_user = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)  # Thay đổi related_name
+    to_user = models.ForeignKey(User, related_name='follower', on_delete=models.CASCADE)  # Thay đổi related_name
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['from_user', 'to_user'], name='unique_follow')
+        ]
+
+    def __str__(self):
+        return f"{self.from_user} follows {self.to_user}"
 
 class Blog(BaseModel):
     VISIBILITY_CHOICES = [
@@ -330,3 +345,109 @@ class GroupPriority(models.Model):
 #             ("change_job_application_status", "Can change job application status"),
 #             ("full_access_job_application", "Full access to job application"),
 #         ]
+class Vstorage(models.Model):
+    VstorageCreadentialUsername = models.CharField(max_length=255, unique=True)
+    VstorageCreadentialPassword = models.CharField(max_length=255)
+    ProjectID = models.CharField(max_length=255, unique=True)
+    X_Subject_Token = models.CharField(max_length=255, blank=True, null=True)
+    url = models.URLField(max_length=500, blank=True, null=True)
+    expired_at = models.DateTimeField(null=True, blank=True)  # Thêm trường expired_at
+
+    def __str__(self):
+        return self.VstorageCreadentialUsername
+
+    def is_expired(self):
+        """Kiểm tra xem token có hết hạn hay chưa."""
+        return self.expired_at and timezone.now() >= self.expired_at
+
+    def get_vstorage_token(self):
+        """Lấy token từ Vstorage và cập nhật nếu cần thiết."""
+        if self.is_expired():
+            # URL cho API
+            url = "https://hcm03.auth.vstorage.vngcloud.vn/v3/auth/tokens"
+
+            # Header cho request
+            headers = {
+                'Content-Type': 'application/json'
+            }
+
+            # Body của request
+            body = {
+                "auth": {
+                    "identity": {
+                        "methods": ["password"],
+                        "password": {
+                            "user": {
+                                "domain": {"name": "default"},
+                                "name": self.VstorageCreadentialUsername,
+                                "password": self.VstorageCreadentialPassword
+                            }
+                        }
+                    },
+                    "scope": {
+                        "project": {
+                            "domain": {"name": "default"},
+                            "id": self.ProjectID
+                        }
+                    }
+                }
+            }
+
+            # Thực hiện POST request
+            response = requests.post(url, json=body, headers=headers)
+
+            if response.status_code == 201:
+                x_subject_token = response.headers.get('X-Subject-Token')
+                response_data = response.json()
+
+                # Lấy expires_at = time.now() + 1 tiếng
+                expires_at = timezone.now() + timedelta(hours=1)
+
+                # Lấy url từ "catalog" -> "endpoints" -> [0] -> "url"
+                catalog_url = response_data['token']['catalog'][0]['endpoints'][0]['url']
+
+                # Cập nhật lại Vstorage
+                self.X_Subject_Token = x_subject_token
+                self.url = catalog_url
+                self.expired_at = expires_at
+                self.save()
+            else:
+                # Raise exception nếu response không thành công
+                response.raise_for_status()
+
+from django.core.exceptions import ValidationError
+class GroupChat(BaseModel):
+    name = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='group_images/%Y/%m', null=True, blank=True)
+    def __str__(self):
+        return self.name
+
+    def user_count(self):
+        return self.memberships.count()
+class GroupChatMembership(BaseModel):
+    ROLE_CHOICES = [
+        ('owner', 'Owner'),
+        ('manager', 'Manager'),
+        ('member', 'Member'),
+    ]
+
+    group_chat = models.ForeignKey(GroupChat, related_name='memberships', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='group_memberships', on_delete=models.CASCADE)
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='member')
+    interactive = models.DateTimeField(null=True,blank=True)  # Thêm trường lưu lần tương tác cuối cùng
+
+    class Meta:
+        unique_together = ('group_chat', 'user')
+
+    def __str__(self):
+        return f"{self.user.username} ({self.get_role_display()}) in {self.group_chat.name}"
+
+    def save(self, *args, **kwargs):
+        if self.group_chat.user_count() >= 40:
+            raise ValidationError(f"Groups are limited to a maximum of 40 members.")
+        super().save(*args, **kwargs)  # Gọi phương thức save gốc
+
+
+class PersonalGroup(BaseModel):
+    interactive = models.DateTimeField(null=True, blank=True)
+    user = models.ManyToManyField('User', related_name='personal_groups')

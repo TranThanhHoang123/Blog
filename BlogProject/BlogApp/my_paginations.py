@@ -44,6 +44,10 @@ class BannerPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+class SocialGroupPagination(PageNumberPagination):
+    page_size = 10  # Số mục trên mỗi trang
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class BlogPagination(PageNumberPagination):
     page_size = 15  # Số mục trên mỗi trang

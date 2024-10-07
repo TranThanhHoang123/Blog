@@ -229,3 +229,86 @@ def initialize_website():
 def create_initial_tags(TAGS):
     for tag_data in TAGS:
         Tag.objects.get_or_create(**tag_data)
+
+#init vstorage
+def create_vstorage(vstote):
+    # Extract information from the VSTOTE dictionary
+    try:
+        username = vstote.get('username')
+        password = vstote.get('password')
+        project_id = vstote.get('project_id')
+        # Create a new Vstorage object and save it to the database
+        vstorage = Vstorage.objects.create(
+            VstorageCreadentialUsername=username,
+            VstorageCreadentialPassword=password,
+            ProjectID=project_id,
+        )
+        print('Initialize Vstorage completed')
+    except:
+        pass
+
+
+from datetime import timedelta
+from django.utils import timezone
+import requests
+
+
+def get_vstorage_token(vstorage_id):
+    try:
+        vstorage = Vstorage.objects.get(pk=vstorage_id)
+    except Vstorage.DoesNotExist:
+        return {"error": "Vstorage not found"}
+
+    # URL cho API
+    url = "https://hcm03.auth.vstorage.vngcloud.vn/v3/auth/tokens"
+
+    # Header cho request
+    headers = {
+        'Content-Type': 'application/json'
+    }
+
+    # Body của request
+    body = {
+        "auth": {
+            "identity": {
+                "methods": ["password"],
+                "password": {
+                    "user": {
+                        "domain": {"name": "default"},
+                        "name": vstorage.VstorageCreadentialUsername,
+                        "password": vstorage.VstorageCreadentialPassword
+                    }
+                }
+            },
+            "scope": {
+                "project": {
+                    "domain": {"name": "default"},
+                    "id": vstorage.ProjectID
+                }
+            }
+        }
+    }
+
+    # Thực hiện POST request
+    response = requests.post(url, json=body, headers=headers)
+
+    if response.status_code == 201:
+        x_subject_token = response.headers.get('X-Subject-Token')
+        response_data = response.json()
+
+        # Lấy expires_at = time.now() + 1 tiếng
+        expires_at = timezone.now() + timedelta(hours=1)  # Sử dụng pytz để gán múi giờ UTC
+
+        # Lấy url từ "catalog" -> "endpoints" -> [0] -> "url"
+        catalog_url = response_data['token']['catalog'][0]['endpoints'][0]['url']
+
+        # Cập nhật lại Vstorage
+        vstorage.X_Subject_Token = x_subject_token
+        vstorage.url = catalog_url
+        vstorage.expired_at = expires_at
+        vstorage.save()
+
+        print("Vstorage updated successfully")
+    else:
+        print(f"Failed to retrieve token, status code: {response.status_code}")
+        print(f"detail:{response.json()}")

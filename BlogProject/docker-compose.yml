@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: Admin@123
+      MYSQL_DATABASE: blogdb
+      MYSQL_USER: AnonymusUser
+      MYSQL_PASSWORD: Admin@123
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    expose:
+      - "3306"
+
+  redis:
+    image: redis:latest
+    environment:
+      REDIS_PASSWORD: Admin@123
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data  # Mount volume cho dữ liệu Redis
+    expose:
+      - "6379"
+
+  web:
+    build:
+      context: .  # Xây dựng image từ thư mục hiện tại
+    command: gunicorn BlogProject.wsgi:application --bind 0.0.0.0:8000
+    environment:
+      -DB_HOST: db
+      -DB_PORT: 3306
+      -REDIS_HOST: redis
+      -REDIS_PORT: 6379
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - .:/app  # Mount thư mục hiện tại vào thư mục /app trong container
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Gắn file nginx.conf từ cùng cấp với docker-compose.yml
+    networks:
+      - backend
+
+networks:
+  backend:
+
+volumes:
+  db_data:
+  redis_data:

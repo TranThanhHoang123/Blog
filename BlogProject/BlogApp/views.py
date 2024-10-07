@@ -1,20 +1,17 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from django.utils.crypto import get_random_string
-from oauth2_provider.models import Application, AccessToken, RefreshToken
-from rest_framework import viewsets, generics, status, permissions
-from django.db.models import Q
+from oauth2_provider.models import Application
+from rest_framework import viewsets, generics,permissions
 from rest_framework.response import Response
-from . import serializers, my_paginations, my_generics, filters, utils, my_permissions
+from . import serializers, my_paginations, filters, utils, my_permissions
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from .utils import *
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.conf import settings
 from oauth2_provider.views import TokenView
 from rest_framework.decorators import api_view, permission_classes
-from django.utils import timezone
-from datetime import timedelta
 from rest_framework.permissions import AllowAny
 from oauth2_provider.settings import oauth2_settings
 from django.db.utils import IntegrityError
@@ -22,15 +19,14 @@ import json
 import uuid
 from rest_framework import status
 from .models import *
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db import transaction
-from django.core.files.base import ContentFile
-import os
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
-from django.conf import settings
 from rest_framework.exceptions import ValidationError
+from django.core.cache import cache
+
 
 # Create your views here.
 class CustomTokenView(TokenView):
@@ -39,6 +35,8 @@ class CustomTokenView(TokenView):
         if response.status_code == 200:
             data = json.loads(response.content)
             refresh_token = data.get('refresh_token')
+
+            # Thiết lập cookie cho refresh_token
             response.set_cookie(
                 key='refresh_token',
                 value=refresh_token,
@@ -132,7 +130,14 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
     @action(detail=False, methods=['post'], url_path='register')
     def register(self, request):
+        #thêm file vào vstorage
+        data = request.data.copy()
+        if request.FILES.get('profile_image'):
+            data['profile_image'] = utils.upload_file_to_vstorage(request.FILES.get('profile_image'),'UserAvatar')
+        if request.FILES.get('profile_bg'):
+            data['profile_bg'] = utils.upload_file_to_vstorage(request.FILES.get('profile_bg'),'UserBackground')
         serializer = serializers.UserRegistrationSerializer(data=request.data, context={'request': request})
+        print('tạo processing')
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"detail": "Registration successful. Please check your email for the activation link."},
@@ -226,6 +231,63 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         # Trả về phản hồi có phân trang
         return paginator.get_paginated_response(serializer.data)
 
+    @action(methods=['post'], detail=True, url_path='follow')
+    def follow(self, request, pk=None):
+        user = self.get_object()
+        try:
+            to_user = User.objects.get(pk=pk,is_active=True)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        if user == to_user:
+            return Response({'error': 'You cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
+        follow, created = Follow.objects.get_or_create(from_user=user, to_user=to_user)
+        if not created:
+            follow.delete()
+            return Response({'message': 'Unfollowed successfully'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'Followed successfully'}, status=status.HTTP_201_CREATED)
+
+    @action(methods=['get'], detail=False, url_path='following')
+    def following(self, request, pk=None):
+        user = self.get_object()  # Lấy người dùng hiện tại
+        # Lấy danh sách những người mà user đang theo dõi
+        following_users = User.objects.filter(follower__from_user=user).order_by('-personal_groups__interactive')
+        page = self.paginate_queryset(following_users)
+        # Chúng ta cần serialize danh sách `to_user`
+        serializer = serializers.UserListSerializer(page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
+
+    @action(methods=['get'], detail=False, url_path='followers')
+    def followers(self, request, pk=None):
+        user = request.user  # Lấy người dùng hiện tại từ request
+        # Lấy danh sách những người theo dõi user
+        follower_users = User.objects.filter(following__to_user=user).order_by('-personal_groups__interactive')
+        page = self.paginate_queryset(follower_users)
+        serializer = serializers.UserListSerializer(page, many=True, context={'request': request})
+        return self.get_paginated_response(serializer.data)
+
+    @action(methods=['get'], detail=False, url_path='stranger')
+    def strangers(self, request, pk=None):
+        user = request.user  # Lấy user hiện tại từ request
+
+        # Lấy danh sách người dùng có PersonalGroup với user nhưng không follow user
+        strangers_with_group = User.objects.filter(
+            personal_groups__user=user,  # Có PersonalGroup chung với user
+        ).exclude(  # Loại bỏ những người đang following hoặc được follow bởi user
+            Q(following__from_user=user) | Q(following__to_user=user)  # Thay đổi từ follower thành following
+        ).distinct().order_by('-personal_groups__interactive')
+
+        # Debugging
+        print("Strangers with group:", strangers_with_group)
+
+        # Paginate
+        page = self.paginate_queryset(strangers_with_group)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(strangers_with_group, many=True, context={'request': request})
+        return Response(serializer.data)
 
 class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Blog.objects.all().order_by('-created_date')
@@ -708,10 +770,15 @@ class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAP
         if request.method == 'POST':
             serializer = serializers.JobApplicationSerializer(data=request.data)
             if serializer.is_valid():
-                # Lưu đơn xin việc với công ty và người dùng hiện tại
-                instance = serializer.save(job_post=job_post, user=user, status='pending')
-                return Response({'detail': "Job application created successfully."},
-                                status=status.HTTP_201_CREATED)
+                try:
+                    # Lưu đơn xin việc với công ty và người dùng hiện tại
+                    instance = serializer.save(job_post=job_post, user=user, status='pending')
+                    return Response({'detail': "Job application created successfully."},
+                                    status=status.HTTP_201_CREATED)
+                except IntegrityError:
+                    # Xử lý lỗi trùng lặp
+                    return Response({'detail': "Duplicate job application. You have already applied for this job."},
+                                    status=status.HTTP_400_BAD_REQUEST)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         elif request.method == 'GET':
             if user != job_post.user:
@@ -733,8 +800,7 @@ class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAP
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAPIView, generics.UpdateAPIView,
-                      generics.CreateAPIView):
+class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAPIView, generics.UpdateAPIView, generics.CreateAPIView):
     queryset = Category.objects.all().order_by('-created_date')
     serializer_class = serializers.CategorySerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -745,38 +811,84 @@ class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAP
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
+    def list(self, request, *args, **kwargs):
+        cache_key = 'category_list'
+        categories = cache.get(cache_key)
+        if not categories:
+            response = super().list(request, *args, **kwargs)
+            categories = response.data
+            cache.set(cache_key, categories, timeout=settings.CATEGORY_CACHE_TIME)  # Cache trong 24 giờ
+        else:
+            response = Response(categories, status=status.HTTP_200_OK)
+        return response
+
+    def retrieve(self, request, *args, **kwargs):
+        category_id = kwargs.get('pk')
+        cache_key = f'category_{category_id}'
+        category = cache.get(cache_key)
+        if not category:
+            response = super().retrieve(request, *args, **kwargs)
+            category = response.data
+            cache.set(cache_key, category, timeout=60*60*24)  # Cache trong 24 giờ
+        else:
+            response = Response(category, status=status.HTTP_200_OK)
+        return response
+
     def create(self, request, *args, **kwargs):
         if not utils.has_admin_or_manager_permission(request.user):
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
-        return super().create(request, *args, **kwargs)
+        response = super().create(request, *args, **kwargs)
+        # Xóa cache khi thêm mới danh mục
+        cache.delete('category_list')
+        return response
 
     def update(self, request, *args, **kwargs):
         if not utils.has_admin_or_manager_permission(request.user):
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
-        return super().update(request, *args, **kwargs)
+        response = super().update(request, *args, **kwargs)
+        cache_key = kwargs.get('pk')
+        cache.delete(f'category_{cache_key}')
+        cache.delete('category_list')
+        return response
 
     def destroy(self, request, *args, **kwargs):
         if not utils.has_admin_or_manager_permission(request.user):
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
-        return super().destroy(request, *args, **kwargs)
+        response = super().destroy(request, *args, **kwargs)
+        cache_key = kwargs.get('pk')
+        cache.delete(f'category_{cache_key}')
+        cache.delete('category_list')
+        return response
 
     @action(methods=['get'], detail=True, url_path='products')
     def product(self, request, pk=None):
-        # Lấy danh mục dựa vào pk
-        category = get_object_or_404(Category, pk=pk)
+        cache_key = f'category_products_{pk}'
+        cached_data = cache.get(cache_key)
 
-        # Lấy danh sách sản phẩm thuộc về danh mục đó
-        products = Product.objects.filter(productcategory__category=category)
+        if cached_data is None:
+            # Lấy danh mục dựa vào pk
+            category = get_object_or_404(Category, pk=pk)
 
-        # Phân trang danh sách sản phẩm
-        paginator = my_paginations.ProductPagination()
-        page = paginator.paginate_queryset(products, request)
+            # Lấy danh sách sản phẩm thuộc về danh mục đó
+            products = Product.objects.filter(productcategory__category=category)
 
-        # Serialize danh sách sản phẩm
-        serializer = serializers.ProductListSerializer(page, many=True, context={'request': request})
+            # Phân trang danh sách sản phẩm
+            paginator = my_paginations.ProductPagination()
+            page = paginator.paginate_queryset(products, request)
 
-        # Trả về danh sách sản phẩm đã phân trang
-        return paginator.get_paginated_response(serializer.data)
+            # Serialize danh sách sản phẩm
+            serializer = serializers.ProductListSerializer(page, many=True, context={'request': request})
+
+            # Trả về danh sách sản phẩm đã phân trang
+            paginated_data = paginator.get_paginated_response(serializer.data)
+
+            # Lưu dữ liệu đã phân trang vào cache
+            cache.set(cache_key, paginated_data.data, timeout=settings.PRODUCT_CACHE_TIME)  # Cache trong 10 phút
+
+            return paginated_data
+        else:
+            # Nếu đã có cache, trả về dữ liệu đã phân trang từ cache
+            return Response(cached_data)
 
 
 class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.CreateAPIView, generics.UpdateAPIView,
@@ -907,9 +1019,9 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.CreateAPIView,
-                    generics.DestroyAPIView):
-    queryset = Banner.objects.filter(status='show').order_by('-created_date')
+
+class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.CreateAPIView, generics.DestroyAPIView):
+    queryset = Banner.objects.all().order_by('-created_date')
     serializer_class = serializers.BannerSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = my_paginations.BannerPagination
@@ -920,19 +1032,24 @@ class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIVi
         return [permissions.IsAuthenticated()]
 
     def get_serializer_class(self):
-        if self.action in ['list']:
+        if self.action in ['list','list_banner']:
             return serializers.BannerListSerializer
         return self.serializer_class
 
+    def get_queryset(self):
+        if self.action in ['list']:
+            return Banner.objects.filter(status='show').order_by('-created_date')
+        return self.queryset
     def create(self, request, *args, **kwargs):
         if not utils.has_admin_or_manager_permission(request.user):
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             try:
-                # Lưu banner với người dùng hiện tại
                 banner = serializer.save(user=request.user)
-                # Trả về dữ liệu chi tiết của banner mới tạo
+                # Xóa cache khi có banner mới được thêm
+                cache.delete('banner_list_show')
+                cache.delete('banner_list_all')
                 return Response(serializers.BannerDetailSerializer(banner, context={'request': request}).data,
                                 status=status.HTTP_201_CREATED)
             except Exception as e:
@@ -942,58 +1059,70 @@ class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIVi
     def partial_update(self, request, pk=None):
         if not utils.has_admin_or_manager_permission(request.user):
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
-        # Lấy đối tượng Banner cần cập nhật
         banner = get_object_or_404(Banner, pk=pk)
-
-        # Tạo serializer với dữ liệu từ request và đối tượng banner đã có
         serializer = self.get_serializer(banner, data=request.data, partial=True)
-
-        # Kiểm tra tính hợp lệ của dữ liệu
         if serializer.is_valid():
             try:
-                # Cập nhật thông tin banner
                 banner = serializer.save()
-                # Trả về dữ liệu chi tiết của banner sau khi cập nhật
+                # Xóa cache khi có banner được cập nhật
+                cache.delete('banner_list_show')
+                cache.delete('banner_list_all')
                 return Response(serializers.BannerDetailSerializer(banner, context={'request': request}).data,
                                 status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Nếu dữ liệu không hợp lệ, trả về lỗi với thông báo chi tiết
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
-        # Lấy đối tượng Banner cần xóa
         banner = get_object_or_404(Banner, pk=pk)
-
-        # Kiểm tra quyền của người dùng trước khi xóa (tùy chọn)
         if not utils.has_admin_or_manager_permission(request.user):
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
-
         try:
-            # Thực hiện xóa banner
             banner.delete()
+            # Xóa cache khi có banner bị xóa
+            cache.delete('banner_list_show')
+            cache.delete('banner_list_all')
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    def list(self, request, *args, **kwargs):
+        cache_key = 'banner_list_show'
+        banners = cache.get(cache_key)
+        if not banners:
+            response = super().list(request, *args, **kwargs)
+            banners = response.data
+            cache.set(cache_key, banners)
+        else:
+            response = Response(banners, status=status.HTTP_200_OK)
+        return response
+
     @action(methods=['get'], url_path='list', detail=False)
     def list_banner(self, request):
-        # Kiểm tra quyền truy cập
-        if not utils.has_admin_or_manager_permission(request.user):
-            return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
+        cache_key = f'banner_list_all'
+        cached_data = cache.get(cache_key)
 
-        # Lấy danh sách banner và phân trang
-        queryset = Banner.objects.all().order_by('-created_date')
-        page = self.paginate_queryset(queryset)
+        if cached_data is None:
 
-        if page is not None:
-            serializer = serializers.BannerListSerializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
+            # Lấy danh sách sản phẩm thuộc về danh mục đó
+            banners = self.get_queryset()
+            # Phân trang danh sách sản phẩm
+            paginator = self.pagination_class()
+            page = paginator.paginate_queryset(banners, request)
 
-        serializer = serializers.BannerListSerializer(queryset, many=True, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+            # Serialize danh sách sản phẩm
+            serializer = self.get_serializer(page, many=True, context={'request': request})
 
+            # Trả về danh sách banner đã phân trang
+            paginated_data = paginator.get_paginated_response(serializer.data)
+
+            # Lưu dữ liệu đã phân trang vào cache
+            cache.set(cache_key, paginated_data.data)
+
+            return paginated_data
+        else:
+            # Nếu đã có cache, trả về dữ liệu đã phân trang từ cache
+            return Response(cached_data)
 
 class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Group.objects.all()
@@ -1001,6 +1130,12 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
     permission_classes = [my_permissions.IsAdminOrManager]
     pagination_class = my_paginations.GroupPagination  # Sử dụng phân trang có sẵn của bạn
     filter_backends = [DjangoFilterBackend]
+
+    def get_permissions(self):
+        if self.action in ['all_users']:
+            return [my_permissions.IsAdmin()]
+        return [my_permissions.IsAdminOrManager()]
+
 
     # API để lấy tất cả thành viên nào có group
     @action(methods=['get'], detail=False, url_path='all-users-with-group')
@@ -1023,7 +1158,16 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
         serializer = serializers.UserListSerializer(paginated_users, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
-
+        # API để lấy tất cả user
+        @action(methods=['get'], detail=False, url_path='admin/users')
+        def all_users(self, request):
+            users = User.objects.filter(is_active=True).order_by('-date_joined')
+            filtered_users = filters.UserAdminFilter(request.GET, queryset=users).qs  # Áp dụng bộ lọc
+            paginator = my_paginations.UserPagination()
+            paginated_users = paginator.paginate_queryset(filtered_users, request)
+            serializer = serializers.UserListForAdminSerializer(paginated_users, many=True,
+                                                                context={'request': request})
+            return paginator.get_paginated_response(serializer.data)
     @action(methods=['post'], detail=True, url_path='add-user')
     def add_user(self, request, pk=None):
         group = self.get_object()
@@ -1102,7 +1246,7 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
 
 
 
-class WebsiteViewSet(viewsets.ViewSet,generics.RetrieveAPIView,generics.UpdateAPIView):
+class WebsiteViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.UpdateAPIView):
     queryset = Website.objects.all()
     serializer_class = serializers.WebsiteSerializer
     permission_classes = [my_permissions.IsAdmin]
@@ -1119,66 +1263,295 @@ class WebsiteViewSet(viewsets.ViewSet,generics.RetrieveAPIView,generics.UpdateAP
 
     @action(detail=True, methods=['GET'])
     def detail(self, request, pk=None):
-        website = self.get_object()
-        serializer = serializers.WebsiteDetailSerializer(website, context={'request':request})
-        return Response(serializer.data)
+        cache_key = f'website_config_{pk}'
+        website_data = cache.get(cache_key)
+
+        if website_data is None:
+            website = self.get_object()
+            serializer = serializers.WebsiteDetailSerializer(website, context={'request': request})
+            website_data = serializer.data
+            # Cache dữ liệu cấu hình vĩnh viễn
+            cache.set(cache_key, website_data)
+        return Response(website_data)
 
     def update(self, request, *args, **kwargs):
-        # Tạo serializer với dữ liệu từ request và đối tượng banner đã có
         website = self.get_object()
         serializer = self.get_serializer(website, data=request.data, partial=True)
 
-        # Kiểm tra tính hợp lệ của dữ liệu
         if serializer.is_valid():
             try:
-                # Cập nhật thông tin banner
                 website = serializer.save()
-                # Trả về dữ liệu chi tiết của banner sau khi cập nhật
+                # Xóa cache khi có sự thay đổi
+                cache_key = f'website_config_{website.pk}'
+                cache.delete(cache_key)
                 return Response(serializers.WebsiteDetailSerializer(website, context={'request': request}).data,
                                 status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Nếu dữ liệu không hợp lệ, trả về lỗi với thông báo chi tiết
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TagViewSet(viewsets.ViewSet,generics.ListAPIView,generics.CreateAPIView,generics.UpdateAPIView,generics.DestroyAPIView):
+class TagViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
     queryset = Tag.objects.all()
     serializer_class = serializers.TagSerializer
     permission_classes = [my_permissions.IsAdmin]
+    pagination_class = my_paginations.TagPagination
     def get_permissions(self):
         if self.action in ['list']:
             return [permissions.AllowAny()]
         return [my_permissions.IsAdmin()]
 
     def list(self, request):
-        tags = Tag.objects.all().order_by('id')
-        paginator = my_paginations.TagPagination()
-        paginated_tags = paginator.paginate_queryset(tags, request)
-        serializer = serializers.TagSerializer(paginated_tags, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        cache_key = 'tag_list_cache'
+        tags_data = cache.get(cache_key)
+
+        if tags_data is None:
+            tags = Tag.objects.all().order_by('id')
+            # Phân trang danh sách sản phẩm
+            paginator = self.pagination_class()
+            page = paginator.paginate_queryset(tags, request)
+
+            # Serialize danh sách sản phẩm
+            serializer = self.get_serializer(page, many=True)
+
+            # Trả về danh sách banner đã phân trang
+            paginated_data = paginator.get_paginated_response(serializer.data)
+
+            # Lưu dữ liệu đã phân trang vào cache
+            cache.set(cache_key, paginated_data.data)
+            return paginated_data
+        else:
+         return Response(tags_data)
 
     def create(self, request):
         serializer = serializers.TagSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # Xóa cache khi có tag mới được thêm
+            cache.delete('tag_list_cache')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk=None):
         tag = get_object_or_404(Tag, pk=pk)
-        serializer = serializers.TagSerializer(tag, data=request.data)
+        serializer = serializers.TagSerializer(tag, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            # Xóa cache khi có tag được cập nhật
+            cache.delete('tag_list_cache')
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk=None):
         tag = get_object_or_404(Tag, pk=pk)
         tag.delete()
+        # Xóa cache khi có tag bị xóa
+        cache.delete('tag_list_cache')
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+
+class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView,generics.DestroyAPIView):
+    queryset = GroupChat.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = serializers.GroupChatSerializer
+    pagination_class = my_paginations.SocialGroupPagination
+    def get_queryset(self):
+        query = self.queryset
+        if self.action in ['list']:
+            name = self.request.query_params.get('name', None)
+            if name:
+                 query = query.filter(name__icontains=name)
+        return query
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return serializers.GroupChatListSerializer
+        return self.serializer_class
+
+    def list(self, request, *args, **kwargs):
+        user = request.user
+        groups = self.get_queryset().filter(memberships__user=user).order_by('-memberships__interactive')
+        #lấy pagitation
+        paginator = my_paginations.SocialGroupPagination()
+        #paginate groups
+        paginated_groups = paginator.paginate_queryset(groups,request)
+        #serialize lại dữ liệu được paginate
+        serializer = self.get_serializer(paginated_groups, many=True, context={'request': request})
+        #trả về kết quả được paginate
+        return paginator.get_paginated_response(serializer.data)
+
+    def create(self, request, *args, **kwargs):
+        #copy dữ liệu từ body
+        data = request.data.copy()
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid():
+            #lấy groupchat
+            group_chat = serializer.save()
+            # Người tạo group sẽ trở thành owner
+            GroupChatMembership.objects.create(group_chat=group_chat, user=request.user, role='owner')
+
+        serializer = serializers.GroupChatDetailSerializer(group_chat, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        group_chat = self.get_object()
+
+        # Kiểm tra quyền sửa (owner hoặc manager)
+        membership = GroupChatMembership.objects.filter(group_chat=group_chat, user=request.user).first()
+        if membership.role not in ['owner', 'manager']:
+            return Response({'error': 'You do not have permission to update group.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(group_chat, data=request.data, partial=True,context={'request': request})
+        if serializer.is_valid():
+            group_data = serializer.save()
+            return Response(serializers.GroupChatDetailSerializer(group_data,context={'request': request}).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        group_chat = self.get_object()
+
+        # Chỉ owner mới được xóa group
+        is_owner = GroupChatMembership.objects.filter(
+            group_chat=group_chat,
+            user=request.user,
+            role='owner'
+        ).exists()
+
+        if not is_owner:
+            return Response(
+                {'error': 'Only owner has permission to delete this group.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        group_chat.delete()
+        return Response( status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['get','post','delete','update'],detail=True,url_path='member')
+    def member(self,request,pk=None):
+        group_chat = self.get_object()
+        user = request.user
+        #lấy role của user
+        try:
+            group_chat_membership = GroupChatMembership.objects.get(
+                group_chat=group_chat,
+                user=user)
+        except GroupChatMembership.DoesNotExist:
+            return Response({'error': 'You do not have permission in this group.'},
+                            status=status.HTTP_403_FORBIDDEN)
+        if request.method == "GET":
+            members = GroupChatMembership.objects.filter(group_chat=group_chat).order_by("role","-created_date")
+            username = request.query_params.get('username',None)
+            if username:
+                members = members.filter(user__username__icontains=username)
+            #lấy paginator
+            paginator = my_paginations.UserPagination()
+            #pagination dữ liệu
+            paginated_members = paginator.paginate_queryset(members,request)
+            #serialize dữ liệu được paginate
+            serializer = serializers.GroupChatMemberListSerializer(paginated_members,many=True,context={'request':request})
+            return paginator.get_paginated_response(serializer.data)
+
+        elif request.method == "POST":
+            # Lấy danh sách user_id để thêm người dùng
+            user_ids = request.data.getlist('user_id', [])
+
+            # Lấy danh sách user_id_remove để xóa người dùng
+            user_ids_remove = request.data.getlist('user_id_remove', [])
+
+            # Xóa người dùng khỏi group nếu có danh sách user_id_remove
+            if user_ids_remove:
+                # Kiểm tra quyền (chỉ owner mới được xóa)
+                if group_chat_membership.role != 'owner':
+                    return Response({'error': 'Only owner can delete members.'}, status=status.HTTP_403_FORBIDDEN)
+
+                # Kiểm tra xem người dùng có tự xóa mình không
+                if str(user.id) in user_ids_remove:
+                    return Response({'error': 'You cannot remove yourself from the group.'},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+                for user_id in user_ids_remove:
+                    try:
+                        member_to_remove = GroupChatMembership.objects.get(group_chat=group_chat, user_id=user_id)
+                        member_to_remove.delete()
+                    except GroupChatMembership.DoesNotExist:
+                        pass  # Bỏ qua nếu người dùng không phải là thành viên
+
+            # Thêm người dùng vào group nếu có danh sách user_id
+            if user_ids:
+                for user_id in user_ids:
+                    try:
+                        new_user = User.objects.get(id=user_id)
+                        try:
+                            # Thêm user vào nhóm với role 'member'
+                            GroupChatMembership.objects.create(group_chat=group_chat, user=new_user, role='member')
+                        except IntegrityError:
+                            # Bỏ qua nếu user đã là thành viên của nhóm (duplicate entry)
+                            pass
+                    except User.DoesNotExist:
+                        pass  # Bỏ qua nếu người dùng không tồn tại
+
+            # Trả về thông báo thành công
+            return Response({"message": "Operation successful"}, status=status.HTTP_200_OK)
+
+        elif request.method == "DELETE":
+
+            # Nếu user là owner, cần chuyển quyền owner trước khi rời nhóm
+            if group_chat_membership.role == 'owner':
+                # Tìm thành viên có `created_date` lâu nhất (trừ người dùng hiện tại)
+                next_owner = GroupChatMembership.objects.filter(
+                    group_chat=group_chat
+                ).exclude(user=user).order_by('created_date').first()
+
+                if next_owner:
+                    # Trao quyền owner cho thành viên có `created_date` lâu nhất
+                    next_owner.role = 'owner'
+                    next_owner.save()
+                else:
+                    # Nếu không còn thành viên nào khác, xóa group
+                    group_chat.delete()
+                    return Response(status=status.HTTP_200_OK)
+            return Response(status=status.HTTP_200_OK)
+
+        elif request.method == "PATCH":
+            # Chỉ owner mới được thay đổi vai trò của thành viên khác
+            if group_chat_membership.role != 'owner':
+                return Response({'error': 'Only the owner can change roles.'}, status=status.HTTP_403_FORBIDDEN)
+
+            # Lấy user_id và vai trò mới từ request
+            user_id = request.data.get('user_id')
+            new_role = request.data.get('role')
+
+            if not user_id or not new_role:
+                return Response({'error': 'Both user_id and role must be provided.'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            # Kiểm tra vai trò hợp lệ
+            if new_role not in ['owner', 'manager', 'member']:
+                return Response({'error': 'Invalid role. Role must be "owner", "manager", or "member".'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            try:
+                # Lấy thành viên cần đổi vai trò
+                member_to_update = GroupChatMembership.objects.get(group_chat=group_chat, user_id=user_id)
+
+                # Nếu role mới là "owner", cập nhật owner hiện tại thành "member"
+                if new_role == 'owner':
+                    # Đổi vai trò của owner hiện tại thành member
+                    group_chat_membership.role = 'member'
+                    group_chat_membership.save()
+
+                # Đổi vai trò của người dùng được chỉ định
+                member_to_update.role = new_role
+                member_to_update.save()
+
+                return Response({'message': f'Role of {member_to_update.user.username} changed to {new_role}.'},
+                                status=status.HTTP_200_OK)
+
+            except GroupChatMembership.DoesNotExist:
+                return Response({'error': 'The specified user is not a member of the group.'},
+                                status=status.HTTP_404_NOT_FOUND)
 
 # class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView):
 #     queryset = Company.objects.all().order_by('-workers_number')

@@ -42,37 +42,38 @@ from django.utils.encoding import force_bytes, force_bytes
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'email', 'phone_number', 'location', 'about',
-                  'profile_image', 'profile_bg', 'link']
+        fields = ['id', 'username', 'password', 'first_name', 'last_name', 'email', 'phone_number', 'location', 'about', 'link']
         extra_kwargs = {
             'password': {'write_only': True},
             'location': {'required': False},
             'about': {'required': False},
-            'profile_image': {'required': False},
-            'profile_bg': {'required': False},
+            # 'profile_image': {'required': False},
+            # 'profile_bg': {'required': False},
             'link': {'required': False},
-            'form': {'required': False},
         }
 
 
     def create(self, validated_data):
-            user = User.objects.create_user(**validated_data)
-            user.is_active = False  # Set is_active to False by default
-            user.save()
+        print('tạo user')
+        # Tạo người dùng
+        user = User.objects.create(**validated_data)
+        user.set_password(validated_data['password'])
+        user.is_active = False  # Set is_active to False by default
+        user.save()
 
-            # Create verification code
-            code = get_random_string(length=6, allowed_chars='0123456789')
-            EmailVerificationCode.objects.create(
-                user=user,
-                code=code,
-                expires_at=timezone.now() + timedelta(minutes=3)
-            )
+        # Tạo mã xác thực
+        code = get_random_string(length=6, allowed_chars='0123456789')
+        EmailVerificationCode.objects.create(
+            user=user,
+            code=code,
+            expires_at=timezone.now() + timedelta(minutes=3)
+        )
 
-            # Send activation email
-            from . import utils
-            utils.send_activation_email(user, code)
+        # Gửi email xác thực
+        from . import utils
+        utils.send_activation_email(user, code)
 
-            return user
+        return user
 
 class ActivationSerializer(serializers.Serializer):
     uid = serializers.CharField()
@@ -113,21 +114,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 
 class UserDetailSerializer(UserSerializer):
-    profile_image = serializers.SerializerMethodField()
-    profile_bg = serializers.SerializerMethodField()
     groups = GroupListSerializer(many=True)
-
-    def get_profile_image(self, obj):
-        if obj.profile_image:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            profile_image = obj.profile_image.name
-            return self.context['request'].build_absolute_uri(f"/static/{profile_image}")
-
-    def get_profile_bg(self, obj):
-        if obj.profile_bg:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            profile_bg = obj.profile_bg.name
-            return self.context['request'].build_absolute_uri(f"/static/{profile_bg}")
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ['groups']
@@ -528,6 +515,36 @@ class WebsiteDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Website
         fields = ['id','img', 'about', 'phone_number', 'mail', 'location', 'link']
+
+
+class GroupChatSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GroupChat
+        fields = ['id', 'name', 'image']
+
+
+class GroupChatDetailSerializer(GroupChatSerializer):
+    image = serializers.SerializerMethodField()
+    def get_image(self, obj):
+        if obj.image:
+            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
+            image = obj.image.name
+            return self.context['request'].build_absolute_uri(f"/static/{image}")
+    class Meta(GroupChatSerializer.Meta):
+        fields = ['id', 'name', 'image', 'created_date','updated_date']
+
+class GroupChatListSerializer(GroupChatDetailSerializer):
+
+    class Meta(GroupChatDetailSerializer.Meta):
+        fields = ['id', 'name', 'image']
+
+
+class GroupChatMemberListSerializer(serializers.ModelSerializer):
+    user = UserListSerializer()
+
+    class Meta:
+        model = GroupChatMembership
+        fields = ['user', 'role', 'interactive','created_date','updated_date']
 
 # class CompanySerializer(serializers.ModelSerializer):
 #     class Meta:

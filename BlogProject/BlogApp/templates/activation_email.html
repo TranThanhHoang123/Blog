@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Account Activation</title>
 </head>
 <body>
-$END$
+    <p>Hello {{ user.username }},</p>
+    <p>Please click the link below to activate your account:</p>
+    <p><a href="{{ activation_link }}">Activate your account</a></p>
+    <p>The activation link will expire in 3 minutes.</p>
+    <p>Best regards,</p>
+    <p>The Team</p>
 </body>
 </html>

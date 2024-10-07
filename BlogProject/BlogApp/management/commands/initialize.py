@@ -45,6 +45,11 @@ LOGIN = [
         'email':'admin@example.com',
         'password': 'SNN@2024'
     },
+    {
+        'username': 'H2htechenergy2024',
+        'email':'admin@example.com',
+        'password': '123'
+    },
 ]
 # Khởi tạo các account system admin
 LOGIN_SYS_ADMIN = [
@@ -58,6 +63,10 @@ LOGIN_SYS_ADMIN = [
 MEMBERS = [
     {
         'username': 'Songnhatnguyen2024',
+        'group': 'admin'
+    },
+    {
+        'username': 'H2htechenergy2024',
         'group': 'admin'
     },
     {
@@ -85,7 +94,11 @@ TAGS = [
         'name':'remote'
     }
 ]
-
+VSTOTE = {
+    'username':'a18c9ad',
+    'password':'E3kxLea=',
+    'project_id':'f2ecf7a1f0494cdf954303888b0e5df1',
+}
 class Command(BaseCommand):
     help = 'Khởi tạo quyền và nhóm'
 
@@ -120,4 +133,9 @@ class Command(BaseCommand):
 
         #khởi tạo tag
         utils.create_initial_tags(TAGS)
+        #khỏi tạo vstorage
+        utils.create_vstorage(VSTOTE)
+        #lấy token vstorage
+        result = utils.get_vstorage_token(1)
+        print(result)
         self.stdout.write(self.style.SUCCESS('Successfully initialized tags'))

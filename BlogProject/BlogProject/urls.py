@@ -19,6 +19,7 @@ from django.urls import path, include
 from django.conf import settings
 urlpatterns = [
     path('', include('BlogApp.urls')),
+    path('chat/', include('ChatApp.urls')),
     # path('notification', include('NotificationApp.urls')),
     path(f'{settings.ADMIN_ENDPOINT}', admin.site.urls),
     path('o/', include('oauth2_provider.urls',

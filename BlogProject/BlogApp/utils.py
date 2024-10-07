@@ -97,12 +97,76 @@ def has_permission_to_modify_group(user, group):
         return user_highest_priority < group.grouppriority.priority
 
     return False  # Nếu người dùng không thuộc nhóm nào, mặc định không có quyền
-import re
-from PIL import Image
-from io import BytesIO
-from django.core.files.base import ContentFile
+
+
+import requests
+import mimetypes
 import os
-import io
+
+
+# Mapping từ phần mở rộng của file đến loại MIME tương ứng
+MIME_TYPES = {
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'png': 'image/png',
+    'gif': 'image/gif',
+    'ico': 'image/x-icon',
+    'pdf': 'application/pdf',
+    'doc': 'application/msword',
+    'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'xls': 'application/vnd.ms-excel',
+    'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'txt': 'text/plain',
+    # Thêm các phần mở rộng và loại MIME khác nếu cần
+}
+
+def upload_file_to_vstorage(file, directory):
+    from .models import Vstorage  # Import tại nơi cần sử dụng
+    try:
+        vstorage = Vstorage.objects.get(id=1)
+    except Vstorage.DoesNotExist:
+        return {"error": "Vstorage not found"}
+
+    if vstorage.is_expired():
+        return {"error": "Vstorage token expired"}
+
+    # Lấy tên file và phần mở rộng từ đối tượng file
+    file_name = os.path.basename(file.name)
+    file_extension = file_name.split('.')[-1].lower()
+
+    # Xác định loại MIME từ phần mở rộng của file
+    content_type, _ = mimetypes.guess_type(file_name)
+    if content_type is None:
+        content_type = 'application/octet-stream'
+
+    # Đọc nội dung file từ đối tượng file
+    try:
+        file_data = file.read()
+    except Exception as e:
+        print({"error": f"File validation failed: {str(e)}"})
+        return {"error": f"File validation failed: {str(e)}"}
+
+    file_url = f"{vstorage.url}/MediaOfBlogApp/{directory}/{file_name}"
+
+    headers = {
+        'X-Auth-Token': vstorage.X_Subject_Token,
+        'Content-Type': content_type
+    }
+
+    response = requests.put(file_url, headers=headers, data=file_data)
+
+    if response.status_code == 201:
+        print({"message": "File uploaded successfully", "file_url": file_url})
+        return file_url
+    else:
+        print({
+            "error": f"Failed to upload file, status code: {response.status_code}",
+            "details": response.text
+        })
+        return {
+            "error": f"Failed to upload file, status code: {response.status_code}",
+            "details": response.text
+        }
 
 # def sanitize_filename(filename):
 #     """Xóa các ký tự đặc biệt và giữ lại các ký tự an toàn trong tên tập tin."""
