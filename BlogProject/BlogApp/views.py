@@ -364,8 +364,8 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                 visibility=visibility
             )
             for file in medias:
-                # Chuyển đổi file thành định dạng jpeg
-                BlogMedia.objects.create(blog=blog, file=file)
+                file_url = utils.upload_file_to_vstorage(file, 'Blog')
+                BlogMedia.objects.create(blog=blog, file=file_url)
 
             # Serialize the response data
             serializer = serializers.BlogSerializer(blog, context={'request': request})
@@ -410,8 +410,7 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                         if current_media_count + len(new_media) > 1:
                             return Response({'detail': 'You can only have up to 1 PDF file.'},
                                             status=status.HTTP_400_BAD_REQUEST)
-                        for file in new_media:
-                            BlogMedia.objects.create(blog=updated_blog, file=file)
+
 
                     elif file_type == 'image':
                         # Kiểm tra xem blog có chứa file PDF không
@@ -421,8 +420,11 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                         if current_media_count + len(new_media) > 4:
                             return Response({'detail': 'You can have up to 4 images total.'},
                                             status=status.HTTP_400_BAD_REQUEST)
-                        for file in new_media:
-                            BlogMedia.objects.create(blog=updated_blog, file=file)
+                    from . import utils
+                    for file in new_media:
+                        utils.sanitize_filename(file)
+                        file_url = utils.upload_file_to_vstorage(file, 'Blog')
+                        BlogMedia.objects.create(blog=blog, file=file_url)
 
                 return Response(serializer.data, status=status.HTTP_200_OK)
 

@@ -55,8 +55,6 @@ class Blog(BaseModel):
     content = models.CharField(max_length=255)
     description = models.TextField(validators=[MaxLengthValidator(4000)])  # Giới hạn 1000 ký tự
     visibility = models.CharField(max_length=9, choices=VISIBILITY_CHOICES, default='public')
-    # likes_count = models.PositiveIntegerField(default=0)
-    # comments_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.content
@@ -76,11 +74,10 @@ class Comment(BaseModel):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.CharField(max_length=255)
-    file = models.FileField(
-        upload_to='comment/%Y/%m',
+    file = models.URLField(
         null=True,
         blank=True,
-        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png', 'gif'])]
+        max_length=600,
     )
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
@@ -90,10 +87,8 @@ class Comment(BaseModel):
 
 class BlogMedia(models.Model):
     blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='media')
-    file = models.FileField(
-        upload_to='blog_media/%Y/%m',
-        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png', 'gif'])]
-    )
+
+    file = models.URLField(max_length=600)
     def __str__(self):
         return f'Media for blog {self.blog.id}'
 
@@ -361,6 +356,7 @@ class Vstorage(models.Model):
         return self.expired_at and timezone.now() >= self.expired_at
 
     def get_vstorage_token(self):
+        print('get_vstorage_token')
         """Lấy token từ Vstorage và cập nhật nếu cần thiết."""
         if self.is_expired():
             # URL cho API
@@ -397,6 +393,7 @@ class Vstorage(models.Model):
             response = requests.post(url, json=body, headers=headers)
 
             if response.status_code == 201:
+                print('lấy vstorage_token thành công')
                 x_subject_token = response.headers.get('X-Subject-Token')
                 response_data = response.json()
 
@@ -412,6 +409,7 @@ class Vstorage(models.Model):
                 self.expired_at = expires_at
                 self.save()
             else:
+                print('lấy vstorage_token thất bại')
                 # Raise exception nếu response không thành công
                 response.raise_for_status()
 

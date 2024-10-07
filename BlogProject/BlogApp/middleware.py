@@ -72,20 +72,25 @@ class SanitizeFilenameMiddleware(MiddlewareMixin):
         file.name = sanitized_name
 
     def process_request(self, request):
-        if request.method in ['POST', 'PATCH'] and request.FILES:
-            if 'media' in request.FILES:
-                files = request.FILES.getlist('media')
-                if files:
-                    for file in files:
-                        self.sanitize_file(file)
-            else:
-                for file_key, file in request.FILES.items():
-                    self.sanitize_file(file)
+        if request.method in ['POST', 'PATCH']:
+            print("process_request SanitizeFilenameMiddleware")
 
+            # Kiểm tra và in ra toàn bộ request.FILES để debug
+            print("request.FILES:", request.FILES)
 
-from django.http import HttpResponseBadRequest
-import magic
+            # Duyệt qua danh sách 'media'
+            medias = request.FILES.getlist('media')
+            print("Medias:", medias)  # Kiểm tra danh sách media
 
+            for file in medias:
+                print("chỉnh tên media")
+                self.sanitize_file(file)
+
+            # Xử lý tệp đơn lẻ (nếu có)
+            file = request.FILES.get('file')
+            if file:
+                print("chỉnh tên file")
+                self.sanitize_file(file)
 
 class FileExtensionWhitelistMiddleware(MiddlewareMixin):
     ALLOWED_EXTENSIONS = ['jpeg', 'pdf', 'ico', 'jpg', 'png']

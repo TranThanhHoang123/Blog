@@ -5,12 +5,15 @@ from oauth2_provider.models import AccessToken
 from channels.security.websocket import WebsocketDenier
 from django.utils import timezone
 from channels.db import database_sync_to_async
+
+
 class TokenAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
-        headers = dict(scope['headers'])
-        token = headers.get(b'authorization', None)
+        # Extract the token from the query parameters instead of headers
+        query_string = scope.get('query_string', b'').decode('utf-8')
+        token = self.get_token_from_query(query_string)
+
         if token:
-            token = token.decode('utf-8').split(' ')[1]
             scope['user'] = await self.get_user_from_token(token)
             if scope['user'] == AnonymousUser():
                 denier = WebsocketDenier()
@@ -18,7 +21,14 @@ class TokenAuthMiddleware(BaseMiddleware):
         else:
             denier = WebsocketDenier()
             return await denier(scope, receive, send)
+
         await super().__call__(scope, receive, send)
+
+    def get_token_from_query(self, query_string):
+        from urllib.parse import parse_qs
+        query_params = parse_qs(query_string)
+        token = query_params.get('token', [None])[0]  # Get 'token' from query params
+        return token
 
     @database_sync_to_async
     def get_user_from_token(self, token):

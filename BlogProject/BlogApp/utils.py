@@ -121,15 +121,16 @@ MIME_TYPES = {
 }
 
 def upload_file_to_vstorage(file, directory):
+    print('upload_file_to_vstorage')
     from .models import Vstorage  # Import tại nơi cần sử dụng
     try:
         vstorage = Vstorage.objects.get(id=1)
     except Vstorage.DoesNotExist:
         return {"error": "Vstorage not found"}
-
+    print('lấy được vstorage object')
     if vstorage.is_expired():
-        return {"error": "Vstorage token expired"}
-
+        vstorage.get_vstorage_token()
+    print('upload_file_to_vstorage còn hạn')
     # Lấy tên file và phần mở rộng từ đối tượng file
     file_name = os.path.basename(file.name)
     file_extension = file_name.split('.')[-1].lower()
@@ -167,6 +168,43 @@ def upload_file_to_vstorage(file, directory):
             "error": f"Failed to upload file, status code: {response.status_code}",
             "details": response.text
         }
+
+
+import os
+import re
+from datetime import datetime
+
+def sanitize_filename(file):
+    """
+    Hàm này sẽ làm sạch tên file bằng cách:
+      - Xóa tất cả các ký tự đặc biệt.
+      - Xóa các dấu cách thừa hoặc dấu gạch ngang ở đầu/cuối.
+      - Thêm timestamp vào tên file.
+
+    Args:
+      file: Một object file (ví dụ: từ request.FILES).
+
+    Returns:
+      Một object file mới với tên đã được làm sạch.
+    """
+
+    # Lấy phần mở rộng của tệp
+    file_extension = os.path.splitext(file.name)[1]
+
+    # Xóa tất cả các ký tự đặc biệt
+    sanitized_name = re.sub(r'[^\w\s-]', '', os.path.splitext(file.name)[0])
+
+    # Xóa các dấu cách thừa hoặc dấu gạch ngang ở đầu/cuối
+    sanitized_name = re.sub(r'[-\s]+', '-', sanitized_name).strip('-_')
+
+    # Thêm timestamp vào tên tệp
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+    sanitized_name = f"{sanitized_name}_{timestamp}{file_extension}"
+
+    # Cập nhật tên tệp
+    file.name = sanitized_name
+
+    return file
 
 # def sanitize_filename(filename):
 #     """Xóa các ký tự đặc biệt và giữ lại các ký tự an toàn trong tên tập tin."""

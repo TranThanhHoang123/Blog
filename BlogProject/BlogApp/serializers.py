@@ -130,13 +130,6 @@ class UserListForAdminSerializer(UserDetailSerializer):
 
 
 class BlogMediaSerializer(serializers.ModelSerializer):
-    file = serializers.SerializerMethodField()
-
-    def get_file(self, obj):
-        if obj.file:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            file = obj.file.name
-            return self.context['request'].build_absolute_uri(f"/static/{file}")
 
     class Meta:
         model = BlogMedia
@@ -189,11 +182,9 @@ class BlogDetailSerializer(BlogSerializer):
                   'created_date', 'updated_date', 'liked']
 
     def get_likes_count(self, obj):
-        # Đã được tính trong QuerySet, không cần thiết phải làm lại ở đây
         return obj.likes_count
 
     def get_comment_count(self, obj):
-        # Đã được tính trong QuerySet, không cần thiết phải làm lại ở đây
         return obj.comment_count
 
     def get_liked(self, obj):
@@ -212,14 +203,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 class CommentListSerializer(CommentSerializer):
     user = UserListSerializer()
-    file = serializers.SerializerMethodField()
     reply_count = serializers.SerializerMethodField()  # Thêm trường đếm số phản hồi
-
-    def get_file(self, obj):
-        if obj.file:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường file
-            file = obj.file.name
-            return self.context['request'].build_absolute_uri(f"/static/{file}")
 
     def get_reply_count(self, obj):
         # Đếm số lượng phản hồi của comment
