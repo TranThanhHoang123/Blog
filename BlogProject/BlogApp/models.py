@@ -77,7 +77,7 @@ class Comment(BaseModel):
     file = models.URLField(
         null=True,
         blank=True,
-        max_length=600,
+        max_length=1024,
     )
     parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.CASCADE)
 
@@ -94,9 +94,8 @@ class BlogMedia(models.Model):
 
 
 class Website(models.Model):
-    img = models.FileField(
-        upload_to='icon/%Y/%m',
-        validators=[FileExtensionValidator(allowed_extensions=['ico'])]
+    img = models.URLField(
+        max_length=1024,
     )
     about = models.TextField(validators=[MaxLengthValidator(4000)])
     phone_number = models.CharField(max_length=20)
@@ -149,9 +148,8 @@ class JobApplication(BaseModel):
     job_post = models.ForeignKey('JobPost', related_name='job_applications', on_delete=models.CASCADE,null=True)
     user = models.ForeignKey(User, related_name='job_applications', on_delete=models.CASCADE)
     job_title = models.CharField(max_length=255)
-    cv = models.FileField(
-        upload_to='cv/%Y/%m',
-        validators=[FileExtensionValidator(allowed_extensions=['pdf'])]
+    cv = models.URLField(
+        max_length=1024,
     )
     fullname = models.CharField(max_length=50)
     phone_number = models.CharField(max_length=11)
@@ -263,8 +261,8 @@ class Product(BaseModel):
 
 class ProductMedia(models.Model):
     product = models.ForeignKey(Product, related_name='medias', on_delete=models.CASCADE)
-    media = models.FileField(
-        upload_to='products/%Y/%m',
+    media = models.URLField(
+        max_length=1024,
         validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
         null=False,
         blank=False
@@ -293,9 +291,8 @@ class Banner(BaseModel):
 
     title = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
-    image = models.ImageField(
-        upload_to='banners/%Y/%m',
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png', 'gif'])]
+    image = models.URLField(
+        max_length=1024,
     )
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,default='hide')
     link = models.URLField(max_length=255, blank=True, null=True)
@@ -416,7 +413,7 @@ class Vstorage(models.Model):
 from django.core.exceptions import ValidationError
 class GroupChat(BaseModel):
     name = models.CharField(max_length=255)
-    image = models.ImageField(upload_to='group_images/%Y/%m', null=True, blank=True)
+    image = models.URLField(max_length=1024, null=True, blank=True)
     def __str__(self):
         return self.name
 

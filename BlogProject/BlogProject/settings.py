@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-l=ildokp$!efu15v@gsdm#$al^tpypxwj)p61o06zb@4bnj%ao'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 if not DEBUG:  # Chỉ trong production
     REST_FRAMEWORK = {
         'DEFAULT_RENDERER_CLASSES': (
@@ -81,10 +81,7 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',  # Cấu hình cors cho phép người dùng có thể fetapi dù khác domain
     # 'BlogApp.middleware.RequestLoggingMiddleware',
     'BlogApp.middleware.FileSizeLimitMiddleware',
-    'BlogApp.middleware.SanitizeFilenameMiddleware',
     'BlogApp.middleware.FileExtensionWhitelistMiddleware',
-    # 'BlogApp.middleware.FileValidationMiddleware',
-    # 'BlogApp.middleware.CustomCSRFMiddleware',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [

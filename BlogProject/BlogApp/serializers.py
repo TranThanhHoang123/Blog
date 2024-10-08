@@ -1,4 +1,4 @@
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.utils.crypto import get_random_string
 from rest_framework import serializers
 from .models import *
@@ -119,6 +119,20 @@ class UserDetailSerializer(UserSerializer):
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ['groups']
 
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        user = User.objects.annotate(
+            following_count=Count('following', distinct=True),
+            follower_count=Count('follower', distinct=True),
+            blog_count=Count('blog', distinct=True)
+        ).get(pk=instance.pk)
+        response['following_count'] = user.following_count
+        response['follower_count'] = user.follower_count  # Sửa lỗi nhầm từ following_count thành follower_count
+        response['blog_count'] = user.blog_count
+        return response
+
+
+
 
 class UserListSerializer(UserDetailSerializer):
     class Meta(UserDetailSerializer.Meta):
@@ -198,7 +212,7 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['id', 'blog', 'user', 'content', 'file', 'parent', 'created_date', 'updated_date']
-        read_only_fields = ['user', 'created_date', 'updated_date']
+        read_only_fields = ['created_date', 'updated_date']
 
 
 class CommentListSerializer(CommentSerializer):
@@ -227,7 +241,7 @@ class BlogDetailWithCommentsSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = {
-            'blog': BlogDetailSerializer(instance, context=self.context).data,
+            'blog': BlogDetailSerializer(instance).data,
             'comments': self.get_comments(instance)
         }
         return representation
@@ -343,12 +357,6 @@ class JobApplicationDetailSerializer(serializers.ModelSerializer):
     cv = serializers.SerializerMethodField()
     job_post = JobPostListSerializer()
 
-    def get_cv(self, obj):
-        if obj.cv:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            cv = obj.cv.name
-            return self.context['request'].build_absolute_uri(f"/static/{cv}")
-
     class Meta:
         model = JobApplication
         fields = '__all__'
@@ -356,13 +364,6 @@ class JobApplicationDetailSerializer(serializers.ModelSerializer):
 
 class JobApplicationListSerializer(serializers.ModelSerializer):
     user = UserListSerializer()
-    cv = serializers.SerializerMethodField()
-
-    def get_cv(self, obj):
-        if obj.cv:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            cv = obj.cv.name
-            return self.context['request'].build_absolute_uri(f"/static/{cv}")
 
     class Meta:
         model = JobApplication
@@ -381,12 +382,6 @@ class CategoryListSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
 class ProductMediaSerializer(serializers.ModelSerializer):
-    media = serializers.SerializerMethodField()
-    def get_media(self, obj):
-        if obj.media:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            media = obj.media.name
-            return self.context['request'].build_absolute_uri(f"/static/{media}")
     class Meta:
         model = ProductMedia
         fields = '__all__'  # Hoặc bạn có thể chỉ định từng trường cụ thể nếu muốn
@@ -418,12 +413,6 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     categories = serializers.SerializerMethodField()
     user = UserListSerializer()
 
-    # def get_file(self, obj):
-    #     if obj.file:
-    #         # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-    #         file = obj.file.name
-    #         return self.context['request'].build_absolute_uri(f"/static/{file}")
-
     def get_categories(self, obj):
         # Lấy danh sách categories liên kết với sản phẩm thông qua ProductCategory
         categories = Category.objects.filter(productcategory__product=obj)
@@ -432,7 +421,7 @@ class ProductDetailSerializer(serializers.ModelSerializer):
     def get_medias(self, obj):
         # Lấy danh sách categories liên kết với sản phẩm thông qua ProductCategory
         medias = ProductMedia.objects.filter(product=obj)
-        return ProductMediaSerializer(medias, many=True, context=self.context).data
+        return ProductMediaSerializer(medias, many=True).data
 
     class Meta:
         model = Product
@@ -448,7 +437,7 @@ class ProductListSerializer(ProductDetailSerializer):
 class BannerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Banner
-        fields = '__all__'
+        fields = ['id','title','description','image','status','link']
         extra_kwargs = {
             'user': {'read_only': True},
             'title': {'required': True},
@@ -459,14 +448,6 @@ class BannerSerializer(serializers.ModelSerializer):
 
 
 class BannerDetailSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
-    def get_image(self, obj):
-        if obj.image:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            image = obj.image.name
-            return self.context['request'].build_absolute_uri(f"/static/{image}")
-
     class Meta(BannerSerializer.Meta):
         pass
 
@@ -489,13 +470,6 @@ class WebsiteSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class WebsiteDetailSerializer(serializers.ModelSerializer):
-    img = serializers.SerializerMethodField()
-
-    def get_img(self, obj):
-        if obj.img:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            img = obj.img.name
-            return self.context['request'].build_absolute_uri(f"/static/{img}")
     class Meta:
         model = Website
         fields = ['id','img', 'about', 'phone_number', 'mail', 'location', 'link']
@@ -508,12 +482,6 @@ class GroupChatSerializer(serializers.ModelSerializer):
 
 
 class GroupChatDetailSerializer(GroupChatSerializer):
-    image = serializers.SerializerMethodField()
-    def get_image(self, obj):
-        if obj.image:
-            # Lấy tên file hình ảnh từ đường dẫn được lưu trong trường image
-            image = obj.image.name
-            return self.context['request'].build_absolute_uri(f"/static/{image}")
     class Meta(GroupChatSerializer.Meta):
         fields = ['id', 'name', 'image', 'created_date','updated_date']
 

@@ -51,47 +51,6 @@ class FileSizeLimitMiddleware(MiddlewareMixin):
 
         return total_file_size
 
-import os
-import re
-class SanitizeFilenameMiddleware(MiddlewareMixin):
-    def sanitize_file(self, file):
-        # Lấy phần mở rộng của tệp
-        file_extension = os.path.splitext(file.name)[1]
-
-        # Xóa tất cả các ký tự đặc biệt
-        sanitized_name = re.sub(r'[^\w\s-]', '', os.path.splitext(file.name)[0])
-
-        # Xóa các dấu cách thừa hoặc dấu gạch ngang ở đầu/cuối
-        sanitized_name = re.sub(r'[-\s]+', '-', sanitized_name).strip('-_')
-
-        # Thêm timestamp vào tên tệp
-        timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-        sanitized_name = f"{sanitized_name}_{timestamp}{file_extension}"
-
-        # Cập nhật tên tệp trong request.FILES
-        file.name = sanitized_name
-
-    def process_request(self, request):
-        if request.method in ['POST', 'PATCH']:
-            print("process_request SanitizeFilenameMiddleware")
-
-            # Kiểm tra và in ra toàn bộ request.FILES để debug
-            print("request.FILES:", request.FILES)
-
-            # Duyệt qua danh sách 'media'
-            medias = request.FILES.getlist('media')
-            print("Medias:", medias)  # Kiểm tra danh sách media
-
-            for file in medias:
-                print("chỉnh tên media")
-                self.sanitize_file(file)
-
-            # Xử lý tệp đơn lẻ (nếu có)
-            file = request.FILES.get('file')
-            if file:
-                print("chỉnh tên file")
-                self.sanitize_file(file)
-
 class FileExtensionWhitelistMiddleware(MiddlewareMixin):
     ALLOWED_EXTENSIONS = ['jpeg', 'pdf', 'ico', 'jpg', 'png']
 

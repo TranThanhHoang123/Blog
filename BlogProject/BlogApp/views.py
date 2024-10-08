@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.utils.crypto import get_random_string
 from oauth2_provider.models import Application
-from rest_framework import viewsets, generics,permissions
+from rest_framework import viewsets, generics, permissions
 from rest_framework.response import Response
 from . import serializers, my_paginations, filters, utils, my_permissions
 from rest_framework.decorators import action
@@ -114,7 +114,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
     # Thêm filter_backends và filterset_fields
     def get_permissions(self):
-        if self.action in ['create', 'list', 'blog','activate','register','retrieve']:
+        if self.action in ['create', 'list', 'blog', 'activate', 'register', 'retrieve']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -130,12 +130,12 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
     @action(detail=False, methods=['post'], url_path='register')
     def register(self, request):
-        #thêm file vào vstorage
+        # thêm file vào vstorage
         data = request.data.copy()
-        if request.FILES.get('profile_image'):
-            data['profile_image'] = utils.upload_file_to_vstorage(request.FILES.get('profile_image'),'UserAvatar')
-        if request.FILES.get('profile_bg'):
-            data['profile_bg'] = utils.upload_file_to_vstorage(request.FILES.get('profile_bg'),'UserBackground')
+        if 'profile_image' in data and data['profile_image']:
+            data['profile_image'] = utils.upload_file_to_vstorage(request.FILES.get('profile_image'), 'UserAvatar')
+        if 'profile_bg' in data and data['profile_bg']:
+            data['profile_bg'] = utils.upload_file_to_vstorage(request.FILES.get('profile_bg'), 'UserBackground')
         serializer = serializers.UserRegistrationSerializer(data=request.data, context={'request': request})
         print('tạo processing')
         serializer.is_valid(raise_exception=True)
@@ -157,17 +157,21 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
             verification_code = EmailVerificationCode.objects.get(user=user, code=code)
             verification_code.status = True
-            verification_code.save()            # Redirect to a specific page after successful activation
+            verification_code.save()  # Redirect to a specific page after successful activation
             return redirect(settings.LOGIN_SUCCESSFULLY_URL)  # 'login' should be the name of your login URL pattern
         else:
             # If the activation fails, you can redirect to an error page or render an error template
             return redirect(settings.LOGIN_FAIL_URL)
 
-
     @action(detail=False, methods=['patch'], url_path='update-profile')
     def update_profile(self, request, *args, **kwargs):
         user = self.get_object()
-        serializer = serializers.UserUpdateSerializer(user, data=request.data, partial=True,
+        data = request.data.copy()
+        if 'profile_image' in data and data['profile_image']:
+            data['profile_image'] = utils.upload_file_to_vstorage(request.FILES.get('profile_image'), 'UserAvatar')
+        if 'profile_bg' in data and data['profile_bg']:
+            data['profile_bg'] = utils.upload_file_to_vstorage(request.FILES.get('profile_bg'), 'UserBackground')
+        serializer = serializers.UserUpdateSerializer(user, data=data, partial=True,
                                                       context={'request': request})
         if serializer.is_valid():
             serializer.save()
@@ -193,7 +197,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def retrieve(self, request, *args, **kwargs):
         user_id = kwargs.get('pk')  # Lấy ID từ URL
         try:
-            user = User.objects.get(id=user_id,is_active=True)
+            user = User.objects.get(id=user_id, is_active=True)
         except User.DoesNotExist:
             return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -203,7 +207,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     @action(detail=True, methods=['get'], url_path='blog', permission_classes=[permissions.IsAuthenticated])
     def blog(self, request, pk=None):
         # người dung của blog
-        user_blog = User.objects.get(pk=pk,is_active=True)
+        user_blog = User.objects.get(pk=pk, is_active=True)
         blogs = utils.get_blog_list_of_user(user_blog=user_blog, user=request.user)
         paginator = my_paginations.BlogPagination()
         result_page = paginator.paginate_queryset(blogs, request)
@@ -235,7 +239,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def follow(self, request, pk=None):
         user = self.get_object()
         try:
-            to_user = User.objects.get(pk=pk,is_active=True)
+            to_user = User.objects.get(pk=pk, is_active=True)
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         if user == to_user:
@@ -288,6 +292,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
         serializer = self.get_serializer(strangers_with_group, many=True, context={'request': request})
         return Response(serializer.data)
+
 
 class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
     queryset = Blog.objects.all().order_by('-created_date')
@@ -422,7 +427,6 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                                             status=status.HTTP_400_BAD_REQUEST)
                     from . import utils
                     for file in new_media:
-                        utils.sanitize_filename(file)
                         file_url = utils.upload_file_to_vstorage(file, 'Blog')
                         BlogMedia.objects.create(blog=blog, file=file_url)
 
@@ -492,12 +496,22 @@ class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                 parent_comment = get_object_or_404(Comment, id=parent_id)
                 data['parent'] = parent_comment.id
 
+            # Log thông tin file trước khi upload
+            if 'file' in data and data['file']:
+                data['file'] = utils.upload_file_to_vstorage(data['file'], 'Comment')
+
+            data['user'] = user.id
             serializer = serializers.CommentSerializer(data=data)
 
             if serializer.is_valid():
-                instance = serializer.save(user=user)
-                return Response(serializers.CommentListSerializer(instance,context={'request': request}).data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                try:
+                    instance = serializer.save()
+                    return Response(serializers.CommentListSerializer(instance).data, status=status.HTTP_201_CREATED)
+                except Exception as e:
+                    # Log lỗi cụ thể khi gặp lỗi tại bước save
+                    return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         elif request.method == 'GET':
             comments = Comment.objects.filter(blog=blog, parent=None).order_by('-created_date')
@@ -546,6 +560,8 @@ class CommentViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyA
 
         # Loại bỏ trường 'parent' khỏi dữ liệu gửi đến
         data = request.data.copy()
+        if 'file' in data and data['file']:
+            data['file'] = utils.upload_file_to_vstorage(data['file'], 'Comment')
         if 'parent' in data:
             data.pop('parent')
 
@@ -553,13 +569,8 @@ class CommentViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyA
         serializer = self.get_serializer(comment, data=data, partial=partial)
 
         if serializer.is_valid():
-            old_file = comment.file
-            updated_comment = serializer.save()
-
-            # Xóa file cũ nếu có file mới được cập nhật
-            if old_file and old_file != updated_comment.file:
-                old_file.delete(save=False)
-
+            comment.file
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -639,7 +650,7 @@ class ChangePasswordViewSet(viewsets.ViewSet):
         serializer = serializers.PasswordResetSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
-        user = User.objects.get(email=email,is_active=True)
+        user = User.objects.get(email=email, is_active=True)
         code = get_random_string(length=6, allowed_chars='0123456789')
 
         try:
@@ -663,7 +674,7 @@ class ChangePasswordViewSet(viewsets.ViewSet):
         serializer = serializers.VerifyCodeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        user = User.objects.get(email=serializer.validated_data['email'],is_active=True)
+        user = User.objects.get(email=serializer.validated_data['email'], is_active=True)
         reset_code = PasswordResetCode.objects.get(user=user, code=serializer.validated_data['code'])
 
         if reset_code.is_expired():
@@ -726,7 +737,8 @@ class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAP
 
         if serializer.is_valid():
             updated_job_post = serializer.save()  # Lưu các thay đổi
-            return Response(serializers.JobPostDetailSerializer(updated_job_post,context={'request':request}).data, status=status.HTTP_200_OK)
+            return Response(serializers.JobPostDetailSerializer(updated_job_post, context={'request': request}).data,
+                            status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -766,32 +778,52 @@ class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAP
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post', 'get'], url_path='job-applications')
-    def add_job_application(self, request, pk=None):
+    def job_application(self, request, pk=None):
         job_post = self.get_object()
         user = request.user
-        if request.method == 'POST':
-            serializer = serializers.JobApplicationSerializer(data=request.data)
-            if serializer.is_valid():
-                try:
-                    # Lưu đơn xin việc với công ty và người dùng hiện tại
-                    instance = serializer.save(job_post=job_post, user=user, status='pending')
-                    return Response({'detail': "Job application created successfully."},
-                                    status=status.HTTP_201_CREATED)
-                except IntegrityError:
-                    # Xử lý lỗi trùng lặp
-                    return Response({'detail': "Duplicate job application. You have already applied for this job."},
-                                    status=status.HTTP_400_BAD_REQUEST)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        elif request.method == 'GET':
-            if user != job_post.user:
-                return Response({"detail": "You do not have permission to view these job applications."},
-                                status=status.HTTP_403_FORBIDDEN)
-            job_applications = JobApplication.objects.filter(job_post=job_post).order_by('-created_date')
-            paginator = my_paginations.JobApplicationPagination()
-            paginated_applications = paginator.paginate_queryset(job_applications, request)
-            serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
-                                                                  context={'request': request})
-            return paginator.get_paginated_response(serializer.data)
+        try:
+            if request.method == 'POST':
+                # Lấy từng trường dữ liệu từ request
+                job_title = request.data.get('job_title')
+                cv = request.FILES.get('cv')
+                fullname = request.data.get('fullname')
+                phone_number = request.data.get('phone_number')
+                email = request.data.get('email')
+                sex = request.data.get('sex')
+                age = request.data.get('age')
+                cv = utils.upload_file_to_vstorage(cv, "CV")
+                # Validate dữ liệu (bạn có thể thêm các bước validate khác ở đây)
+                if not all([job_title, cv, fullname, phone_number, email, sex, age]):
+                    return Response({"error": "Required fields not enough"}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Tạo JobApplication mới
+                job_application = JobApplication.objects.create(
+                    job_post=job_post,
+                    user=user,
+                    job_title=job_title,
+                    cv=cv,
+                    fullname=fullname,
+                    phone_number=phone_number,
+                    email=email,
+                    sex=sex,
+                    age=age,
+                )
+
+                return Response({"message": "Successfully"}, status=status.HTTP_201_CREATED)
+
+            elif request.method == 'GET':
+                if user != job_post.user:
+                    return Response({"detail": "You do not have permission to view these job applications."},
+                                    status=status.HTTP_403_FORBIDDEN)
+                job_applications = JobApplication.objects.filter(job_post=job_post).order_by('-created_date')
+                paginator = my_paginations.JobApplicationPagination()
+                paginated_applications = paginator.paginate_queryset(job_applications, request)
+                serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
+                                                                      context={'request': request})
+                return paginator.get_paginated_response(serializer.data)
+        except Exception as e:
+            print("Error occurred: ", str(e))
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def destroy(self, request, *args, **kwargs):
         job_post = self.get_object()
@@ -802,7 +834,8 @@ class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAP
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAPIView, generics.UpdateAPIView, generics.CreateAPIView):
+class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAPIView, generics.UpdateAPIView,
+                      generics.CreateAPIView):
     queryset = Category.objects.all().order_by('-created_date')
     serializer_class = serializers.CategorySerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -831,7 +864,7 @@ class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAP
         if not category:
             response = super().retrieve(request, *args, **kwargs)
             category = response.data
-            cache.set(cache_key, category, timeout=60*60*24)  # Cache trong 24 giờ
+            cache.set(cache_key, category, timeout=60 * 60 * 24)  # Cache trong 24 giờ
         else:
             response = Response(category, status=status.HTTP_200_OK)
         return response
@@ -943,11 +976,12 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
                         if len(medias) > 4:
                             return Response({'detail': 'You can upload up to 4 media files.'},
                                             status=status.HTTP_400_BAD_REQUEST)
-                        for media_file in medias:
-                            ProductMedia.objects.create(product=product, media=media_file)
+                        for file in medias:
+                            file_url = utils.upload_file_to_vstorage(file, 'Product')
+                            ProductMedia.objects.create(product=product, media=file_url)
 
                     # Serialize the response data
-                    response_serializer = serializers.ProductDetailSerializer(product,context={'request':request})
+                    response_serializer = serializers.ProductDetailSerializer(product)
                     return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
             except Category.DoesNotExist:
@@ -957,6 +991,7 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def partial_update(self, request, pk=None):
         # Lấy đối tượng sản phẩm hoặc trả về lỗi 404 nếu không tìm thấy
         product = get_object_or_404(Product, pk=pk, user=request.user)
@@ -987,31 +1022,33 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
                                                 status=status.HTTP_400_BAD_REQUEST)
                             except IntegrityError:
                                 return Response({
-                                                    'detail': f'ProductCategory with product {product.id} and category {cat_id} already exists.'},
-                                                status=status.HTTP_400_BAD_REQUEST)
+                                    'detail': f'ProductCategory with product {product.id} and category {cat_id} already exists.'},
+                                    status=status.HTTP_400_BAD_REQUEST)
 
                     # Xử lý các remove_product_category_id: xóa các category
                     remove_category_ids = request.data.getlist('remove_product_category_id', None)
                     if remove_category_ids:
                         ProductCategory.objects.filter(product=product, category__id__in=remove_category_ids).delete()
 
-                    # Xử lý các media: thêm mới các media
-                    media_files = request.FILES.getlist('media', None)
-                    if media_files:
-                        if len(media_files) > 4:
-                            return Response({'detail': 'You can upload up to 4 media files.'},
-                                            status=status.HTTP_400_BAD_REQUEST)
-
-                        # Thêm các media mới vào sản phẩm
-                        for media_file in media_files:
-                            ProductMedia.objects.create(product=product, media=media_file)
-
                     # Xử lý các remove_product_media_id: xóa các media
                     remove_media_ids = request.data.getlist('remove_product_media_id', None)
                     if remove_media_ids:
                         ProductMedia.objects.filter(id__in=remove_media_ids).delete()
 
-                    return Response({'Message': 'Updated product successfully.'}, status=status.HTTP_200_OK)
+                    # Xử lý các media: thêm mới các media
+                    media_files = request.FILES.getlist('media', None)
+                    if media_files:
+                        current_media_count = ProductMedia.objects.filter(product=product).count()
+                        if current_media_count + len(media_files) > 4:
+                            return Response({'detail': 'You can upload up to 4 media files.'},
+                                            status=status.HTTP_400_BAD_REQUEST)
+                        else:
+                            # Thêm các media mới vào sản phẩm
+                            for file in media_files:
+                                file_url = utils.upload_file_to_vstorage(file, 'Product')
+                                ProductMedia.objects.create(product=product, media=file_url)
+
+                    return Response(serializers.ProductDetailSerializer(product).data, status=status.HTTP_200_OK)
 
             except Category.DoesNotExist:
                 return Response({'detail': 'One or more categories do not exist.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -1022,7 +1059,8 @@ class ProductViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Create
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.CreateAPIView, generics.DestroyAPIView):
+class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIView, generics.CreateAPIView,
+                    generics.DestroyAPIView):
     queryset = Banner.objects.all().order_by('-created_date')
     serializer_class = serializers.BannerSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -1034,7 +1072,7 @@ class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIVi
         return [permissions.IsAuthenticated()]
 
     def get_serializer_class(self):
-        if self.action in ['list','list_banner']:
+        if self.action in ['list', 'list_banner']:
             return serializers.BannerListSerializer
         return self.serializer_class
 
@@ -1042,34 +1080,41 @@ class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIVi
         if self.action in ['list']:
             return Banner.objects.filter(status='show').order_by('-created_date')
         return self.queryset
+
     def create(self, request, *args, **kwargs):
         if not utils.has_admin_or_manager_permission(request.user):
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
-        serializer = self.get_serializer(data=request.data)
+        data = request.data.copy()
+        if 'image' in data and data['image']:
+            data['image'] = utils.upload_file_to_vstorage(data['image'], 'Banner')
+        serializer = self.get_serializer(data=data)
         if serializer.is_valid():
             try:
                 banner = serializer.save(user=request.user)
                 # Xóa cache khi có banner mới được thêm
                 cache.delete('banner_list_show')
                 cache.delete('banner_list_all')
-                return Response(serializers.BannerDetailSerializer(banner, context={'request': request}).data,
+                return Response(serializers.BannerDetailSerializer(banner).data,
                                 status=status.HTTP_201_CREATED)
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def partial_update(self, request, pk=None):
+    def partial_update(self, request, *args, **kwargs):
         if not utils.has_admin_or_manager_permission(request.user):
             return Response({"detail": "Permission denied."}, status=status.HTTP_403_FORBIDDEN)
-        banner = get_object_or_404(Banner, pk=pk)
-        serializer = self.get_serializer(banner, data=request.data, partial=True)
+        banner = get_object_or_404(Banner, pk=kwargs.get('pk'))
+        data = request.data.copy()
+        if 'image' in data and data['image']:
+            data['image'] = utils.upload_file_to_vstorage(data['image'],'Banner')
+        serializer = self.get_serializer(banner, data=data, partial=True)
         if serializer.is_valid():
             try:
                 banner = serializer.save()
                 # Xóa cache khi có banner được cập nhật
                 cache.delete('banner_list_show')
                 cache.delete('banner_list_all')
-                return Response(serializers.BannerDetailSerializer(banner, context={'request': request}).data,
+                return Response(serializers.BannerDetailSerializer(banner).data,
                                 status=status.HTTP_200_OK)
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -1113,7 +1158,7 @@ class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIVi
             page = paginator.paginate_queryset(banners, request)
 
             # Serialize danh sách sản phẩm
-            serializer = self.get_serializer(page, many=True, context={'request': request})
+            serializer = self.get_serializer(page, many=True)
 
             # Trả về danh sách banner đã phân trang
             paginated_data = paginator.get_paginated_response(serializer.data)
@@ -1125,6 +1170,7 @@ class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIVi
         else:
             # Nếu đã có cache, trả về dữ liệu đã phân trang từ cache
             return Response(cached_data)
+
 
 class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
     queryset = Group.objects.all()
@@ -1138,15 +1184,14 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
             return [my_permissions.IsAdmin()]
         return [my_permissions.IsAdminOrManager()]
 
-
     # API để lấy tất cả thành viên nào có group
     @action(methods=['get'], detail=False, url_path='all-users-with-group')
     def all_users_with_group(self, request):
-        users_with_group = User.objects.filter(groups__isnull=False,is_active=True).distinct()
+        users_with_group = User.objects.filter(groups__isnull=False, is_active=True).distinct()
         filtered_users = filters.UserAdminFilter(request.GET, queryset=users_with_group).qs  # Áp dụng bộ lọc
         paginator = my_paginations.UserPagination()
         paginated_users = paginator.paginate_queryset(filtered_users, request)
-        serializer = serializers.UserListForAdminSerializer(paginated_users, many=True, context={'request': request})
+        serializer = serializers.UserListForAdminSerializer(paginated_users, many=True)
         return paginator.get_paginated_response(serializer.data)
 
     # API để lấy thành viên có trong một group cụ thể
@@ -1157,7 +1202,7 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
         filtered_users = filters.UserAdminFilter(request.GET, queryset=users_in_group).qs  # Áp dụng bộ lọc
         paginator = my_paginations.UserPagination()
         paginated_users = paginator.paginate_queryset(filtered_users, request)
-        serializer = serializers.UserListSerializer(paginated_users, many=True, context={'request': request})
+        serializer = serializers.UserListSerializer(paginated_users, many=True)
         return paginator.get_paginated_response(serializer.data)
 
         # API để lấy tất cả user
@@ -1167,9 +1212,9 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
             filtered_users = filters.UserAdminFilter(request.GET, queryset=users).qs  # Áp dụng bộ lọc
             paginator = my_paginations.UserPagination()
             paginated_users = paginator.paginate_queryset(filtered_users, request)
-            serializer = serializers.UserListForAdminSerializer(paginated_users, many=True,
-                                                                context={'request': request})
+            serializer = serializers.UserListForAdminSerializer(paginated_users, many=True,)
             return paginator.get_paginated_response(serializer.data)
+
     @action(methods=['post'], detail=True, url_path='add-user')
     def add_user(self, request, pk=None):
         group = self.get_object()
@@ -1185,7 +1230,7 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
             with transaction.atomic():
                 for user_id in user_ids:
                     try:
-                        user = User.objects.get(pk=user_id,is_active=True)
+                        user = User.objects.get(pk=user_id, is_active=True)
 
                         # Kiểm tra xem người dùng đã thuộc nhóm nào chưa
                         if user.groups.exists():
@@ -1219,7 +1264,7 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
             with transaction.atomic():
                 for user_id in user_ids:
                     try:
-                        user = User.objects.get(pk=user_id,is_active=True)
+                        user = User.objects.get(pk=user_id, is_active=True)
 
                         # Kiểm tra xem người dùng có thuộc nhóm này không
                         if not group.user_set.filter(pk=user_id).exists():
@@ -1245,7 +1290,6 @@ class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
         paginated_groups = paginator.paginate_queryset(groups, request)
         serializer = serializers.GroupListSerializer(paginated_groups, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
-
 
 
 class WebsiteViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.UpdateAPIView):
@@ -1278,7 +1322,10 @@ class WebsiteViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Update
 
     def update(self, request, *args, **kwargs):
         website = self.get_object()
-        serializer = self.get_serializer(website, data=request.data, partial=True)
+        data = request.data.copy()
+        if 'img' in data and data['img']:
+            data['img'] = utils.upload_file_to_vstorage(data['img'], 'GroupChat')
+        serializer = self.get_serializer(website, data=data, partial=True)
 
         if serializer.is_valid():
             try:
@@ -1294,11 +1341,13 @@ class WebsiteViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.Update
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TagViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+class TagViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView,
+                 generics.DestroyAPIView):
     queryset = Tag.objects.all()
     serializer_class = serializers.TagSerializer
     permission_classes = [my_permissions.IsAdmin]
     pagination_class = my_paginations.TagPagination
+
     def get_permissions(self):
         if self.action in ['list']:
             return [permissions.AllowAny()]
@@ -1324,7 +1373,7 @@ class TagViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView,
             cache.set(cache_key, paginated_data.data)
             return paginated_data
         else:
-         return Response(tags_data)
+            return Response(tags_data)
 
     def create(self, request):
         serializer = serializers.TagSerializer(data=request.data)
@@ -1353,18 +1402,19 @@ class TagViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView,
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
-class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView,generics.DestroyAPIView):
+class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView,
+                       generics.DestroyAPIView):
     queryset = GroupChat.objects.all()
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = serializers.GroupChatSerializer
     pagination_class = my_paginations.SocialGroupPagination
+
     def get_queryset(self):
         query = self.queryset
         if self.action in ['list']:
             name = self.request.query_params.get('name', None)
             if name:
-                 query = query.filter(name__icontains=name)
+                query = query.filter(name__icontains=name)
         return query
 
     def get_serializer_class(self):
@@ -1375,21 +1425,23 @@ class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAP
     def list(self, request, *args, **kwargs):
         user = request.user
         groups = self.get_queryset().filter(memberships__user=user).order_by('-memberships__interactive')
-        #lấy pagitation
+        # lấy pagitation
         paginator = my_paginations.SocialGroupPagination()
-        #paginate groups
-        paginated_groups = paginator.paginate_queryset(groups,request)
-        #serialize lại dữ liệu được paginate
+        # paginate groups
+        paginated_groups = paginator.paginate_queryset(groups, request)
+        # serialize lại dữ liệu được paginate
         serializer = self.get_serializer(paginated_groups, many=True, context={'request': request})
-        #trả về kết quả được paginate
+        # trả về kết quả được paginate
         return paginator.get_paginated_response(serializer.data)
 
     def create(self, request, *args, **kwargs):
-        #copy dữ liệu từ body
+        # copy dữ liệu từ body
         data = request.data.copy()
+        if 'image' in data and data['image']:
+            data['image'] = utils.upload_file_to_vstorage(data['image'], 'GroupChat')
         serializer = self.get_serializer(data=data)
         if serializer.is_valid():
-            #lấy groupchat
+            # lấy groupchat
             group_chat = serializer.save()
             # Người tạo group sẽ trở thành owner
             GroupChatMembership.objects.create(group_chat=group_chat, user=request.user, role='owner')
@@ -1405,11 +1457,14 @@ class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAP
         if membership.role not in ['owner', 'manager']:
             return Response({'error': 'You do not have permission to update group.'},
                             status=status.HTTP_403_FORBIDDEN)
-
-        serializer = self.get_serializer(group_chat, data=request.data, partial=True,context={'request': request})
+        data = request.data.copy()
+        if 'image' in data and data['image']:
+            data['image'] = utils.upload_file_to_vstorage(data['image'], 'GroupChat')
+        serializer = self.get_serializer(group_chat, data=data, partial=True, context={'request': request})
         if serializer.is_valid():
             group_data = serializer.save()
-            return Response(serializers.GroupChatDetailSerializer(group_data,context={'request': request}).data, status=status.HTTP_200_OK)
+            return Response(serializers.GroupChatDetailSerializer(group_data, context={'request': request}).data,
+                            status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
@@ -1428,13 +1483,13 @@ class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAP
                 status=status.HTTP_403_FORBIDDEN
             )
         group_chat.delete()
-        return Response( status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(methods=['get','post','delete','update'],detail=True,url_path='member')
-    def member(self,request,pk=None):
+    @action(methods=['get', 'post', 'delete', 'update'], detail=True, url_path='member')
+    def member(self, request, pk=None):
         group_chat = self.get_object()
         user = request.user
-        #lấy role của user
+        # lấy role của user
         try:
             group_chat_membership = GroupChatMembership.objects.get(
                 group_chat=group_chat,
@@ -1443,16 +1498,17 @@ class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAP
             return Response({'error': 'You do not have permission in this group.'},
                             status=status.HTTP_403_FORBIDDEN)
         if request.method == "GET":
-            members = GroupChatMembership.objects.filter(group_chat=group_chat).order_by("role","-created_date")
-            username = request.query_params.get('username',None)
+            members = GroupChatMembership.objects.filter(group_chat=group_chat).order_by("role", "-created_date")
+            username = request.query_params.get('username', None)
             if username:
                 members = members.filter(user__username__icontains=username)
-            #lấy paginator
+            # lấy paginator
             paginator = my_paginations.UserPagination()
-            #pagination dữ liệu
-            paginated_members = paginator.paginate_queryset(members,request)
-            #serialize dữ liệu được paginate
-            serializer = serializers.GroupChatMemberListSerializer(paginated_members,many=True,context={'request':request})
+            # pagination dữ liệu
+            paginated_members = paginator.paginate_queryset(members, request)
+            # serialize dữ liệu được paginate
+            serializer = serializers.GroupChatMemberListSerializer(paginated_members, many=True,
+                                                                   context={'request': request})
             return paginator.get_paginated_response(serializer.data)
 
         elif request.method == "POST":

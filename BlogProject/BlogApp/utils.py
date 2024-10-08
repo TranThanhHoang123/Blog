@@ -121,6 +121,7 @@ MIME_TYPES = {
 }
 
 def upload_file_to_vstorage(file, directory):
+    sanitize_filename(file)
     print('upload_file_to_vstorage')
     from .models import Vstorage  # Import tại nơi cần sử dụng
     try:
