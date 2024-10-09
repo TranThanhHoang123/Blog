@@ -35,16 +35,10 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="QJ5PGhtFOq5F7lpbPO0n-17" value="Đăng ký tài khoản" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="430" y="495" width="110" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="QJ5PGhtFOq5F7lpbPO0n-18" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-7" target="QJ5PGhtFOq5F7lpbPO0n-17">
-          <mxGeometry width="160" relative="1" as="geometry">
-            <mxPoint x="380" y="590" as="sourcePoint" />
-            <mxPoint x="540" y="590" as="targetPoint" />
-          </mxGeometry>
+          <mxGeometry x="470" y="500" width="110" height="40" as="geometry" />
         </mxCell>
         <mxCell id="QJ5PGhtFOq5F7lpbPO0n-19" value="Gửi mail kích hoạt tài khoản" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="440" y="425" width="110" height="45" as="geometry" />
+          <mxGeometry x="470" y="425" width="110" height="45" as="geometry" />
         </mxCell>
         <mxCell id="QJ5PGhtFOq5F7lpbPO0n-20" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-17" target="QJ5PGhtFOq5F7lpbPO0n-19">
           <mxGeometry width="160" relative="1" as="geometry">
@@ -53,7 +47,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="QJ5PGhtFOq5F7lpbPO0n-21" value="Kích hoạt tài khoản" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="280" y="440" width="110" height="45" as="geometry" />
+          <mxGeometry x="285" y="425" width="110" height="45" as="geometry" />
         </mxCell>
         <mxCell id="QJ5PGhtFOq5F7lpbPO0n-22" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-19" target="QJ5PGhtFOq5F7lpbPO0n-21">
           <mxGeometry width="160" relative="1" as="geometry">
