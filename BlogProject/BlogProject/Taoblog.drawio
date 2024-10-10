@@ -47,7 +47,34 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="hAL4R11POa3iQWuHamc3-14" value="Like" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="605" y="300" width="120" height="50" as="geometry" />
+          <mxGeometry x="510" y="300" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="hAL4R11POa3iQWuHamc3-16" value="Unlike" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="690" y="300" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="hAL4R11POa3iQWuHamc3-17" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="hAL4R11POa3iQWuHamc3-14" target="hAL4R11POa3iQWuHamc3-16">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="523" y="222" as="sourcePoint" />
+            <mxPoint x="627" y="248" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hAL4R11POa3iQWuHamc3-18" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="hAL4R11POa3iQWuHamc3-11" target="hAL4R11POa3iQWuHamc3-14">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="533" y="232" as="sourcePoint" />
+            <mxPoint x="637" y="258" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hAL4R11POa3iQWuHamc3-19" value="Bình luận" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="300" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="hAL4R11POa3iQWuHamc3-20" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="hAL4R11POa3iQWuHamc3-11" target="hAL4R11POa3iQWuHamc3-19">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="495" y="233" as="sourcePoint" />
+            <mxPoint x="560" y="311" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
