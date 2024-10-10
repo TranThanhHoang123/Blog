@@ -34,7 +34,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="hAL4R11POa3iQWuHamc3-21" value="gán tag" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="430" y="280" width="110" height="50" as="geometry" />
+          <mxGeometry x="430" y="300" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="hAL4R11POa3iQWuHamc3-22" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="hAL4R11POa3iQWuHamc3-11" target="hAL4R11POa3iQWuHamc3-21">
           <mxGeometry x="0.0007" width="160" relative="1" as="geometry">
@@ -44,10 +44,10 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="hAL4R11POa3iQWuHamc3-23" value="Phân tích nội dung" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="600" y="175" width="110" height="50" as="geometry" />
+          <mxGeometry x="610" y="175" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="hAL4R11POa3iQWuHamc3-24" value="Phân tích hình ảnh" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="600" y="270" width="110" height="50" as="geometry" />
+          <mxGeometry x="610" y="250" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="hAL4R11POa3iQWuHamc3-25" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="hAL4R11POa3iQWuHamc3-11" target="hAL4R11POa3iQWuHamc3-23">
           <mxGeometry x="0.0007" width="160" relative="1" as="geometry">
@@ -60,6 +60,16 @@
           <mxGeometry x="0.0007" width="160" relative="1" as="geometry">
             <mxPoint x="501" y="245" as="sourcePoint" />
             <mxPoint x="504" y="300" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hAL4R11POa3iQWuHamc3-27" value="Nhập nội dung" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="90" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="hAL4R11POa3iQWuHamc3-28" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="hAL4R11POa3iQWuHamc3-11" target="hAL4R11POa3iQWuHamc3-27">
+          <mxGeometry x="0.0007" width="160" relative="1" as="geometry">
+            <mxPoint x="550" y="210" as="sourcePoint" />
+            <mxPoint x="630" y="210" as="targetPoint" />
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
