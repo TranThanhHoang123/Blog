@@ -8,13 +8,13 @@
           <mxGeometry x="60" y="280" width="30" height="60" as="geometry" />
         </mxCell>
         <mxCell id="Q4h5YGl_CawJlgQXMVtK-3" value="Tạo nhóm quyền" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="410" y="90" width="80" height="40" as="geometry" />
+          <mxGeometry x="440" y="90" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Q4h5YGl_CawJlgQXMVtK-4" value="Xem chi tiết nhóm quyền" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="370" y="330" width="80" height="60" as="geometry" />
         </mxCell>
         <mxCell id="Q4h5YGl_CawJlgQXMVtK-6" value="Thêm quyền vào nhóm" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="570" y="90" width="80" height="40" as="geometry" />
+          <mxGeometry x="600" y="90" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Q4h5YGl_CawJlgQXMVtK-7" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="Q4h5YGl_CawJlgQXMVtK-3" target="Q4h5YGl_CawJlgQXMVtK-6">
           <mxGeometry width="160" relative="1" as="geometry">
@@ -31,7 +31,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="Q4h5YGl_CawJlgQXMVtK-9" value="Xóa quyền khỏi nhóm" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="570" y="160" width="80" height="40" as="geometry" />
+          <mxGeometry x="600" y="160" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Q4h5YGl_CawJlgQXMVtK-10" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="Q4h5YGl_CawJlgQXMVtK-3" target="Q4h5YGl_CawJlgQXMVtK-11">
           <mxGeometry width="160" relative="1" as="geometry">
@@ -41,7 +41,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="Q4h5YGl_CawJlgQXMVtK-11" value="Tìm kiếm quyền" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="570" y="20" width="80" height="40" as="geometry" />
+          <mxGeometry x="600" y="20" width="80" height="40" as="geometry" />
         </mxCell>
         <mxCell id="Q4h5YGl_CawJlgQXMVtK-13" value="Thêm user vào nhóm quyền" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="570" y="370" width="110" height="60" as="geometry" />
