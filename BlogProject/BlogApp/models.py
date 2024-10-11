@@ -315,28 +315,6 @@ class GroupPriority(models.Model):
         return f"{self.group.name} (Priority: {self.priority})"
 
 
-
-
-# class CompanyGroup(models.Model):
-#     company = models.ForeignKey(Company, related_name='groups', on_delete=models.CASCADE)
-#     group = models.OneToOneField(Group, related_name='company_group', on_delete=models.CASCADE)
-#     def __str__(self):
-#         return f"{self.company.name} - {self.group.name}"
-#     #thêm các quyền
-#     class Meta:
-#         permissions = [
-#             ("edit_company", "Can edit company"),
-#             ("add_user_to_group", "Can add user to group"),
-#             ("remove_user_from_group", "Can remove user from group"),
-#             ("add_recruitment", "Can add recruitment"),
-#             ("delete_recruitment", "Can delete recruitment"),
-#             ("change_recruitment", "Can change recruitment"),
-#             ("full_access_recruitment", "Full access to recruitment"),
-#             ("create_job_application", "Can create job application"),
-#             ("delete_job_application", "Can delete job application"),
-#             ("change_job_application_status", "Can change job application status"),
-#             ("full_access_job_application", "Full access to job application"),
-#         ]
 class Vstorage(models.Model):
     VstorageCreadentialUsername = models.CharField(max_length=255, unique=True)
     VstorageCreadentialPassword = models.CharField(max_length=255)
@@ -446,3 +424,24 @@ class GroupChatMembership(BaseModel):
 class PersonalGroup(BaseModel):
     interactive = models.DateTimeField(null=True, blank=True)
     user = models.ManyToManyField('User', related_name='personal_groups')
+
+# class CompanyGroup(models.Model):
+#     company = models.ForeignKey(Company, related_name='groups', on_delete=models.CASCADE)
+#     group = models.OneToOneField(Group, related_name='company_group', on_delete=models.CASCADE)
+#     def __str__(self):
+#         return f"{self.company.name} - {self.group.name}"
+#     #thêm các quyền
+#     class Meta:
+#         permissions = [
+#             ("edit_company", "Can edit company"),
+#             ("add_user_to_group", "Can add user to group"),
+#             ("remove_user_from_group", "Can remove user from group"),
+#             ("add_recruitment", "Can add recruitment"),
+#             ("delete_recruitment", "Can delete recruitment"),
+#             ("change_recruitment", "Can change recruitment"),
+#             ("full_access_recruitment", "Full access to recruitment"),
+#             ("create_job_application", "Can create job application"),
+#             ("delete_job_application", "Can delete job application"),
+#             ("change_job_application_status", "Can change job application status"),
+#             ("full_access_job_application", "Full access to job application"),
+#         ]
