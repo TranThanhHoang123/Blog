@@ -147,7 +147,7 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="oZfX0HAokzO_6hSReje8-70" value="Bạn không có quyền sửa" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-15">
+        <mxCell id="oZfX0HAokzO_6hSReje8-70" value="Thông báo không có quyền sửa" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-15">
           <mxGeometry x="112.75" y="779.5" width="184.5" height="50" as="geometry" />
         </mxCell>
         <mxCell id="oZfX0HAokzO_6hSReje8-68" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0;" edge="1" parent="oZfX0HAokzO_6hSReje8-15" source="oZfX0HAokzO_6hSReje8-28" target="oZfX0HAokzO_6hSReje8-70">
@@ -174,7 +174,7 @@
         <mxCell id="oZfX0HAokzO_6hSReje8-75" value="Kiểm tra quyền xóa" style="rhombus;fillColor=#ffffc0;strokeColor=#ff0000;" vertex="1" parent="oZfX0HAokzO_6hSReje8-15">
           <mxGeometry x="112.75" y="862" width="180" height="85" as="geometry" />
         </mxCell>
-        <mxCell id="oZfX0HAokzO_6hSReje8-76" value="Bạn không có quyền xóa" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-15">
+        <mxCell id="oZfX0HAokzO_6hSReje8-76" value="Thống báo không có quyền xóa" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-15">
           <mxGeometry x="108.25" y="979.5" width="184.5" height="50" as="geometry" />
         </mxCell>
         <mxCell id="oZfX0HAokzO_6hSReje8-77" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0;" edge="1" parent="oZfX0HAokzO_6hSReje8-15" source="oZfX0HAokzO_6hSReje8-75" target="oZfX0HAokzO_6hSReje8-76">
