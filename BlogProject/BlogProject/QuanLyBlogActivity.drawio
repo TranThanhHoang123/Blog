@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36" version="24.7.17">
   <diagram name="Page-1" id="HnpZUGuaxoBwDZ29-cJ9">
-    <mxGraphModel dx="1290" dy="563" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1518" dy="662" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -19,15 +19,9 @@
           <mxGeometry x="265" y="110" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="oZfX0HAokzO_6hSReje8-5" value="Nhập nội dung bài viết" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-1">
-          <mxGeometry x="510" y="212" width="110" height="50" as="geometry" />
+          <mxGeometry x="500" y="222" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="oZfX0HAokzO_6hSReje8-6" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="oZfX0HAokzO_6hSReje8-1" source="oZfX0HAokzO_6hSReje8-4" target="oZfX0HAokzO_6hSReje8-5">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="oZfX0HAokzO_6hSReje8-7" value="Xác nhận" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-1">
-          <mxGeometry x="510" y="325" width="110" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="oZfX0HAokzO_6hSReje8-8" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="oZfX0HAokzO_6hSReje8-1" source="oZfX0HAokzO_6hSReje8-5" target="oZfX0HAokzO_6hSReje8-7">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="oZfX0HAokzO_6hSReje8-44" value="Tìm kiếm tag" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-1">
@@ -90,19 +84,10 @@
         <mxCell id="oZfX0HAokzO_6hSReje8-65" value="Nhập nội dung&#xa; chỉnh sửa" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-1">
           <mxGeometry x="265" y="499.5" width="110" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="oZfX0HAokzO_6hSReje8-66" value="Xác nhận" style="" vertex="1" parent="oZfX0HAokzO_6hSReje8-1">
-          <mxGeometry x="265" y="682" width="110" height="50" as="geometry" />
-        </mxCell>
         <mxCell id="oZfX0HAokzO_6hSReje8-64" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="oZfX0HAokzO_6hSReje8-1" source="oZfX0HAokzO_6hSReje8-52" target="oZfX0HAokzO_6hSReje8-65">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="349" y="372" as="sourcePoint" />
             <mxPoint x="396" y="432" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="oZfX0HAokzO_6hSReje8-67" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="oZfX0HAokzO_6hSReje8-1" source="oZfX0HAokzO_6hSReje8-65" target="oZfX0HAokzO_6hSReje8-66">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="415" y="482" as="sourcePoint" />
-            <mxPoint x="415" y="510" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="oZfX0HAokzO_6hSReje8-15" value="Hệ thống" style="swimlane;whiteSpace=wrap" vertex="1" parent="1">
@@ -229,16 +214,13 @@
             <mxPoint x="-158.5" y="432" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="oZfX0HAokzO_6hSReje8-36" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="1" source="oZfX0HAokzO_6hSReje8-7" target="oZfX0HAokzO_6hSReje8-18">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="859.5" y="478" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="oZfX0HAokzO_6hSReje8-29" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="1" source="oZfX0HAokzO_6hSReje8-66" target="oZfX0HAokzO_6hSReje8-28">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="912.2435714285712" y="780" as="sourcePoint" />
-            <mxPoint x="830" y="783" as="targetPoint" />
-            <Array as="points" />
+        <mxCell id="oZfX0HAokzO_6hSReje8-94" value="" style="edgeStyle=elbowEdgeStyle;elbow=horizontal;verticalAlign=bottom;endArrow=open;endSize=8;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="oZfX0HAokzO_6hSReje8-15" source="oZfX0HAokzO_6hSReje8-58" target="oZfX0HAokzO_6hSReje8-22">
+          <mxGeometry x="-924.5" y="-344" as="geometry">
+            <mxPoint x="115.5" y="1182" as="targetPoint" />
+            <mxPoint x="-374.5" y="1182" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="425" y="1072" />
+            </Array>
           </mxGeometry>
         </mxCell>
         <mxCell id="oZfX0HAokzO_6hSReje8-79" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="1" target="oZfX0HAokzO_6hSReje8-75">
@@ -266,6 +248,17 @@
             <Array as="points">
               <mxPoint x="280" y="1300" />
             </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oZfX0HAokzO_6hSReje8-8" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="1" source="oZfX0HAokzO_6hSReje8-5" target="oZfX0HAokzO_6hSReje8-18">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="635" y="453" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oZfX0HAokzO_6hSReje8-67" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0;" edge="1" parent="1" source="oZfX0HAokzO_6hSReje8-65" target="oZfX0HAokzO_6hSReje8-28">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="485" y="610" as="sourcePoint" />
+            <mxPoint x="390" y="810" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
