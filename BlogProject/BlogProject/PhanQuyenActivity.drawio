@@ -174,8 +174,8 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="3" value="Thread 2" style="swimlane;whiteSpace=wrap" parent="1" vertex="1">
-          <mxGeometry x="720" y="50" width="385.5" height="570" as="geometry" />
+        <mxCell id="3" value="Hệ thống" style="swimlane;whiteSpace=wrap" parent="1" vertex="1">
+          <mxGeometry x="700" y="50" width="385.5" height="570" as="geometry" />
         </mxCell>
         <mxCell id="17" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" parent="3" edge="1">
           <mxGeometry relative="1" as="geometry">
