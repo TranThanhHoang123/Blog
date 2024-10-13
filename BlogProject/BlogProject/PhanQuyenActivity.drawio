@@ -130,6 +130,32 @@
         <mxCell id="u1ysFpymqZyDRabq69S2-26" value="Kiểm tra quyền" style="rhombus;fillColor=#ffffc0;strokeColor=#ff0000;" vertex="1" parent="3">
           <mxGeometry x="155" y="240" width="80" height="40" as="geometry" />
         </mxCell>
+        <mxCell id="u1ysFpymqZyDRabq69S2-27" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="3" source="u1ysFpymqZyDRabq69S2-26" target="bhqzJydA3iUec34EVbpJ-41">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-305" y="298" as="sourcePoint" />
+            <mxPoint x="-170" y="339" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u1ysFpymqZyDRabq69S2-28" value="Đúng" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="u1ysFpymqZyDRabq69S2-27">
+          <mxGeometry x="0.0343" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u1ysFpymqZyDRabq69S2-32" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" edge="1" parent="3" source="u1ysFpymqZyDRabq69S2-26" target="bhqzJydA3iUec34EVbpJ-41">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-88" y="384" as="sourcePoint" />
+            <mxPoint x="-72" y="412" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="250" y="260" />
+              <mxPoint x="250" y="505" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="u1ysFpymqZyDRabq69S2-33" value="Sai" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="u1ysFpymqZyDRabq69S2-32">
+          <mxGeometry x="-0.116" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
