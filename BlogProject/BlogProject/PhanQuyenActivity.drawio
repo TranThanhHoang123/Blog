@@ -8,7 +8,7 @@
           <mxGeometry x="60" y="50" width="610" height="570" as="geometry" />
         </mxCell>
         <mxCell id="5" value="" style="ellipse;shape=startState;fillColor=#000000;strokeColor=#ff0000;" parent="2" vertex="1">
-          <mxGeometry x="212.75" y="32" width="30" height="30" as="geometry" />
+          <mxGeometry x="255" y="32" width="30" height="30" as="geometry" />
         </mxCell>
         <mxCell id="6" value="" style="edgeStyle=elbowEdgeStyle;elbow=horizontal;verticalAlign=bottom;endArrow=open;endSize=8;strokeColor=#FF0000;endFill=1;rounded=0" parent="2" source="5" target="7" edge="1">
           <mxGeometry x="100" y="40" as="geometry">
@@ -16,7 +16,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="7" value="Đăng nhập" style="" parent="2" vertex="1">
-          <mxGeometry x="172.75" y="102" width="110" height="50" as="geometry" />
+          <mxGeometry x="215" y="90" width="110" height="50" as="geometry" />
         </mxCell>
         <mxCell id="8" value="Nhấn vào danh sách nhóm" style="" parent="2" vertex="1">
           <mxGeometry x="190" y="172" width="160" height="50" as="geometry" />
@@ -111,15 +111,6 @@
             <mxPoint x="280" y="182" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="bhqzJydA3iUec34EVbpJ-41" value="" style="ellipse;shape=endState;fillColor=#000000;strokeColor=#ff0000" parent="2" vertex="1">
-          <mxGeometry x="242.75" y="522" width="30" height="30" as="geometry" />
-        </mxCell>
-        <mxCell id="bhqzJydA3iUec34EVbpJ-77" value="" style="endArrow=open;strokeColor=#FF0000;endFill=1;rounded=0" parent="2" source="bhqzJydA3iUec34EVbpJ-46" target="bhqzJydA3iUec34EVbpJ-41" edge="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="305" y="298" as="sourcePoint" />
-            <mxPoint x="440" y="339" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="3" value="Thread 2" style="swimlane;whiteSpace=wrap" parent="1" vertex="1">
           <mxGeometry x="670" y="50" width="385.5" height="570" as="geometry" />
         </mxCell>
@@ -132,6 +123,12 @@
           <mxGeometry x="130" y="90" as="geometry">
             <mxPoint x="130" y="135" as="targetPoint" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="bhqzJydA3iUec34EVbpJ-41" value="" style="ellipse;shape=endState;fillColor=#000000;strokeColor=#ff0000" parent="3" vertex="1">
+          <mxGeometry x="180" y="490" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="u1ysFpymqZyDRabq69S2-26" value="Kiểm tra quyền" style="rhombus;fillColor=#ffffc0;strokeColor=#ff0000;" vertex="1" parent="3">
+          <mxGeometry x="155" y="240" width="80" height="40" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
