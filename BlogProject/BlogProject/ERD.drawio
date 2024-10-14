@@ -4,6 +4,12 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="75buAJmkiO0_xKclVIpT-29" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;User&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;_ id: int&lt;div&gt;_ username: varchar(150)&lt;/div&gt;&lt;div&gt;_ password: varchar(150)&lt;/div&gt;&lt;div&gt;_ first_name: varchar(150)&lt;div&gt;_ last_name: varchar(150)&lt;/div&gt;&lt;div&gt;_ is_staff: boolean&lt;/div&gt;&lt;div&gt;_ phone_number: varchar(11)&lt;div&gt;_ email: varchar(40)&lt;/div&gt;&lt;div&gt;_ location: varchar(85)&lt;/div&gt;&lt;/div&gt;&lt;div&gt;_ profile_image: varchar(600)&lt;div&gt;_ profile_bg: varchar(600)&lt;/div&gt;&lt;div&gt;_ link: varchar(100)&lt;/div&gt;&lt;/div&gt;&lt;div&gt;_ is_active: boolean&lt;/div&gt;&lt;div&gt;&lt;div style=&quot;height:2px;&quot;&gt;&lt;/div&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="500" y="60" width="180" height="240" as="geometry" />
+        </mxCell>
+        <mxCell id="75buAJmkiO0_xKclVIpT-30" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;Follow&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;_ id: int&lt;div&gt;_ from_user: varchar(100)&lt;/div&gt;&lt;div&gt;_ to_user: varchar(100)&lt;/div&gt;&lt;div&gt;_ created_at: datetime&lt;div&gt;&lt;div style=&quot;height:2px;&quot;&gt;&lt;/div&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;div style=&quot;height:2px;&quot;&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="200" y="90" width="180" height="110" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
