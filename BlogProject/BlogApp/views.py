@@ -175,7 +175,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                                                       context={'request': request})
         if serializer.is_valid():
             instance=serializer.save()
-            return Response(serializers.UserDetailSerializer(instance).data, status=status.HTTP_200_OK)
+            return Response(serializers.UserDetailSerializer(instance, context={'request': request}).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'], url_path='details')
