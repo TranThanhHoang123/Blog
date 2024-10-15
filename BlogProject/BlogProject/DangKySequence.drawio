@@ -861,6 +861,21 @@
         <mxCell id="q6s-MFcTAJflmg9bftCQ-1" value="Quản lý blog" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=160;" vertex="1" parent="1">
           <mxGeometry x="90" y="30" width="1310" height="1730" as="geometry" />
         </mxCell>
+        <mxCell id="q21WM5gIm7JguSjI_3JA-76" value="" style="shape=umlDestroy;html=1;" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-1">
+          <mxGeometry x="35" y="1660" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="q6s-MFcTAJflmg9bftCQ-9" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;:User&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;size=40;" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-1">
+          <mxGeometry x="40" y="30" width="20" height="1690" as="geometry" />
+        </mxCell>
+        <mxCell id="q6s-MFcTAJflmg9bftCQ-10" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-9">
+          <mxGeometry x="5" y="80" width="10" height="570" as="geometry" />
+        </mxCell>
+        <mxCell id="q6s-MFcTAJflmg9bftCQ-11" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-9">
+          <mxGeometry x="5" y="740" width="10" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="q21WM5gIm7JguSjI_3JA-23" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-9">
+          <mxGeometry x="5" y="980" width="10" height="670" as="geometry" />
+        </mxCell>
         <mxCell id="q6s-MFcTAJflmg9bftCQ-3" value="opt" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=50;" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-1">
           <mxGeometry x="10" y="960" width="1180" height="700" as="geometry" />
         </mxCell>
@@ -1001,18 +1016,6 @@
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
-        </mxCell>
-        <mxCell id="q6s-MFcTAJflmg9bftCQ-9" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;:User&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;size=40;" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-1">
-          <mxGeometry x="40" y="30" width="20" height="1690" as="geometry" />
-        </mxCell>
-        <mxCell id="q6s-MFcTAJflmg9bftCQ-10" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-9">
-          <mxGeometry x="5" y="80" width="10" height="570" as="geometry" />
-        </mxCell>
-        <mxCell id="q6s-MFcTAJflmg9bftCQ-11" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-9">
-          <mxGeometry x="5" y="740" width="10" height="130" as="geometry" />
-        </mxCell>
-        <mxCell id="q21WM5gIm7JguSjI_3JA-23" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-9">
-          <mxGeometry x="5" y="980" width="10" height="640" as="geometry" />
         </mxCell>
         <mxCell id="q6s-MFcTAJflmg9bftCQ-13" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:Tạo blog&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlBoundary;" vertex="1" parent="q6s-MFcTAJflmg9bftCQ-1">
           <mxGeometry x="230" y="30" width="70" height="1680" as="geometry" />
