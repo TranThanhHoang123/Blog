@@ -1922,12 +1922,12 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="2pgCV48qFJS6L7ipGFkS-56" value="6.2 Gửi yêu cầu" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="2pgCV48qFJS6L7ipGFkS-55">
+        <mxCell id="2pgCV48qFJS6L7ipGFkS-56" value="13.2 Gửi yêu cầu" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="2pgCV48qFJS6L7ipGFkS-55">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="22" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="2pgCV48qFJS6L7ipGFkS-57" value="6.2.1 Xử lý yêu cầu xóa bình luận" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" edge="1" parent="2pgCV48qFJS6L7ipGFkS-38">
+        <mxCell id="2pgCV48qFJS6L7ipGFkS-57" value="13.2.1 Xử lý yêu cầu xóa sản phẩm" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" edge="1" parent="2pgCV48qFJS6L7ipGFkS-38">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="440" y="290" as="sourcePoint" />
             <mxPoint x="735" y="290" as="targetPoint" />
@@ -1951,7 +1951,7 @@
             <mxPoint x="210" y="349.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="2pgCV48qFJS6L7ipGFkS-62" value="6.2.2 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="2pgCV48qFJS6L7ipGFkS-61">
+        <mxCell id="2pgCV48qFJS6L7ipGFkS-62" value="13.2.2 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="2pgCV48qFJS6L7ipGFkS-61">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
@@ -2012,7 +2012,7 @@
             <mxPoint x="60" y="909.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="2pgCV48qFJS6L7ipGFkS-72" value="6.1.5 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="2pgCV48qFJS6L7ipGFkS-71">
+        <mxCell id="2pgCV48qFJS6L7ipGFkS-72" value="13,1,5 hiển thị sản phẩm mới" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="2pgCV48qFJS6L7ipGFkS-71">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
@@ -2023,7 +2023,7 @@
             <mxPoint x="40" y="1039.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="2pgCV48qFJS6L7ipGFkS-74" value="6.2.3 xóa bình luận khỏi danh sách" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="2pgCV48qFJS6L7ipGFkS-73">
+        <mxCell id="2pgCV48qFJS6L7ipGFkS-74" value="13.2.3 xóa sản phẩm khỏi danh sách" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="2pgCV48qFJS6L7ipGFkS-73">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="4" y="-12" as="offset" />
           </mxGeometry>
