@@ -835,6 +835,18 @@
             <mxPoint x="460" y="960" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="7a45XFK5giqvWu3OnJUM-33" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="v7r46ynOy4eQPJA1_6ZV-1">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="210" y="1069" as="sourcePoint" />
+            <mxPoint x="49.5" y="1069" as="targetPoint" />
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="7a45XFK5giqvWu3OnJUM-34" value="5.3 Trả về thông báo thành công" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="7a45XFK5giqvWu3OnJUM-33">
+          <mxGeometry x="-0.1897" relative="1" as="geometry">
+            <mxPoint x="-5" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
