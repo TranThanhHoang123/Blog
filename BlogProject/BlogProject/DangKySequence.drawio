@@ -161,7 +161,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="b5BNbCB7NWANwJ87BcGt-88" value="3.1.2.3 Thông báo đã gửi mail kích hoạt" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-87">
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-88" value="3.1.2.2 Thông báo đã gửi mail kích hoạt" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-87">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
@@ -229,7 +229,7 @@
             <mxPoint x="55" y="519" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="b5BNbCB7NWANwJ87BcGt-93" value="3.1.2.5Hiển thị thông báo đã gửi mail kích hoạt" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-92">
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-93" value="3.1.2.4 Hiển thị thông báo đã gửi mail kích hoạt" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-92">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
@@ -276,7 +276,7 @@
             <mxPoint x="220" y="490" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="b5BNbCB7NWANwJ87BcGt-90" value="3.1.2.4 Thông báo đã gửi mail kích hoạt" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-89">
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-90" value="3.1.2.3 Thông báo đã gửi mail kích hoạt" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-89">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
