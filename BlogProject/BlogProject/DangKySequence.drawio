@@ -301,7 +301,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="M27zcLU9K3oXGzqzcBFh-1" value="Đăng nhập" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=160;" vertex="1" parent="1">
-          <mxGeometry x="90" y="30" width="1040" height="850" as="geometry" />
+          <mxGeometry x="90" y="30" width="1040" height="640" as="geometry" />
         </mxCell>
         <mxCell id="IR_FO9PND-AyCZ2swA1G-7" value="" style="shape=umlDestroy;html=1;" vertex="1" parent="M27zcLU9K3oXGzqzcBFh-1">
           <mxGeometry x="35" y="500" width="30" height="30" as="geometry" />
