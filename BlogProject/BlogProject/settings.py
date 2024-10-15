@@ -213,6 +213,8 @@ LOGIN_SUCCESSFULLY_URL = 'http://127.0.0.1:3000/login'
 LOGIN_FAIL_URL = 'http://127.0.0.1:3000/login'
 #ENDPOINT để đăng nhập trang admin
 ADMIN_ENDPOINT = 'aids@u-uf@82d!31/'
+#Vstorage
+VS_USERNAME = '1f0862c'
 """
 gi lại log
 """

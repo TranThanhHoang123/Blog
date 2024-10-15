@@ -125,7 +125,7 @@ def upload_file_to_vstorage(file, directory):
     print('upload_file_to_vstorage')
     from .models import Vstorage  # Import tại nơi cần sử dụng
     try:
-        vstorage = Vstorage.objects.get(id=1)
+        vstorage = Vstorage.objects.filter(VstorageCreadentialUsername=settings.VS_USERNAME).first()
     except Vstorage.DoesNotExist:
         return {"error": "Vstorage not found"}
     print('lấy được vstorage object')
