@@ -127,9 +127,9 @@ class UserDetailSerializer(UserSerializer):
             blog_count=Count('blog', distinct=True)
         ).get(pk=instance.pk)
         response['is_followed'] = False
-        if self.context['request'].user and self.instance:
-            from_user = self.context['request'].user
-            to_user = self.instance
+        if self.context['request'].user and instance:
+            from_user = self.context['request'].user.id
+            to_user = instance.pk
             if Follow.objects.filter(from_user=from_user,to_user=to_user).exists():
                 response['is_followed'] = True
         response['following_count'] = user.following_count
@@ -140,8 +140,8 @@ class UserDetailSerializer(UserSerializer):
 
 
 
-class UserListSerializer(UserDetailSerializer):
-    class Meta(UserDetailSerializer.Meta):
+class UserListSerializer(UserSerializer):
+    class Meta(UserSerializer.Meta):
         fields = ['id', 'username', 'first_name', 'last_name', 'profile_image', 'profile_bg']
 
 class UserListForAdminSerializer(UserDetailSerializer):
