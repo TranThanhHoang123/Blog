@@ -37,6 +37,53 @@
             </Array>
           </mxGeometry>
         </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-18" value="1. Đăng ký" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-17">
+          <mxGeometry x="-0.1897" relative="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-21" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="1" source="b5BNbCB7NWANwJ87BcGt-14" target="b5BNbCB7NWANwJ87BcGt-13">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="135" y="150" as="sourcePoint" />
+            <mxPoint x="290" y="150" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="210" y="170" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-22" value="1.1: Hiển thị form đăng ký" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-21">
+          <mxGeometry x="-0.1897" relative="1" as="geometry">
+            <mxPoint x="-7" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-23" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="280" y="190" width="10" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-24" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="1" source="b5BNbCB7NWANwJ87BcGt-13" target="b5BNbCB7NWANwJ87BcGt-23">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="290" y="180" as="sourcePoint" />
+            <mxPoint x="135" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-25" value="1..2 điền form đăng ký" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-24">
+          <mxGeometry x="-0.1897" relative="1" as="geometry">
+            <mxPoint x="12" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-26" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="1">
+          <mxGeometry x="440" y="190" width="10" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-27" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="1" source="b5BNbCB7NWANwJ87BcGt-23" target="b5BNbCB7NWANwJ87BcGt-26">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="135" y="200" as="sourcePoint" />
+            <mxPoint x="290" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b5BNbCB7NWANwJ87BcGt-28" value="1..2 điền form đăng ký" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-27">
+          <mxGeometry x="-0.1897" relative="1" as="geometry">
+            <mxPoint x="12" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
