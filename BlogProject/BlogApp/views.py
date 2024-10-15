@@ -1568,7 +1568,7 @@ class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAP
                 else:
                     # Nếu không còn thành viên nào khác, xóa group
                     group_chat.delete()
-                    return Response(status=status.HTTP_200_OK)
+                group_chat_membership.delete()
             return Response(status=status.HTTP_200_OK)
 
         elif request.method == "PATCH":
