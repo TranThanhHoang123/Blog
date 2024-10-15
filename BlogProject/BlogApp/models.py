@@ -19,11 +19,11 @@ class User(AbstractUser):
     about = models.CharField(max_length=255,null=True,blank=True)
     profile_image = models.URLField(
         max_length=600,
-        default="https://hcm03.vstorage.vngcloud.vn/v1/AUTH_f2ecf7a1f0494cdf954303888b0e5df1/MediaOfBlogApp/UserAvatar/default.png"
+        default="https://hcm03.vstorage.vngcloud.vn/v1/AUTH_e2739f2170d44cfc8cfebf9aa23752b6/BlogApp/UserAvatar/default.png"
     )
     profile_bg = models.URLField(
         max_length=600,
-        default='https://hcm03.vstorage.vngcloud.vn/v1/AUTH_f2ecf7a1f0494cdf954303888b0e5df1/MediaOfBlogApp/UserBackground/default.png'
+        default='https://hcm03.vstorage.vngcloud.vn/v1/AUTH_e2739f2170d44cfc8cfebf9aa23752b6/BlogApp/UserBackground/default.png'
     )
     link = models.CharField(max_length=100,null=True)
     is_active = models.BooleanField(default=False)
@@ -107,62 +107,31 @@ class Website(models.Model):
         return f"Website: {self.about}"
 
 
-# class Company(models.Model):
+# class JobApplication(BaseModel):
 #     STATUS_CHOICES = [
 #         ('pending', 'pending'),
 #         ('approved', 'approved'),
 #         ('rejected', 'rejected'),
 #     ]
-#     name = models.CharField(max_length=60,null=True)
-#     founder = models.ForeignKey(User, related_name='companies', on_delete=models.SET_NULL,null=True,blank=True)# người tạo
-#     founding_date = models.DateField()
-#     workers_number = models.IntegerField()
-#     location = models.CharField(max_length=255)
-#     mail = models.EmailField()
-#     phone_number = models.CharField(max_length=20)
-#     link = models.URLField()
-#     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-
-
-# class Recruitment(BaseModel):
-#     # company = models.ForeignKey(Company, related_name='recruitments', on_delete=models.CASCADE)
-#     owner = models.ForeignKey(User, related_name='recruitments', on_delete=models.SET_NULL,null=True,blank=True)# người tạo
+#
+#     job_post = models.ForeignKey('JobPost', related_name='job_applications', on_delete=models.CASCADE,null=True)
+#     user = models.ForeignKey(User, related_name='job_applications', on_delete=models.CASCADE)
 #     job_title = models.CharField(max_length=255)
-#     job_description = models.TextField()
-#     job_requirements = models.TextField()
-#     salary_range = models.CharField(max_length=100)
-#     location = models.CharField(max_length=255)
-#     apply_link = models.URLField()
-#     status = models.BooleanField(default=True)
+#     cv = models.URLField(
+#         max_length=1024,
+#     )
+#     fullname = models.CharField(max_length=50)
+#     phone_number = models.CharField(max_length=11)
+#     email = models.EmailField()
+#     sex = models.BooleanField(default=True)
+#     age = models.CharField(max_length=5) # ngày sinh
+#     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+#
+#     class Meta:
+#         unique_together = ('job_post', 'user')
+#
 #     def __str__(self):
-#         return self.job_title
-
-
-class JobApplication(BaseModel):
-    STATUS_CHOICES = [
-        ('pending', 'pending'),
-        ('approved', 'approved'),
-        ('rejected', 'rejected'),
-    ]
-
-    job_post = models.ForeignKey('JobPost', related_name='job_applications', on_delete=models.CASCADE,null=True)
-    user = models.ForeignKey(User, related_name='job_applications', on_delete=models.CASCADE)
-    job_title = models.CharField(max_length=255)
-    cv = models.URLField(
-        max_length=1024,
-    )
-    fullname = models.CharField(max_length=50)
-    phone_number = models.CharField(max_length=11)
-    email = models.EmailField()
-    sex = models.BooleanField(default=True)
-    age = models.CharField(max_length=5) # ngày sinh
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-
-    class Meta:
-        unique_together = ('job_post', 'user')
-
-    def __str__(self):
-        return f'{self.job_title} - {self.user.username}'
+#         return f'{self.job_title} - {self.user.username}'
 
 
 from datetime import timedelta
@@ -197,18 +166,18 @@ class EmailVerificationCode(models.Model):
     def is_expired(self):
         return timezone.now() > self.expires_at
 
-class JobPost(BaseModel):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
-    location = models.CharField(max_length=255)
-    mail = models.EmailField(max_length=255)
-    phone_number = models.CharField(max_length=15)
-    link = models.URLField(max_length=255, blank=True, null=True)
-    date = models.DateTimeField()
-    experience = models.CharField(max_length=255)
-    quantity = models.IntegerField()
-    job_detail = models.TextField()
-    salary = models.CharField(max_length=255)
-    content = models.CharField(max_length=255,null=False,blank=False)
+# class JobPost(BaseModel):
+#     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+#     location = models.CharField(max_length=255)
+#     mail = models.EmailField(max_length=255)
+#     phone_number = models.CharField(max_length=15)
+#     link = models.URLField(max_length=255, blank=True, null=True)
+#     date = models.DateTimeField()
+#     experience = models.CharField(max_length=255)
+#     quantity = models.IntegerField()
+#     job_detail = models.TextField()
+#     salary = models.CharField(max_length=255)
+#     content = models.CharField(max_length=255,null=False,blank=False)
 
 
 class Tag(models.Model):
@@ -217,15 +186,15 @@ class Tag(models.Model):
     def __str__(self):
         return self.name
 
-class JobPostTag(models.Model):
-    job_post = models.ForeignKey(JobPost, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
-
-    class Meta:
-        unique_together = ('job_post', 'tag')
-
-    def __str__(self):
-        return f'{self.job_post.content} - {self.tag.name}'
+# class JobPostTag(models.Model):
+#     job_post = models.ForeignKey(JobPost, on_delete=models.CASCADE)
+#     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+#
+#     class Meta:
+#         unique_together = ('job_post', 'tag')
+#
+#     def __str__(self):
+#         return f'{self.job_post.content} - {self.tag.name}'
 
 class Category(BaseModel):
     name = models.CharField(max_length=100, unique=True)
@@ -263,7 +232,6 @@ class ProductMedia(models.Model):
     product = models.ForeignKey(Product, related_name='medias', on_delete=models.CASCADE)
     media = models.URLField(
         max_length=1024,
-        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
         null=False,
         blank=False
     )
@@ -300,6 +268,46 @@ class Banner(BaseModel):
 
     def __str__(self):
         return self.title
+
+#Phân quyền
+class Permission(models.Model):
+  name = models.CharField(max_length=255, unique=True)
+  description = models.CharField(max_length=1000)
+
+  def __str__(self):
+    return self.name
+class Role(models.Model):
+  name = models.CharField(max_length=255, unique=True)
+  description = models.CharField(max_length=1000)
+  permissions = models.ManyToManyField(Permission, related_name='roles')
+  def __str__(self):
+    return self.name
+
+class BlogAppGroup(models.Model):
+  name = models.CharField(max_length=255, unique=True)
+
+  def __str__(self):
+    return self.name
+
+class RoleGroup(models.Model):
+  role = models.ForeignKey(Role, related_name='role_groups',on_delete=models.CASCADE)
+  group = models.ForeignKey(BlogAppGroup, related_name='role_groups', on_delete=models.CASCADE)
+
+  class Meta:
+    unique_together = ('group', 'role')
+
+class GroupMember(models.Model):
+  group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='group_members')
+  member = models.ForeignKey(User, on_delete = models.CASCADE, related_name = 'group_members')
+  role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='group_members',default=1)
+
+  class Meta:
+    unique_together = ('group', 'member', 'role')
+
+  def __str__(self):
+    return f"{self.member} in {self.group.name} with {self.role.name}"
+##
+
 
 class GroupPriority(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE)
@@ -445,3 +453,32 @@ class PersonalGroup(BaseModel):
 #             ("change_job_application_status", "Can change job application status"),
 #             ("full_access_job_application", "Full access to job application"),
 #         ]
+# class Company(models.Model):
+#     STATUS_CHOICES = [
+#         ('pending', 'pending'),
+#         ('approved', 'approved'),
+#         ('rejected', 'rejected'),
+#     ]
+#     name = models.CharField(max_length=60,null=True)
+#     founder = models.ForeignKey(User, related_name='companies', on_delete=models.SET_NULL,null=True,blank=True)# người tạo
+#     founding_date = models.DateField()
+#     workers_number = models.IntegerField()
+#     location = models.CharField(max_length=255)
+#     mail = models.EmailField()
+#     phone_number = models.CharField(max_length=20)
+#     link = models.URLField()
+#     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+
+# class Recruitment(BaseModel):
+#     # company = models.ForeignKey(Company, related_name='recruitments', on_delete=models.CASCADE)
+#     owner = models.ForeignKey(User, related_name='recruitments', on_delete=models.SET_NULL,null=True,blank=True)# người tạo
+#     job_title = models.CharField(max_length=255)
+#     job_description = models.TextField()
+#     job_requirements = models.TextField()
+#     salary_range = models.CharField(max_length=100)
+#     location = models.CharField(max_length=255)
+#     apply_link = models.URLField()
+#     status = models.BooleanField(default=True)
+#     def __str__(self):
+#         return self.job_title

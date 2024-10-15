@@ -301,73 +301,73 @@ class TagSerializer(serializers.ModelSerializer):
         model = Tag
         fields = ['id', 'name']
 
-class JobPostTagSerializer(serializers.ModelSerializer):
-    tag = TagSerializer()
-    class Meta:
-        model = JobPostTag
-        fields = ['id', 'tag']
+# class JobPostTagSerializer(serializers.ModelSerializer):
+#     tag = TagSerializer()
+#     class Meta:
+#         model = JobPostTag
+#         fields = ['id', 'tag']
 
-class JobPostSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JobPost
-        fields = "__all__"
-        extra_kwargs = {
-            'user': {'read_only': True},
-        }
-
-
-class JobPostDetailSerializer(JobPostSerializer):
-    user = UserListSerializer()
-    tags = serializers.SerializerMethodField()
-
-    def get_tags(self, obj):
-        # Return the tags related to the JobPost instance
-        return JobPostTagSerializer(obj.jobposttag_set.all().select_related('tag'), many=True).data
-
-    class Meta(JobPostSerializer.Meta):
-        fields = ['id','user','location','mail','phone_number','link','date','experience','quantity','job_detail','salary','content','tags']
+# class JobPostSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = JobPost
+#         fields = "__all__"
+#         extra_kwargs = {
+#             'user': {'read_only': True},
+#         }
 
 
-class JobPostListSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)  # Hiển thị thông tin người dùng, chỉ đọc
+# class JobPostDetailSerializer(JobPostSerializer):
+#     user = UserListSerializer()
+#     tags = serializers.SerializerMethodField()
+#
+#     def get_tags(self, obj):
+#         # Return the tags related to the JobPost instance
+#         return JobPostTagSerializer(obj.jobposttag_set.all().select_related('tag'), many=True).data
+#
+#     class Meta(JobPostSerializer.Meta):
+#         fields = ['id','user','location','mail','phone_number','link','date','experience','quantity','job_detail','salary','content','tags']
+#
 
-    class Meta:
-        model = JobPost
-        exclude = ['job_detail']  # Loại bỏ trường `job_detail`
-
-
-class JobApplicationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = JobApplication
-        fields = "__all__"
-        extra_kwargs = {
-            'user': {'read_only': True},
-            'job_post': {'read_only': True},
-            'status': {'required': False, 'read_only': True},
-            'fullname': {'required': True},
-            'phone_number': {'required': True},
-            'email': {'required': True},
-            'sex': {'required': True},
-            'age': {'required': True},
-        }
+# class JobPostListSerializer(serializers.ModelSerializer):
+#     user = UserSerializer(read_only=True)  # Hiển thị thông tin người dùng, chỉ đọc
+#
+#     class Meta:
+#         model = JobPost
+#         exclude = ['job_detail']  # Loại bỏ trường `job_detail`
 
 
-class JobApplicationDetailSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
-    cv = serializers.SerializerMethodField()
-    job_post = JobPostListSerializer()
+# class JobApplicationSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = JobApplication
+#         fields = "__all__"
+#         extra_kwargs = {
+#             'user': {'read_only': True},
+#             'job_post': {'read_only': True},
+#             'status': {'required': False, 'read_only': True},
+#             'fullname': {'required': True},
+#             'phone_number': {'required': True},
+#             'email': {'required': True},
+#             'sex': {'required': True},
+#             'age': {'required': True},
+#         }
 
-    class Meta:
-        model = JobApplication
-        fields = '__all__'
 
+# class JobApplicationDetailSerializer(serializers.ModelSerializer):
+#     user = UserSerializer()
+#     cv = serializers.SerializerMethodField()
+#     job_post = JobPostListSerializer()
+#
+#     class Meta:
+#         model = JobApplication
+#         fields = '__all__'
+#
 
-class JobApplicationListSerializer(serializers.ModelSerializer):
-    user = UserListSerializer()
-
-    class Meta:
-        model = JobApplication
-        fields = ['id', 'user', 'fullname', 'job_title','phone_number','email', 'cv', 'status', 'created_date']
+# class JobApplicationListSerializer(serializers.ModelSerializer):
+#     user = UserListSerializer()
+#
+#     class Meta:
+#         model = JobApplication
+#         fields = ['id', 'user', 'fullname', 'job_title','phone_number','email', 'cv', 'status', 'created_date']
 
 
 class CategorySerializer(serializers.ModelSerializer):

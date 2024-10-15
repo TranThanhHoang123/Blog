@@ -209,12 +209,10 @@ EMAIL_USE_SSL = False
 EMAIL_HOST_USER = 'taxhuy2001@gmail.com'
 EMAIL_HOST_PASSWORD = 'owum fexk zmuh gddj'  # Use the App Password here
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024  # 5MB
-LOGIN_SUCCESSFULLY_URL = 'https://songnhatnguyen.vn/'
-LOGIN_FAIL_URL = 'https://songnhatnguyen.vn/'
+LOGIN_SUCCESSFULLY_URL = 'http://127.0.0.1:3000/login'
+LOGIN_FAIL_URL = 'http://127.0.0.1:3000/login'
 #ENDPOINT để đăng nhập trang admin
 ADMIN_ENDPOINT = 'aids@u-uf@82d!31/'
-#CSRF_TOKEN
-CSRF_COOKIE_NAME = 'csrftoken'
 """
 gi lại log
 """

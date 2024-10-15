@@ -174,8 +174,8 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         serializer = serializers.UserUpdateSerializer(user, data=data, partial=True,
                                                       context={'request': request})
         if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'Profile updated successfully'}, status=status.HTTP_200_OK)
+            instance=serializer.save()
+            return Response(serializers.UserDetailSerializer(instance).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['get'], url_path='details')
@@ -184,15 +184,15 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         serializer = serializers.UserDetailSerializer(user, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], url_path='job-applications')
-    def job_applications(self, request, pk=None):
-        user = request.user
-        # người dung của blog
-        job_application = JobApplication.objects.filter(user=user).order_by('-created_date')
-        paginator = my_paginations.JobApplicationPagination()
-        result_page = paginator.paginate_queryset(job_application, request)
-        serializer = serializers.JobApplicationListSerializer(result_page, many=True, context={'request': request})
-        return paginator.get_paginated_response(serializer.data)
+    # @action(detail=False, methods=['get'], url_path='job-applications')
+    # def job_applications(self, request, pk=None):
+    #     user = request.user
+    #     # người dung của blog
+    #     job_application = JobApplication.objects.filter(user=user).order_by('-created_date')
+    #     paginator = my_paginations.JobApplicationPagination()
+    #     result_page = paginator.paginate_queryset(job_application, request)
+    #     serializer = serializers.JobApplicationListSerializer(result_page, many=True, context={'request': request})
+    #     return paginator.get_paginated_response(serializer.data)
 
     def retrieve(self, request, *args, **kwargs):
         user_id = kwargs.get('pk')  # Lấy ID từ URL
@@ -214,26 +214,26 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         serializer = serializers.BlogDetailSerializer(result_page, many=True, context={'request': request})
         return paginator.get_paginated_response(serializer.data)
 
-    @action(detail=False, methods=['get'], url_path='job-post/job-applications')
-    def job_application(self, request):
-        user = request.user
-
-        # Lấy tất cả các JobPost của user
-        job_posts = JobPost.objects.filter(user=user)
-
-        # Lấy tất cả các JobApplication liên quan đến các JobPost này
-        job_applications = JobApplication.objects.filter(job_post__in=job_posts).order_by('-created_date')
-
-        # Phân trang các kết quả
-        paginator = my_paginations.JobApplicationPagination()
-        paginated_applications = paginator.paginate_queryset(job_applications, request)
-
-        # Serialize các kết quả
-        serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
-                                                              context={'request': request})
-
-        # Trả về phản hồi có phân trang
-        return paginator.get_paginated_response(serializer.data)
+    # @action(detail=False, methods=['get'], url_path='job-post/job-applications')
+    # def job_application(self, request):
+    #     user = request.user
+    #
+    #     # Lấy tất cả các JobPost của user
+    #     job_posts = JobPost.objects.filter(user=user)
+    #
+    #     # Lấy tất cả các JobApplication liên quan đến các JobPost này
+    #     job_applications = JobApplication.objects.filter(job_post__in=job_posts).order_by('-created_date')
+    #
+    #     # Phân trang các kết quả
+    #     paginator = my_paginations.JobApplicationPagination()
+    #     paginated_applications = paginator.paginate_queryset(job_applications, request)
+    #
+    #     # Serialize các kết quả
+    #     serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
+    #                                                           context={'request': request})
+    #
+    #     # Trả về phản hồi có phân trang
+    #     return paginator.get_paginated_response(serializer.data)
 
     @action(methods=['post'], detail=True, url_path='follow')
     def follow(self, request, pk=None):
@@ -583,47 +583,47 @@ class CommentViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyA
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAPIView):
-    queryset = JobApplication.objects.all().order_by('-created_date')
-    serializer_class = serializers.JobApplicationSerializer
-
-    # def update(self, request, *args, **kwargs):
-    #     job_application = self.get_object()
-    #     # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
-    #     if request.user != job_application.user:
-    #         return Response({"detail": "You do not have permission to update this job application."},
-    #                         status=status.HTTP_403_FORBIDDEN)
-    #     serializer = serializers.JobApplicationSerializer(job_application, data=request.data, partial=True)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response({"detail": "Job application updated successfully."},status=status.HTTP_200_OK)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #
-    # def destroy(self, request, pk=None):
-    #     job_application = self.get_object()
-    #     # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
-    #     if request.user != job_application.user:
-    #         return Response({"detail": "You do not have permission to delete this job application."},
-    #                         status=status.HTTP_403_FORBIDDEN)
-    #     job_application.delete()
-    #     return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(detail=True, methods=['patch'], url_path='status')
-    def update_status(self, request, pk=None):
-        job_application = self.get_object()
-        new_status = request.data.get('status')
-        # Kiểm tra quyền chỉnh sửa: Chỉ cho phép người tạo bài đăng sửa đổi nó
-        if job_application.job_post.user != request.user:
-            return Response({'detail': 'You do not have permission to change status this job application.'},
-                            status=status.HTTP_403_FORBIDDEN)
-        if new_status not in dict(JobApplication.STATUS_CHOICES).keys():
-            return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
-
-        job_application.status = new_status
-        job_application.save()
-
-        serializer = serializers.JobApplicationDetailSerializer(job_application, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# class JobApplicationViewSet(viewsets.ViewSet, generics.UpdateAPIView, generics.DestroyAPIView):
+#     queryset = JobApplication.objects.all().order_by('-created_date')
+#     serializer_class = serializers.JobApplicationSerializer
+#
+#     # def update(self, request, *args, **kwargs):
+#     #     job_application = self.get_object()
+#     #     # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
+#     #     if request.user != job_application.user:
+#     #         return Response({"detail": "You do not have permission to update this job application."},
+#     #                         status=status.HTTP_403_FORBIDDEN)
+#     #     serializer = serializers.JobApplicationSerializer(job_application, data=request.data, partial=True)
+#     #     if serializer.is_valid():
+#     #         serializer.save()
+#     #         return Response({"detail": "Job application updated successfully."},status=status.HTTP_200_OK)
+#     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#     #
+#     # def destroy(self, request, pk=None):
+#     #     job_application = self.get_object()
+#     #     # Kiểm tra xem người dùng hiện tại có phải là người đã tạo ra JobApplication không
+#     #     if request.user != job_application.user:
+#     #         return Response({"detail": "You do not have permission to delete this job application."},
+#     #                         status=status.HTTP_403_FORBIDDEN)
+#     #     job_application.delete()
+#     #     return Response(status=status.HTTP_204_NO_CONTENT)
+#
+#     @action(detail=True, methods=['patch'], url_path='status')
+#     def update_status(self, request, pk=None):
+#         job_application = self.get_object()
+#         new_status = request.data.get('status')
+#         # Kiểm tra quyền chỉnh sửa: Chỉ cho phép người tạo bài đăng sửa đổi nó
+#         if job_application.job_post.user != request.user:
+#             return Response({'detail': 'You do not have permission to change status this job application.'},
+#                             status=status.HTTP_403_FORBIDDEN)
+#         if new_status not in dict(JobApplication.STATUS_CHOICES).keys():
+#             return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         job_application.status = new_status
+#         job_application.save()
+#
+#         serializer = serializers.JobApplicationDetailSerializer(job_application, context={'request': request})
+#         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ChangePasswordViewSet(viewsets.ViewSet):
@@ -692,147 +692,146 @@ class ChangePasswordViewSet(viewsets.ViewSet):
         return Response({"message": "Password has been updated successfully"}, status=status.HTTP_200_OK)
 
 
-class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView,
-                     generics.CreateAPIView, generics.DestroyAPIView):
-    queryset = JobPost.objects.all().order_by('-created_date')
-    serializer_class = serializers.JobPostSerializer
-    pagination_class = my_paginations.JobPostPagination
-    permission_classes = [permissions.IsAuthenticated]  # Yêu cầu người dùng phải đăng nhập
-
-    def get_permissions(self):
-        if self.action in ['list', 'retrieve']:
-            return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
-
-    def get_serializer_class(self, *args, **kwargs):
-        if self.action in ['retrieve']:
-            return serializers.JobPostDetailSerializer
-        elif self.action in ['list']:
-            return serializers.JobPostListSerializer
-        return self.serializer_class
-
-    def update(self, request, *args, **kwargs):
-        job_post = self.get_object()
-
-        # Kiểm tra quyền chỉnh sửa: Chỉ cho phép người tạo bài đăng sửa đổi nó
-        if job_post.user != request.user:
-            return Response({'detail': 'You do not have permission to edit this job post.'},
-                            status=status.HTTP_403_FORBIDDEN)
-
-        # Loại bỏ trường không cho phép chỉnh sửa nếu cần
-        data = request.data.copy()
-
-        # Xử lý danh sách tag_id để thêm tag mới vào JobPost
-        tag_ids = request.data.getlist('tag_id')
-        for tag_id in tag_ids:
-            tag, created = Tag.objects.get_or_create(id=tag_id)
-            JobPostTag.objects.get_or_create(job_post=job_post, tag=tag)
-
-        # Xử lý danh sách remove_jobpost_tag_id để xóa các JobPostTag hiện có
-        remove_jobpost_tag_ids = request.data.getlist('remove_jobpost_tag_id')
-        JobPostTag.objects.filter(id__in=remove_jobpost_tag_ids, job_post=job_post).delete()
-
-        # Cập nhật JobPost với các thay đổi khác
-        serializer = self.get_serializer(job_post, data=data, partial=True)
-
-        if serializer.is_valid():
-            updated_job_post = serializer.save()  # Lưu các thay đổi
-            return Response(serializers.JobPostDetailSerializer(updated_job_post, context={'request': request}).data,
-                            status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def create(self, request):
-        user = request.user
-        data = request.data.copy()
-        data['user'] = user.id  # Gán user hiện tại vào dữ liệu
-
-        # Lấy danh sách tag_id từ request data
-        tag_ids = request.data.getlist('tag_id', [])
-
-        serializer = serializers.JobPostSerializer(data=data)
-
-        if serializer.is_valid():
-            try:
-                with transaction.atomic():
-                    # Tạo JobPost
-                    instance = serializer.save(user=user)
-
-                    # Thêm các tag vào JobPost
-                    for tag_id in tag_ids:
-                        try:
-                            tag = Tag.objects.get(id=tag_id)
-                            JobPostTag.objects.create(job_post=instance, tag=tag)
-                        except Tag.DoesNotExist:
-                            raise ValidationError({'tag_id': f'Tag with id {tag_id} does not exist.'})
-                        except IntegrityError:
-                            raise ValidationError({'tag_id': f'Tag with id {tag_id} already exists for this job post.'})
-
-                    # Trả về response với chi tiết JobPost
-                    return Response(serializers.JobPostDetailSerializer(instance, context={'request': request}).data,
-                                    status=status.HTTP_201_CREATED)
-
-            except ValidationError as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(detail=True, methods=['post', 'get'], url_path='job-applications')
-    def job_application(self, request, pk=None):
-        job_post = self.get_object()
-        user = request.user
-        try:
-            if request.method == 'POST':
-                # Lấy từng trường dữ liệu từ request
-                job_title = request.data.get('job_title')
-                cv = request.FILES.get('cv')
-                fullname = request.data.get('fullname')
-                phone_number = request.data.get('phone_number')
-                email = request.data.get('email')
-                sex = request.data.get('sex')
-                age = request.data.get('age')
-                cv = utils.upload_file_to_vstorage(cv, "CV")
-                # Validate dữ liệu (bạn có thể thêm các bước validate khác ở đây)
-                if not all([job_title, cv, fullname, phone_number, email, sex, age]):
-                    return Response({"error": "Required fields not enough"}, status=status.HTTP_400_BAD_REQUEST)
-
-                # Tạo JobApplication mới
-                job_application = JobApplication.objects.create(
-                    job_post=job_post,
-                    user=user,
-                    job_title=job_title,
-                    cv=cv,
-                    fullname=fullname,
-                    phone_number=phone_number,
-                    email=email,
-                    sex=sex,
-                    age=age,
-                )
-
-                return Response({"message": "Successfully"}, status=status.HTTP_201_CREATED)
-
-            elif request.method == 'GET':
-                if user != job_post.user:
-                    return Response({"detail": "You do not have permission to view these job applications."},
-                                    status=status.HTTP_403_FORBIDDEN)
-                job_applications = JobApplication.objects.filter(job_post=job_post).order_by('-created_date')
-                paginator = my_paginations.JobApplicationPagination()
-                paginated_applications = paginator.paginate_queryset(job_applications, request)
-                serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
-                                                                      context={'request': request})
-                return paginator.get_paginated_response(serializer.data)
-        except Exception as e:
-            print("Error occurred: ", str(e))
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    def destroy(self, request, *args, **kwargs):
-        job_post = self.get_object()
-        if job_post.user != request.user:
-            return Response({'detail': 'You do not have permission to delete this job post.'},
-                            status=status.HTTP_403_FORBIDDEN)
-        job_post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
+# class JobPostViewSet(viewsets.ViewSet, generics.ListAPIView, generics.RetrieveAPIView, generics.UpdateAPIView,
+#                      generics.CreateAPIView, generics.DestroyAPIView):
+#     queryset = JobPost.objects.all().order_by('-created_date')
+#     serializer_class = serializers.JobPostSerializer
+#     pagination_class = my_paginations.JobPostPagination
+#     permission_classes = [permissions.IsAuthenticated]  # Yêu cầu người dùng phải đăng nhập
+#
+#     def get_permissions(self):
+#         if self.action in ['list', 'retrieve']:
+#             return [permissions.AllowAny()]
+#         return [permissions.IsAuthenticated()]
+#
+#     def get_serializer_class(self, *args, **kwargs):
+#         if self.action in ['retrieve']:
+#             return serializers.JobPostDetailSerializer
+#         elif self.action in ['list']:
+#             return serializers.JobPostListSerializer
+#         return self.serializer_class
+#
+#     def update(self, request, *args, **kwargs):
+#         job_post = self.get_object()
+#
+#         # Kiểm tra quyền chỉnh sửa: Chỉ cho phép người tạo bài đăng sửa đổi nó
+#         if job_post.user != request.user:
+#             return Response({'detail': 'You do not have permission to edit this job post.'},
+#                             status=status.HTTP_403_FORBIDDEN)
+#
+#         # Loại bỏ trường không cho phép chỉnh sửa nếu cần
+#         data = request.data.copy()
+#
+#         # Xử lý danh sách tag_id để thêm tag mới vào JobPost
+#         tag_ids = request.data.getlist('tag_id')
+#         for tag_id in tag_ids:
+#             tag, created = Tag.objects.get_or_create(id=tag_id)
+#             JobPostTag.objects.get_or_create(job_post=job_post, tag=tag)
+#
+#         # Xử lý danh sách remove_jobpost_tag_id để xóa các JobPostTag hiện có
+#         remove_jobpost_tag_ids = request.data.getlist('remove_jobpost_tag_id')
+#         JobPostTag.objects.filter(id__in=remove_jobpost_tag_ids, job_post=job_post).delete()
+#
+#         # Cập nhật JobPost với các thay đổi khác
+#         serializer = self.get_serializer(job_post, data=data, partial=True)
+#
+#         if serializer.is_valid():
+#             updated_job_post = serializer.save()  # Lưu các thay đổi
+#             return Response(serializers.JobPostDetailSerializer(updated_job_post, context={'request': request}).data,
+#                             status=status.HTTP_200_OK)
+#
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#     def create(self, request):
+#         user = request.user
+#         data = request.data.copy()
+#         data['user'] = user.id  # Gán user hiện tại vào dữ liệu
+#
+#         # Lấy danh sách tag_id từ request data
+#         tag_ids = request.data.getlist('tag_id', [])
+#
+#         serializer = serializers.JobPostSerializer(data=data)
+#
+#         if serializer.is_valid():
+#             try:
+#                 with transaction.atomic():
+#                     # Tạo JobPost
+#                     instance = serializer.save(user=user)
+#
+#                     # Thêm các tag vào JobPost
+#                     for tag_id in tag_ids:
+#                         try:
+#                             tag = Tag.objects.get(id=tag_id)
+#                             JobPostTag.objects.create(job_post=instance, tag=tag)
+#                         except Tag.DoesNotExist:
+#                             raise ValidationError({'tag_id': f'Tag with id {tag_id} does not exist.'})
+#                         except IntegrityError:
+#                             raise ValidationError({'tag_id': f'Tag with id {tag_id} already exists for this job post.'})
+#
+#                     # Trả về response với chi tiết JobPost
+#                     return Response(serializers.JobPostDetailSerializer(instance, context={'request': request}).data,
+#                                     status=status.HTTP_201_CREATED)
+#
+#             except ValidationError as e:
+#                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#     @action(detail=True, methods=['post', 'get'], url_path='job-applications')
+#     def job_application(self, request, pk=None):
+#         job_post = self.get_object()
+#         user = request.user
+#         try:
+#             if request.method == 'POST':
+#                 # Lấy từng trường dữ liệu từ request
+#                 job_title = request.data.get('job_title')
+#                 cv = request.FILES.get('cv')
+#                 fullname = request.data.get('fullname')
+#                 phone_number = request.data.get('phone_number')
+#                 email = request.data.get('email')
+#                 sex = request.data.get('sex')
+#                 age = request.data.get('age')
+#                 cv = utils.upload_file_to_vstorage(cv, "CV")
+#                 # Validate dữ liệu (bạn có thể thêm các bước validate khác ở đây)
+#                 if not all([job_title, cv, fullname, phone_number, email, sex, age]):
+#                     return Response({"error": "Required fields not enough"}, status=status.HTTP_400_BAD_REQUEST)
+#                 # Tạo JobApplication mới
+#                 job_application = JobApplication.objects.create(
+#                     job_post=job_post,
+#                     user=user,
+#                     job_title=job_title,
+#                     cv=cv,
+#                     fullname=fullname,
+#                     phone_number=phone_number,
+#                     email=email,
+#                     sex=sex,
+#                     age=age,
+#                 )
+#
+#                 return Response({"message": "Successfully"}, status=status.HTTP_201_CREATED)
+#
+#             elif request.method == 'GET':
+#                 if user != job_post.user:
+#                     return Response({"detail": "You do not have permission to view these job applications."},
+#                                     status=status.HTTP_403_FORBIDDEN)
+#                 job_applications = JobApplication.objects.filter(job_post=job_post).order_by('-created_date')
+#                 paginator = my_paginations.JobApplicationPagination()
+#                 paginated_applications = paginator.paginate_queryset(job_applications, request)
+#                 serializer = serializers.JobApplicationListSerializer(paginated_applications, many=True,
+#                                                                       context={'request': request})
+#                 return paginator.get_paginated_response(serializer.data)
+#         except Exception as e:
+#             print("Error occurred: ", str(e))
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#
+#     def destroy(self, request, *args, **kwargs):
+#         job_post = self.get_object()
+#         if job_post.user != request.user:
+#             return Response({'detail': 'You do not have permission to delete this job post.'},
+#                             status=status.HTTP_403_FORBIDDEN)
+#         job_post.delete()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
+#
 
 class CategoryViewSet(viewsets.ViewSet, generics.ListAPIView, generics.DestroyAPIView, generics.UpdateAPIView,
                       generics.CreateAPIView):

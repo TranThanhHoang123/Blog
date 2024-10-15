@@ -147,8 +147,8 @@ def upload_file_to_vstorage(file, directory):
     except Exception as e:
         print({"error": f"File validation failed: {str(e)}"})
         return {"error": f"File validation failed: {str(e)}"}
-
-    file_url = f"{vstorage.url}/MediaOfBlogApp/{directory}/{file_name}"
+    container = "BlogApp"
+    file_url = f"{vstorage.url}/{container}/{directory}/{file_name}"
 
     headers = {
         'X-Auth-Token': vstorage.X_Subject_Token,

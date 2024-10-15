@@ -95,9 +95,9 @@ TAGS = [
     }
 ]
 VSTOTE = {
-    'username':'a18c9ad',
-    'password':'E3kxLea=',
-    'project_id':'f2ecf7a1f0494cdf954303888b0e5df1',
+    'username':'1f0862c',
+    'password':'y4PkwJq*',
+    'project_id':'e2739f2170d44cfc8cfebf9aa23752b6',
 }
 class Command(BaseCommand):
     help = 'Khởi tạo quyền và nhóm'
@@ -136,6 +136,6 @@ class Command(BaseCommand):
         #khỏi tạo vstorage
         utils.create_vstorage(VSTOTE)
         #lấy token vstorage
-        result = utils.get_vstorage_token(1)
+        result = utils.get_vstorage_token(VSTOTE)
         print(result)
         self.stdout.write(self.style.SUCCESS('Successfully initialized tags'))
