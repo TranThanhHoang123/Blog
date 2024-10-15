@@ -269,20 +269,6 @@
             <mxPoint x="770" y="410" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="b5BNbCB7NWANwJ87BcGt-115" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="b5BNbCB7NWANwJ87BcGt-43">
-          <mxGeometry width="160" relative="1" as="geometry">
-            <mxPoint x="440" y="730" as="sourcePoint" />
-            <mxPoint x="220" y="730" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="335.5" y="730" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="b5BNbCB7NWANwJ87BcGt-116" value="Nhận kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="b5BNbCB7NWANwJ87BcGt-115">
-          <mxGeometry x="-0.1897" relative="1" as="geometry">
-            <mxPoint x="12" y="-10" as="offset" />
-          </mxGeometry>
-        </mxCell>
         <mxCell id="b5BNbCB7NWANwJ87BcGt-121" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="b5BNbCB7NWANwJ87BcGt-43">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="210" y="760" as="sourcePoint" />
@@ -298,6 +284,12 @@
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="765" y="389.71" as="sourcePoint" />
             <mxPoint x="975" y="389.71" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="dM86dp5R9Y6jVkoYG2M8-7" value="Trả về kết quả" style="endArrow=open;startArrow=none;endFill=0;startFill=0;endSize=8;html=1;verticalAlign=bottom;dashed=1;labelBackgroundColor=none;rounded=0;" edge="1" parent="b5BNbCB7NWANwJ87BcGt-43">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="440" y="730" as="sourcePoint" />
+            <mxPoint x="220" y="730" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>
