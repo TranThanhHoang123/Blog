@@ -2430,7 +2430,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="iHi5pZrTsbTu5hhTz4pg-1" value="Thống kê" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=160;" vertex="1" parent="1">
-          <mxGeometry x="40" y="20" width="840" height="780" as="geometry" />
+          <mxGeometry x="40" y="20" width="840" height="680" as="geometry" />
         </mxCell>
         <mxCell id="iHi5pZrTsbTu5hhTz4pg-2" value="" style="shape=umlDestroy;html=1;" vertex="1" parent="iHi5pZrTsbTu5hhTz4pg-1">
           <mxGeometry x="35" y="630" width="30" height="30" as="geometry" />
