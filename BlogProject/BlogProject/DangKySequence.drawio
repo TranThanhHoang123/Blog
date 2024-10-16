@@ -2142,64 +2142,67 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="ei7vmSE3_9i9pStGhdun-1" value="Phân quyền" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=160;" vertex="1" parent="1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-1" value="Phân quyền" style="shape=umlFrame;whiteSpace=wrap;html=1;pointerEvents=0;recursiveResize=0;container=1;collapsible=0;width=160;" parent="1" vertex="1">
           <mxGeometry x="40" y="20" width="1040" height="940" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-2" value="" style="shape=umlDestroy;html=1;" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-2" value="" style="shape=umlDestroy;html=1;" parent="ei7vmSE3_9i9pStGhdun-1" vertex="1">
           <mxGeometry x="35" y="860" width="30" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-3" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;:User&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;size=40;" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-3" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: initial;&quot;&gt;:User&lt;/span&gt;&lt;br&gt;&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;size=40;" parent="ei7vmSE3_9i9pStGhdun-1" vertex="1">
           <mxGeometry x="40" y="30" width="20" height="850" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-4" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-3">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-4" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-3" vertex="1">
           <mxGeometry x="5" y="80" width="10" height="780" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-7" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:Phân quyền&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlBoundary;" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-7" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:Phân quyền&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlBoundary;" parent="ei7vmSE3_9i9pStGhdun-1" vertex="1">
           <mxGeometry x="180" y="40" width="70" height="860" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-8" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-7">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-8" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-7" vertex="1">
           <mxGeometry x="30" y="320" width="10" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-9" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-7">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-9" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-7" vertex="1">
           <mxGeometry x="30" y="500" width="10" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-10" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-7">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-10" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-7" vertex="1">
           <mxGeometry x="30" y="250" width="10" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-11" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-7">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-11" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-7" vertex="1">
           <mxGeometry x="30" y="430" width="10" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-123" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-7">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-123" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-7" vertex="1">
           <mxGeometry x="30" y="590" width="10" height="55" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-12" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:Hệ thống&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlControl;" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-12" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:Hệ thống&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlControl;" parent="ei7vmSE3_9i9pStGhdun-1" vertex="1">
           <mxGeometry x="410" y="40" width="70" height="830" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-14" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-12">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-14" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-12" vertex="1">
           <mxGeometry x="30" y="400" width="10" height="55" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-15" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-12">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-15" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-12" vertex="1">
           <mxGeometry x="30" y="150" width="10" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-16" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-12">
-          <mxGeometry x="30" y="210" width="10" height="50" as="geometry" />
+        <mxCell id="ei7vmSE3_9i9pStGhdun-16" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-12" vertex="1">
+          <mxGeometry x="30" y="230" width="10" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-108" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-12">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-108" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-12" vertex="1">
           <mxGeometry x="30" y="350" width="10" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-115" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-12">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-115" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-12" vertex="1">
           <mxGeometry x="30" y="500" width="10" height="70" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-122" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-12">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-122" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-12" vertex="1">
           <mxGeometry x="30" y="580" width="10" height="55" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-17" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:BlogAppGroup&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlEntity;" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
-          <mxGeometry x="730" y="40" width="40" height="830" as="geometry" />
+        <mxCell id="ei7vmSE3_9i9pStGhdun-17" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:User&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlEntity;" parent="ei7vmSE3_9i9pStGhdun-1" vertex="1">
+          <mxGeometry x="600" y="40" width="40" height="830" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-22" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="gbw0_iGA0PIjXQrJtnJ8-4" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-17">
+          <mxGeometry x="15" y="180" width="10" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="ei7vmSE3_9i9pStGhdun-22" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="ei7vmSE3_9i9pStGhdun-1" vertex="1">
           <mxGeometry x="210" y="120" width="10" height="130" as="geometry" />
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-23" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-4" target="ei7vmSE3_9i9pStGhdun-22">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-23" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-4" target="ei7vmSE3_9i9pStGhdun-22" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="270" y="180" as="sourcePoint" />
             <mxPoint x="430" y="180" as="targetPoint" />
@@ -2208,40 +2211,40 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-24" value="1. Đăng nhập" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-23">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-24" value="1. Đăng nhập" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-23" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-27" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-27" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
-            <mxPoint x="55" y="220" as="sourcePoint" />
-            <mxPoint x="210" y="220" as="targetPoint" />
+            <mxPoint x="55" y="210" as="sourcePoint" />
+            <mxPoint x="210" y="210" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-28" value="4. Chọn nhóm" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-27">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-28" value="4. Chọn thêm người dùng vào nhóm quản trị" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-27" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-29" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-29" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="210" y="320" as="sourcePoint" />
             <mxPoint x="55" y="320" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-30" value="8 Hiển thị danh sách role" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-29">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-30" value="8 Hiển thị danh sách người dùng" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-29" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="-13" y="-11" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-31" value="Trả về kết quả" style="endArrow=open;startArrow=none;endFill=0;startFill=0;endSize=8;html=1;verticalAlign=bottom;dashed=1;labelBackgroundColor=none;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-94" target="ei7vmSE3_9i9pStGhdun-14">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-31" value="Trả về kết quả" style="endArrow=open;startArrow=none;endFill=0;startFill=0;endSize=8;html=1;verticalAlign=bottom;dashed=1;labelBackgroundColor=none;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" source="gbw0_iGA0PIjXQrJtnJ8-7" target="ei7vmSE3_9i9pStGhdun-14" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
-            <mxPoint x="785" y="470" as="sourcePoint" />
+            <mxPoint x="885" y="440" as="sourcePoint" />
             <mxPoint x="490" y="470" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-57" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" target="ei7vmSE3_9i9pStGhdun-9">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-57" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" target="ei7vmSE3_9i9pStGhdun-9" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="55" y="560" as="sourcePoint" />
             <mxPoint x="260" y="560" as="targetPoint" />
@@ -2250,133 +2253,107 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-58" value="13 chọn danh sách người dùng thêm vào" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-57">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-58" value="13 chọn danh sách người dùng thêm vào" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-57" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-69" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
-          <mxGeometry width="160" relative="1" as="geometry">
-            <mxPoint x="220" y="230" as="sourcePoint" />
-            <mxPoint x="440" y="230" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-70" value="5 Gửi yêu cầu lấy danh sách nhóm quyền" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-69">
-          <mxGeometry x="-0.1897" relative="1" as="geometry">
-            <mxPoint x="12" y="-10" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-71" value="6 Xử lý yêu cầu lấy danh sách role trong nhóm quyền" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" target="ei7vmSE3_9i9pStGhdun-107">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-71" value="6 xử lý yêu cầu" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" target="gbw0_iGA0PIjXQrJtnJ8-4" edge="1">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="450" y="235" as="sourcePoint" />
-            <mxPoint x="1085" y="235" as="targetPoint" />
+            <mxPoint x="995" y="235" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-72" value="Trả về kết quả" style="endArrow=open;startArrow=none;endFill=0;startFill=0;endSize=8;html=1;verticalAlign=bottom;dashed=1;labelBackgroundColor=none;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-107">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-72" value="Trả về kết quả" style="endArrow=open;startArrow=none;endFill=0;startFill=0;endSize=8;html=1;verticalAlign=bottom;dashed=1;labelBackgroundColor=none;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" source="gbw0_iGA0PIjXQrJtnJ8-4" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
-            <mxPoint x="740" y="260" as="sourcePoint" />
-            <mxPoint x="450" y="260" as="targetPoint" />
+            <mxPoint x="995" y="280" as="sourcePoint" />
+            <mxPoint x="450" y="280" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-73" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-16" target="ei7vmSE3_9i9pStGhdun-10">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-73" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-16" target="ei7vmSE3_9i9pStGhdun-10" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="230" y="222" as="sourcePoint" />
             <mxPoint x="450" y="222" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-74" value="7 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-73">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-74" value="7 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-73" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-75" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-75" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="55" y="380" as="sourcePoint" />
             <mxPoint x="210" y="380" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-76" value="9 Bấm vào hỉnh sửa nhóm quyền" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-75">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-76" value="9 Chọn người dùng" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-75" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-81" value="11 xử lý yêu cầu tạo product" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-108" target="ei7vmSE3_9i9pStGhdun-94">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-81" value="11 xử lý yêu cầu thêm user vào group" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-108" target="gbw0_iGA0PIjXQrJtnJ8-8" edge="1">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="460" y="390" as="sourcePoint" />
-            <mxPoint x="755" y="390" as="targetPoint" />
+            <mxPoint x="885" y="410" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-84" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-84" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="440" y="480" as="sourcePoint" />
             <mxPoint x="220" y="480" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-85" value="11 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-84">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-85" value="11 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-84" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-86" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-86" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="210" y="510" as="sourcePoint" />
             <mxPoint x="55" y="510" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-113" value="12 hiển thị danh sách người dùng" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-86">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-113" value="12 hiển thị danh sách người dùng mới" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-86" vertex="1" connectable="0">
           <mxGeometry x="-0.1974" y="4" relative="1" as="geometry">
             <mxPoint y="-19" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-93" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:GroupMembership&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlEntity;" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
-          <mxGeometry x="870" y="40" width="40" height="820" as="geometry" />
-        </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-94" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-93">
-          <mxGeometry x="15" y="350" width="10" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-118" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-93">
-          <mxGeometry x="15" y="550" width="10" height="70" as="geometry" />
-        </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-99" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-99" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="55" y="160" as="sourcePoint" />
             <mxPoint x="210" y="160" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-100" value="2. Chọn nhóm" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-99">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-100" value="2. Vào trang quản lý người dùng" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-99" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-101" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-22" target="ei7vmSE3_9i9pStGhdun-4">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-101" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
-            <mxPoint x="250" y="160" as="sourcePoint" />
-            <mxPoint x="405" y="160" as="targetPoint" />
+            <mxPoint x="210" y="184.5" as="sourcePoint" />
+            <mxPoint x="55" y="184.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-102" value="3 Hiển thị danh sách nhóm" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-101">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-102" value="3 Hiển thị danh sách nhóm" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-101" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="-8" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-103" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:RoleGroup&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlEntity;" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
-          <mxGeometry x="980" y="40" width="40" height="1020" as="geometry" />
-        </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-107" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="ei7vmSE3_9i9pStGhdun-103">
-          <mxGeometry x="15" y="160" width="10" height="80" as="geometry" />
-        </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-109" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-109" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="220" y="410" as="sourcePoint" />
             <mxPoint x="440" y="410" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-110" value="10 Gửi yêu cầu lấy danh sách người dùng" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-109">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-110" value="10 gửi yêu cầu thêm người dùng vào nhóm" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-109" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-116" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-9" target="ei7vmSE3_9i9pStGhdun-115">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-116" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-9" target="ei7vmSE3_9i9pStGhdun-115" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="250" y="574.5" as="sourcePoint" />
             <mxPoint x="405" y="574.5" as="targetPoint" />
@@ -2385,49 +2362,66 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-117" value="14 Gửi yêu cầu thêm user vào nhóm quyền" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-116">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-117" value="14 Gửi yêu cầu thêm user vào nhóm quyền" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-116" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-119" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-115" target="ei7vmSE3_9i9pStGhdun-118">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-119" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-115" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="230" y="585" as="sourcePoint" />
-            <mxPoint x="450" y="585" as="targetPoint" />
+            <mxPoint x="885" y="590" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-120" value="15 Gửi yêu cầu thêm user vào nhóm quyền" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-119">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-120" value="15 Gửi yêu cầu thêm user vào nhóm quyền" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-119" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-121" value="Trả về kết quả" style="endArrow=open;startArrow=none;endFill=0;startFill=0;endSize=8;html=1;verticalAlign=bottom;dashed=1;labelBackgroundColor=none;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-121" value="Trả về kết quả" style="endArrow=open;startArrow=none;endFill=0;startFill=0;endSize=8;html=1;verticalAlign=bottom;dashed=1;labelBackgroundColor=none;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="885" y="650" as="sourcePoint" />
             <mxPoint x="450" y="650" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-124" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-124" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="440" y="650" as="sourcePoint" />
             <mxPoint x="220" y="650" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-125" value="16 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-124">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-125" value="16 gửi kết quả" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-124" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="12" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-126" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-123">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-126" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" parent="ei7vmSE3_9i9pStGhdun-1" source="ei7vmSE3_9i9pStGhdun-123" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="270" y="660" as="sourcePoint" />
             <mxPoint x="50" y="660" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="ei7vmSE3_9i9pStGhdun-127" value="17 trả về danh sách user mới" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="ei7vmSE3_9i9pStGhdun-126">
+        <mxCell id="ei7vmSE3_9i9pStGhdun-127" value="17 trả về danh sách user mới" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ei7vmSE3_9i9pStGhdun-126" vertex="1" connectable="0">
           <mxGeometry x="-0.1897" relative="1" as="geometry">
             <mxPoint x="-11" y="-10" as="offset" />
           </mxGeometry>
+        </mxCell>
+        <mxCell id="gbw0_iGA0PIjXQrJtnJ8-2" value="" style="endArrow=open;endFill=1;endSize=12;html=1;rounded=0;" edge="1" parent="ei7vmSE3_9i9pStGhdun-1">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="220" y="230" as="sourcePoint" />
+            <mxPoint x="440" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gbw0_iGA0PIjXQrJtnJ8-3" value="5. Gửi yêu cầu lấy danh sách user" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="gbw0_iGA0PIjXQrJtnJ8-2">
+          <mxGeometry x="-0.1897" relative="1" as="geometry">
+            <mxPoint x="12" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gbw0_iGA0PIjXQrJtnJ8-7" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;:UserGroup&lt;/div&gt;" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlEntity;" vertex="1" parent="ei7vmSE3_9i9pStGhdun-1">
+          <mxGeometry x="730" y="40" width="40" height="830" as="geometry" />
+        </mxCell>
+        <mxCell id="gbw0_iGA0PIjXQrJtnJ8-8" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" vertex="1" parent="gbw0_iGA0PIjXQrJtnJ8-7">
+          <mxGeometry x="15" y="360" width="10" height="70" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
