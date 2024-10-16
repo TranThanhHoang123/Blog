@@ -176,7 +176,7 @@
         <mxCell id="QJ5PGhtFOq5F7lpbPO0n-101" value="Xem thống kê Sản phẩm" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="965" y="420" width="110" height="40" as="geometry" />
         </mxCell>
-        <mxCell id="QJ5PGhtFOq5F7lpbPO0n-105" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-62" target="hF7PXmI_utsZl6V9U2d8-1" edge="1">
+        <mxCell id="QJ5PGhtFOq5F7lpbPO0n-105" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-109" target="hF7PXmI_utsZl6V9U2d8-4" edge="1">
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="970" y="205" as="sourcePoint" />
             <mxPoint x="1040" y="205" as="targetPoint" />
@@ -191,7 +191,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="QJ5PGhtFOq5F7lpbPO0n-109" value="Phân quyền quản trị" style="ellipse;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="690" y="285" width="90" height="30" as="geometry" />
+          <mxGeometry x="645" y="285" width="90" height="30" as="geometry" />
         </mxCell>
         <mxCell id="QJ5PGhtFOq5F7lpbPO0n-110" value="" style="endArrow=none;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-2" target="QJ5PGhtFOq5F7lpbPO0n-109" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
@@ -332,6 +332,36 @@
           <mxGeometry width="160" relative="1" as="geometry">
             <mxPoint x="883" y="422" as="sourcePoint" />
             <mxPoint x="1007" y="348" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hF7PXmI_utsZl6V9U2d8-4" value="Xem thống kê blog" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="250" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="hF7PXmI_utsZl6V9U2d8-5" value="Xem thống kê user" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="300" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="hF7PXmI_utsZl6V9U2d8-6" value="Xem thống kê Sản phẩm" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="790" y="190" width="110" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="hF7PXmI_utsZl6V9U2d8-9" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-109" target="hF7PXmI_utsZl6V9U2d8-6">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="883" y="422" as="sourcePoint" />
+            <mxPoint x="1007" y="348" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hF7PXmI_utsZl6V9U2d8-10" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-62" target="hF7PXmI_utsZl6V9U2d8-1">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="900" y="426" as="sourcePoint" />
+            <mxPoint x="991" y="404" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="hF7PXmI_utsZl6V9U2d8-11" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="endArrow=open;endSize=12;dashed=1;html=1;rounded=0;strokeColor=default;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=11;fontColor=default;labelBackgroundColor=default;edgeStyle=none;" edge="1" parent="1" source="QJ5PGhtFOq5F7lpbPO0n-109" target="hF7PXmI_utsZl6V9U2d8-5">
+          <mxGeometry width="160" relative="1" as="geometry">
+            <mxPoint x="738" y="302" as="sourcePoint" />
+            <mxPoint x="820" y="284" as="targetPoint" />
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
