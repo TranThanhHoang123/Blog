@@ -15,13 +15,15 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+import os
+from dotenv import load_dotenv
+# Nạp biến môi trường từ file .env
+load_dotenv()
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-l=ildokp$!efu15v@gsdm#$al^tpypxwj)p61o06zb@4bnj%ao'
-
+SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 if not DEBUG:  # Chỉ trong production
@@ -38,8 +40,6 @@ DOMAIN = 'http://127.0.0.1:8000'
 # Application definition
 
 INSTALLED_APPS = [
-    'daphne',
-    'channels', #django chanel
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -50,8 +50,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'oauth2_provider',
     'BlogApp.apps.BlogappConfig',
-    'ChatApp.apps.ChatappConfig',
-    'rest_framework_mongoengine',
     'django_filters',
 ]
 
@@ -111,9 +109,6 @@ TEMPLATES = [
 MEDIA_ROOT = '%s/BlogApp/static/' % BASE_DIR
 
 WSGI_APPLICATION = 'BlogProject.wsgi.application'
-#cấu hình django chanel
-ASGI_APPLICATION = 'BlogProject.asgi.application'
-
 import os
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -133,9 +128,9 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'blogdb',
-        'USER': 'root',  # Cập nhật tên người dùng tương ứng
-        'PASSWORD': 'Admin@123',  # Cập nhật mật khẩu tương ứng
+        'NAME': os.getenv('BLOG_DATABASE'),
+        'USER': os.getenv('MYSQL_USERNAME'),  # Cập nhật tên người dùng tương ứng
+        'PASSWORD': os.getenv('MYSQL_PASSWORD'),  # Cập nhật mật khẩu tương ứng
         'HOST': '',  # Sử dụng tên dịch vụ 'db' như đã định nghĩa trong docker-compose.yml
         # 'PORT': '3306',  # Cổng MySQL mặc định là 3306
     },
@@ -213,8 +208,6 @@ LOGIN_SUCCESSFULLY_URL = 'https://songnhatnguyen.vn/'
 LOGIN_FAIL_URL = 'https://songnhatnguyen.vn/'
 #ENDPOINT để đăng nhập trang admin
 ADMIN_ENDPOINT = 'aids@u-uf@82d!31/'
-#CSRF_TOKEN
-CSRF_COOKIE_NAME = 'csrftoken'
 """
 gi lại log
 """
@@ -280,17 +273,3 @@ CACHES = {
 STATICAL_CACHE_TIME = 60*5 #5 phút
 CATEGORY_CACHE_TIME = 60*60*24 #24 tiếng
 PRODUCT_CACHE_TIME = 60*10 #10 phút
-
-#mongo
-from mongoengine import connect, disconnect
-
-# Ngắt kết nối cũ (nếu có)
-disconnect(alias='default')
-
-# Tạo kết nối mới mongodb
-connect(
-    db='chatdb',
-    host='localhost',
-    port=27017,
-    alias='default'
-)

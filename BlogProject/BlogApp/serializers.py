@@ -126,6 +126,9 @@ class UserDetailSerializer(UserSerializer):
             follower_count=Count('follower', distinct=True),
             blog_count=Count('blog', distinct=True)
         ).get(pk=instance.pk)
+        response['is_followed'] = False
+        if self.context['request'].user and Follow.objects.filter(from_user=self.context['request'].user,to_user=instance).exists():
+            response['is_followed'] = True
         response['following_count'] = user.following_count
         response['follower_count'] = user.follower_count  # Sửa lỗi nhầm từ following_count thành follower_count
         response['blog_count'] = user.blog_count
@@ -134,8 +137,9 @@ class UserDetailSerializer(UserSerializer):
 
 
 
-class UserListSerializer(UserDetailSerializer):
-    class Meta(UserDetailSerializer.Meta):
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'profile_image', 'profile_bg']
 
 class UserListForAdminSerializer(UserDetailSerializer):
@@ -474,29 +478,6 @@ class WebsiteDetailSerializer(serializers.ModelSerializer):
         model = Website
         fields = ['id','img', 'about', 'phone_number', 'mail', 'location', 'link']
 
-
-class GroupChatSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = GroupChat
-        fields = ['id', 'name', 'image']
-
-
-class GroupChatDetailSerializer(GroupChatSerializer):
-    class Meta(GroupChatSerializer.Meta):
-        fields = ['id', 'name', 'image', 'created_date','updated_date']
-
-class GroupChatListSerializer(GroupChatDetailSerializer):
-
-    class Meta(GroupChatDetailSerializer.Meta):
-        fields = ['id', 'name', 'image']
-
-
-class GroupChatMemberListSerializer(serializers.ModelSerializer):
-    user = UserListSerializer()
-
-    class Meta:
-        model = GroupChatMembership
-        fields = ['user', 'role', 'interactive','created_date','updated_date']
 
 # class CompanySerializer(serializers.ModelSerializer):
 #     class Meta:

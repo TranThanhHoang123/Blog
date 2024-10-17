@@ -135,7 +135,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         if 'profile_image' in data and data['profile_image']:
             data['profile_image'] = utils.upload_file_to_vstorage(request.FILES.get('profile_image'), 'UserAvatar')
         if 'profile_bg' in data and data['profile_bg']:
-            data['profile_bg'] = utils.upload_file_to_vstorage(request.FILES.get('profile_bg'), 'UserBackground')
+            data['profile_bg'] = utils.upload_file_to_vstorage(request.FILES.get('profile_bg'), 'UserAvatar')
         serializer = serializers.UserRegistrationSerializer(data=request.data, context={'request': request})
         print('tạo processing')
         serializer.is_valid(raise_exception=True)
@@ -235,27 +235,41 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         # Trả về phản hồi có phân trang
         return paginator.get_paginated_response(serializer.data)
 
-    @action(methods=['post'], detail=True, url_path='follow')
+    @action(methods=['post', 'delete'], detail=True, url_path='follow')
     def follow(self, request, pk=None):
-        user = self.get_object()
+        user = self.get_object()  # Người dùng hiện tại
         try:
-            to_user = User.objects.get(pk=pk, is_active=True)
+            to_user = User.objects.get(pk=pk, is_active=True)  # Người dùng cần theo dõi hoặc bỏ theo dõi
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
         if user == to_user:
             return Response({'error': 'You cannot follow yourself'}, status=status.HTTP_400_BAD_REQUEST)
-        follow, created = Follow.objects.get_or_create(from_user=user, to_user=to_user)
-        if not created:
-            follow.delete()
-            return Response({'message': 'Unfollowed successfully'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': 'Followed successfully'}, status=status.HTTP_201_CREATED)
 
+        if request.method == 'POST':
+            # Tạo quan hệ theo dõi nếu chưa tồn tại
+            follow, created = Follow.objects.get_or_create(from_user=user, to_user=to_user)
+            if created:
+                return Response({'message': 'Followed successfully'}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'message': 'You are already following this user'}, status=status.HTTP_200_OK)
+
+        elif request.method == 'DELETE':
+            # Xóa quan hệ theo dõi nếu tồn tại
+            try:
+                follow = Follow.objects.get(from_user=user, to_user=to_user)
+                follow.delete()
+                return Response({'message': 'Unfollowed successfully'}, status=status.HTTP_200_OK)
+            except Follow.DoesNotExist:
+                return Response({'error': 'You are not following this user'}, status=status.HTTP_400_BAD_REQUEST)
     @action(methods=['get'], detail=False, url_path='following')
     def following(self, request, pk=None):
         user = self.get_object()  # Lấy người dùng hiện tại
         # Lấy danh sách những người mà user đang theo dõi
-        following_users = User.objects.filter(follower__from_user=user).order_by('-personal_groups__interactive')
+        if request.data.params.get("sort_by") and request.data.params.get("sort_by") == "oldest":
+            following_users = User.objects.filter(follower__from_user=user).order_by('follower__created_at')
+        else:
+            following_users = User.objects.filter(follower__from_user=user).order_by('-follower__created_at')
         page = self.paginate_queryset(following_users)
         # Chúng ta cần serialize danh sách `to_user`
         serializer = serializers.UserListSerializer(page, many=True, context={'request': request})
@@ -265,33 +279,36 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def followers(self, request, pk=None):
         user = request.user  # Lấy người dùng hiện tại từ request
         # Lấy danh sách những người theo dõi user
-        follower_users = User.objects.filter(following__to_user=user).order_by('-personal_groups__interactive')
+        if request.data.params.get("sort_by") and request.data.params.get("sort_by") == "oldest":
+            follower_users = User.objects.filter(following__to_user=user).order_by('following__created_at')
+        else:
+            follower_users = User.objects.filter(following__to_user=user).order_by('-following__created_at')
         page = self.paginate_queryset(follower_users)
         serializer = serializers.UserListSerializer(page, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['get'], detail=False, url_path='stranger')
-    def strangers(self, request, pk=None):
-        user = request.user  # Lấy user hiện tại từ request
-
-        # Lấy danh sách người dùng có PersonalGroup với user nhưng không follow user
-        strangers_with_group = User.objects.filter(
-            personal_groups__user=user,  # Có PersonalGroup chung với user
-        ).exclude(  # Loại bỏ những người đang following hoặc được follow bởi user
-            Q(following__from_user=user) | Q(following__to_user=user)  # Thay đổi từ follower thành following
-        ).distinct().order_by('-personal_groups__interactive')
-
-        # Debugging
-        print("Strangers with group:", strangers_with_group)
-
-        # Paginate
-        page = self.paginate_queryset(strangers_with_group)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(strangers_with_group, many=True, context={'request': request})
-        return Response(serializer.data)
+    # @action(methods=['get'], detail=False, url_path='stranger')
+    # def strangers(self, request, pk=None):
+    #     user = request.user  # Lấy user hiện tại từ request
+    #
+    #     # Lấy danh sách người dùng có PersonalGroup với user nhưng không follow user
+    #     strangers_with_group = User.objects.filter(
+    #         personal_groups__user=user,  # Có PersonalGroup chung với user
+    #     ).exclude(  # Loại bỏ những người đang following hoặc được follow bởi user
+    #         Q(following__from_user=user) | Q(following__to_user=user)  # Thay đổi từ follower thành following
+    #     ).distinct().order_by('-personal_groups__interactive')
+    #
+    #     # Debugging
+    #     print("Strangers with group:", strangers_with_group)
+    #
+    #     # Paginate
+    #     page = self.paginate_queryset(strangers_with_group)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True, context={'request': request})
+    #         return self.get_paginated_response(serializer.data)
+    #
+    #     serializer = self.get_serializer(strangers_with_group, many=True, context={'request': request})
+    #     return Response(serializer.data)
 
 
 class BlogViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
@@ -1400,216 +1417,6 @@ class TagViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView,
         # Xóa cache khi có tag bị xóa
         cache.delete('tag_list_cache')
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class GroupChatViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView,
-                       generics.DestroyAPIView):
-    queryset = GroupChat.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = serializers.GroupChatSerializer
-    pagination_class = my_paginations.SocialGroupPagination
-
-    def get_queryset(self):
-        query = self.queryset
-        if self.action in ['list']:
-            name = self.request.query_params.get('name', None)
-            if name:
-                query = query.filter(name__icontains=name)
-        return query
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return serializers.GroupChatListSerializer
-        return self.serializer_class
-
-    def list(self, request, *args, **kwargs):
-        user = request.user
-        groups = self.get_queryset().filter(memberships__user=user).order_by('-memberships__interactive')
-        # lấy pagitation
-        paginator = my_paginations.SocialGroupPagination()
-        # paginate groups
-        paginated_groups = paginator.paginate_queryset(groups, request)
-        # serialize lại dữ liệu được paginate
-        serializer = self.get_serializer(paginated_groups, many=True, context={'request': request})
-        # trả về kết quả được paginate
-        return paginator.get_paginated_response(serializer.data)
-
-    def create(self, request, *args, **kwargs):
-        # copy dữ liệu từ body
-        data = request.data.copy()
-        if 'image' in data and data['image']:
-            data['image'] = utils.upload_file_to_vstorage(data['image'], 'GroupChat')
-        serializer = self.get_serializer(data=data)
-        if serializer.is_valid():
-            # lấy groupchat
-            group_chat = serializer.save()
-            # Người tạo group sẽ trở thành owner
-            GroupChatMembership.objects.create(group_chat=group_chat, user=request.user, role='owner')
-
-        serializer = serializers.GroupChatDetailSerializer(group_chat, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def update(self, request, *args, **kwargs):
-        group_chat = self.get_object()
-
-        # Kiểm tra quyền sửa (owner hoặc manager)
-        membership = GroupChatMembership.objects.filter(group_chat=group_chat, user=request.user).first()
-        if membership.role not in ['owner', 'manager']:
-            return Response({'error': 'You do not have permission to update group.'},
-                            status=status.HTTP_403_FORBIDDEN)
-        data = request.data.copy()
-        if 'image' in data and data['image']:
-            data['image'] = utils.upload_file_to_vstorage(data['image'], 'GroupChat')
-        serializer = self.get_serializer(group_chat, data=data, partial=True, context={'request': request})
-        if serializer.is_valid():
-            group_data = serializer.save()
-            return Response(serializers.GroupChatDetailSerializer(group_data, context={'request': request}).data,
-                            status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request, *args, **kwargs):
-        group_chat = self.get_object()
-
-        # Chỉ owner mới được xóa group
-        is_owner = GroupChatMembership.objects.filter(
-            group_chat=group_chat,
-            user=request.user,
-            role='owner'
-        ).exists()
-
-        if not is_owner:
-            return Response(
-                {'error': 'Only owner has permission to delete this group.'},
-                status=status.HTTP_403_FORBIDDEN
-            )
-        group_chat.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    @action(methods=['get', 'post', 'delete', 'update'], detail=True, url_path='member')
-    def member(self, request, pk=None):
-        group_chat = self.get_object()
-        user = request.user
-        # lấy role của user
-        try:
-            group_chat_membership = GroupChatMembership.objects.get(
-                group_chat=group_chat,
-                user=user)
-        except GroupChatMembership.DoesNotExist:
-            return Response({'error': 'You do not have permission in this group.'},
-                            status=status.HTTP_403_FORBIDDEN)
-        if request.method == "GET":
-            members = GroupChatMembership.objects.filter(group_chat=group_chat).order_by("role", "-created_date")
-            username = request.query_params.get('username', None)
-            if username:
-                members = members.filter(user__username__icontains=username)
-            # lấy paginator
-            paginator = my_paginations.UserPagination()
-            # pagination dữ liệu
-            paginated_members = paginator.paginate_queryset(members, request)
-            # serialize dữ liệu được paginate
-            serializer = serializers.GroupChatMemberListSerializer(paginated_members, many=True,
-                                                                   context={'request': request})
-            return paginator.get_paginated_response(serializer.data)
-
-        elif request.method == "POST":
-            # Lấy danh sách user_id để thêm người dùng
-            user_ids = request.data.getlist('user_id', [])
-
-            # Lấy danh sách user_id_remove để xóa người dùng
-            user_ids_remove = request.data.getlist('user_id_remove', [])
-
-            # Xóa người dùng khỏi group nếu có danh sách user_id_remove
-            if user_ids_remove:
-                # Kiểm tra quyền (chỉ owner mới được xóa)
-                if group_chat_membership.role != 'owner':
-                    return Response({'error': 'Only owner can delete members.'}, status=status.HTTP_403_FORBIDDEN)
-
-                # Kiểm tra xem người dùng có tự xóa mình không
-                if str(user.id) in user_ids_remove:
-                    return Response({'error': 'You cannot remove yourself from the group.'},
-                                    status=status.HTTP_400_BAD_REQUEST)
-
-                for user_id in user_ids_remove:
-                    try:
-                        member_to_remove = GroupChatMembership.objects.get(group_chat=group_chat, user_id=user_id)
-                        member_to_remove.delete()
-                    except GroupChatMembership.DoesNotExist:
-                        pass  # Bỏ qua nếu người dùng không phải là thành viên
-
-            # Thêm người dùng vào group nếu có danh sách user_id
-            if user_ids:
-                for user_id in user_ids:
-                    try:
-                        new_user = User.objects.get(id=user_id)
-                        try:
-                            # Thêm user vào nhóm với role 'member'
-                            GroupChatMembership.objects.create(group_chat=group_chat, user=new_user, role='member')
-                        except IntegrityError:
-                            # Bỏ qua nếu user đã là thành viên của nhóm (duplicate entry)
-                            pass
-                    except User.DoesNotExist:
-                        pass  # Bỏ qua nếu người dùng không tồn tại
-
-            # Trả về thông báo thành công
-            return Response({"message": "Operation successful"}, status=status.HTTP_200_OK)
-
-        elif request.method == "DELETE":
-
-            # Nếu user là owner, cần chuyển quyền owner trước khi rời nhóm
-            if group_chat_membership.role == 'owner':
-                # Tìm thành viên có `created_date` lâu nhất (trừ người dùng hiện tại)
-                next_owner = GroupChatMembership.objects.filter(
-                    group_chat=group_chat
-                ).exclude(user=user).order_by('created_date').first()
-
-                if next_owner:
-                    # Trao quyền owner cho thành viên có `created_date` lâu nhất
-                    next_owner.role = 'owner'
-                    next_owner.save()
-                else:
-                    # Nếu không còn thành viên nào khác, xóa group
-                    group_chat.delete()
-                    return Response(status=status.HTTP_200_OK)
-            return Response(status=status.HTTP_200_OK)
-
-        elif request.method == "PATCH":
-            # Chỉ owner mới được thay đổi vai trò của thành viên khác
-            if group_chat_membership.role != 'owner':
-                return Response({'error': 'Only the owner can change roles.'}, status=status.HTTP_403_FORBIDDEN)
-
-            # Lấy user_id và vai trò mới từ request
-            user_id = request.data.get('user_id')
-            new_role = request.data.get('role')
-
-            if not user_id or not new_role:
-                return Response({'error': 'Both user_id and role must be provided.'},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-            # Kiểm tra vai trò hợp lệ
-            if new_role not in ['owner', 'manager', 'member']:
-                return Response({'error': 'Invalid role. Role must be "owner", "manager", or "member".'},
-                                status=status.HTTP_400_BAD_REQUEST)
-
-            try:
-                # Lấy thành viên cần đổi vai trò
-                member_to_update = GroupChatMembership.objects.get(group_chat=group_chat, user_id=user_id)
-
-                # Nếu role mới là "owner", cập nhật owner hiện tại thành "member"
-                if new_role == 'owner':
-                    # Đổi vai trò của owner hiện tại thành member
-                    group_chat_membership.role = 'member'
-                    group_chat_membership.save()
-
-                # Đổi vai trò của người dùng được chỉ định
-                member_to_update.role = new_role
-                member_to_update.save()
-
-                return Response({'message': f'Role of {member_to_update.user.username} changed to {new_role}.'},
-                                status=status.HTTP_200_OK)
-
-            except GroupChatMembership.DoesNotExist:
-                return Response({'error': 'The specified user is not a member of the group.'},
-                                status=status.HTTP_404_NOT_FOUND)
 
 # class CompanyViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.ListAPIView,generics.RetrieveAPIView,generics.UpdateAPIView):
 #     queryset = Company.objects.all().order_by('-workers_number')

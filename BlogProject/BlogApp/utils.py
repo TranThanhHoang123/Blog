@@ -119,13 +119,16 @@ MIME_TYPES = {
     'txt': 'text/plain',
     # Thêm các phần mở rộng và loại MIME khác nếu cần
 }
-
+import os
+from dotenv import load_dotenv
+# Nạp biến môi trường từ file .env
+load_dotenv()
 def upload_file_to_vstorage(file, directory):
     sanitize_filename(file)
     print('upload_file_to_vstorage')
     from .models import Vstorage  # Import tại nơi cần sử dụng
     try:
-        vstorage = Vstorage.objects.get(id=1)
+        vstorage = Vstorage.objects.get(VstorageCreadentialUsername=os.getenv('VSTORAGE_USERNAME'))
     except Vstorage.DoesNotExist:
         return {"error": "Vstorage not found"}
     print('lấy được vstorage object')
@@ -147,9 +150,7 @@ def upload_file_to_vstorage(file, directory):
     except Exception as e:
         print({"error": f"File validation failed: {str(e)}"})
         return {"error": f"File validation failed: {str(e)}"}
-
-    file_url = f"{vstorage.url}/MediaOfBlogApp/{directory}/{file_name}"
-
+    file_url = f"{vstorage.url}/{os.getenv('VSTORAGE_CONTAINER')}/{directory}/{file_name}"
     headers = {
         'X-Auth-Token': vstorage.X_Subject_Token,
         'Content-Type': content_type

@@ -253,9 +253,9 @@ from django.utils import timezone
 import requests
 
 
-def get_vstorage_token(vstorage_id):
+def get_vstorage_token(vstorage):
     try:
-        vstorage = Vstorage.objects.get(pk=vstorage_id)
+        vstorage = Vstorage.objects.get(VstorageCreadentialUsername=vstorage['username'])
     except Vstorage.DoesNotExist:
         return {"error": "Vstorage not found"}
 

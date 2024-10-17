@@ -19,11 +19,11 @@ class User(AbstractUser):
     about = models.CharField(max_length=255,null=True,blank=True)
     profile_image = models.URLField(
         max_length=600,
-        default="https://hcm03.vstorage.vngcloud.vn/v1/AUTH_f2ecf7a1f0494cdf954303888b0e5df1/MediaOfBlogApp/UserAvatar/default.png"
+        default="https://hcm03.vstorage.vngcloud.vn/v1/AUTH_e2739f2170d44cfc8cfebf9aa23752b6/BlogApp/UserAvatar/default.png"
     )
     profile_bg = models.URLField(
         max_length=600,
-        default='https://hcm03.vstorage.vngcloud.vn/v1/AUTH_f2ecf7a1f0494cdf954303888b0e5df1/MediaOfBlogApp/UserBackground/default.png'
+        default='https://hcm03.vstorage.vngcloud.vn/v1/AUTH_e2739f2170d44cfc8cfebf9aa23752b6/BlogApp/UserAvatar/default.png'
     )
     link = models.CharField(max_length=100,null=True)
     is_active = models.BooleanField(default=False)
@@ -387,44 +387,6 @@ class Vstorage(models.Model):
                 print('lấy vstorage_token thất bại')
                 # Raise exception nếu response không thành công
                 response.raise_for_status()
-
-from django.core.exceptions import ValidationError
-class GroupChat(BaseModel):
-    name = models.CharField(max_length=255)
-    image = models.URLField(max_length=1024, null=True, blank=True)
-    def __str__(self):
-        return self.name
-
-    def user_count(self):
-        return self.memberships.count()
-class GroupChatMembership(BaseModel):
-    ROLE_CHOICES = [
-        ('owner', 'Owner'),
-        ('manager', 'Manager'),
-        ('member', 'Member'),
-    ]
-
-    group_chat = models.ForeignKey(GroupChat, related_name='memberships', on_delete=models.CASCADE)
-    user = models.ForeignKey(User, related_name='group_memberships', on_delete=models.CASCADE)
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='member')
-    interactive = models.DateTimeField(null=True,blank=True)  # Thêm trường lưu lần tương tác cuối cùng
-
-    class Meta:
-        unique_together = ('group_chat', 'user')
-
-    def __str__(self):
-        return f"{self.user.username} ({self.get_role_display()}) in {self.group_chat.name}"
-
-    def save(self, *args, **kwargs):
-        if self.group_chat.user_count() >= 40:
-            raise ValidationError(f"Groups are limited to a maximum of 40 members.")
-        super().save(*args, **kwargs)  # Gọi phương thức save gốc
-
-
-class PersonalGroup(BaseModel):
-    interactive = models.DateTimeField(null=True, blank=True)
-    user = models.ManyToManyField('User', related_name='personal_groups')
-
 # class CompanyGroup(models.Model):
 #     company = models.ForeignKey(Company, related_name='groups', on_delete=models.CASCADE)
 #     group = models.OneToOneField(Group, related_name='company_group', on_delete=models.CASCADE)

@@ -2,6 +2,10 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from . import utils
+import os
+from dotenv import load_dotenv
+# Nạp biến môi trường từ file .env
+load_dotenv()
 # Khởi tạo các quyền
 PERMISSIONS = [
     {
@@ -80,8 +84,8 @@ WEBSITE = {
     'about':'Công ty',
     'phone_number':'00000',
     'mail':'example@example.com',
-    'location':'hehe',
-    'link':'hehe'
+    'location':'',
+    'link':''
 }
 TAGS = [
     {
@@ -95,9 +99,9 @@ TAGS = [
     }
 ]
 VSTOTE = {
-    'username':'a18c9ad',
-    'password':'E3kxLea=',
-    'project_id':'f2ecf7a1f0494cdf954303888b0e5df1',
+    'username':os.getenv('VSTORAGE_USERNAME'),
+    'password':os.getenv('VSTORAGE_PASSWORD'),
+    'project_id':os.getenv('VSTORAGE_PROJECT'),
 }
 class Command(BaseCommand):
     help = 'Khởi tạo quyền và nhóm'
@@ -136,6 +140,6 @@ class Command(BaseCommand):
         #khỏi tạo vstorage
         utils.create_vstorage(VSTOTE)
         #lấy token vstorage
-        result = utils.get_vstorage_token(1)
+        result = utils.get_vstorage_token(VSTOTE)
         print(result)
         self.stdout.write(self.style.SUCCESS('Successfully initialized tags'))

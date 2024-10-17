@@ -18,8 +18,6 @@ router.register(r'group', views.GroupViewSet, basename='group')  # Specify the b
 router.register(r'statical', StatisticalViews.StatsView, basename='statical')
 router.register(r'website', views.WebsiteViewSet, basename='website')
 router.register(r'tag', views.TagViewSet, basename='tag')
-router.register(r'group-chat', views.GroupChatViewSet, basename='group_chat')
-
 urlpatterns = [
     path('', include(router.urls)),
     path('o/token/', CustomTokenView.as_view(), name='token'),
