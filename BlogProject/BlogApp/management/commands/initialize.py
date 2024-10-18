@@ -7,18 +7,6 @@ from dotenv import load_dotenv
 # Nạp biến môi trường từ file .env
 load_dotenv()
 # Khởi tạo các quyền
-PERMISSIONS = [
-    {
-        'codename': 'admin',
-        'content_type': ContentType.objects.get_for_model(Group),
-        'defaults': {'name': 'Admin Permission'}
-    },
-    {
-        'codename': 'manager',
-        'content_type': ContentType.objects.get_for_model(Group),
-        'defaults': {'name': 'Manager Permission'}
-    },
-]
 MANAGER_PERMISSIONS = [
     {
         "name": "Thêm banner",
@@ -87,34 +75,28 @@ ADMIN_PERMISSIONS = [
         "description":"Xóa bất kỳ tin tuyển dụng nào"
     },
     {
-        "name":"",
-        "description":"Xóa bất kỳ bài blog nào"
+        "name": "Xóa người dùng ra khỏi nhóm quyền",
+        "description": "Xóa người dùng ra khỏi nhóm quyền."
+    },
+    {
+        "name":"Thay đổi quyền của người dùng",
+        "description":"Thay đổi quyền của người dùng khác nhóm admin."
     },
 ]
 
-# Khởi tạo các Group
-GROUPS = [
+ROLES = [
     {
-        'name': 'admin',
-        'priority':0
+        "name":"admin",
+        "description":"Nhóm mặc đinh của admin.\nKhông thể sửa đổi, không thể xóa và thêm, xóa người dùng trong nhóm.",
+        "permissions":ADMIN_PERMISSIONS+MANAGER_PERMISSIONS,
     },
     {
-        'name': 'manager',
-        'priority':1
-    },
-]
-# Khởi tạo các quyền của admin
-PERMISSIONS_GROUP_ADMIN = [
-    {
-        'codename': 'admin',
+        "name":"manager",
+        "description":"Nhóm mặc đinh của manager.\nKhông thể sửa đổi, không thể xóa quyền này.",
+        "permissions":MANAGER_PERMISSIONS,
     },
 ]
-# Khởi tạo các quyền của manager
-PERMISSIONS_GROUP_MANAGER = [
-    {
-        'codename': 'manager',
-    },
-]
+
 # Khởi tạo các account của admin
 LOGIN = [
     {
@@ -137,18 +119,18 @@ LOGIN_SYS_ADMIN = [
     },
 ]
 # Khởi tạo thành viên vào nhóm
-MEMBERS = [
+USERROLES = [
     {
         'username': 'Songnhatnguyen2024',
-        'group': 'admin'
+        'role': 'admin'
     },
     {
         'username': 'H2htechenergy2024',
-        'group': 'admin'
+        'role': 'admin'
     },
     {
         'username': 'sysadmin@zzz',
-        'group': 'admin'
+        'role': 'admin'
     }
 ]
 #khởi tạo website
@@ -187,33 +169,29 @@ class Command(BaseCommand):
 
         # Tạo quyền từ danh sách PERMISSIONS
         PERMISSIONS =  MANAGER_PERMISSIONS + ADMIN_PERMISSIONS
-        utils.create_permissions(MANAGER_PERMISSIONS)
+        utils.create_permissions(PERMISSIONS)
+        self.stdout.write(self.style.SUCCESS('Successfully initialized permissions'))
         # Tạo group từ danh sách GROUPS
-        utils.create_groups(GROUPS)
-        # Thêm quyền vào nhóm 'admin'
-        utils.add_permissions_to_group('admin', PERMISSIONS_GROUP_ADMIN)
-        # Thêm quyền vào nhóm 'manager'
-        utils.add_permissions_to_group('manager', PERMISSIONS_GROUP_MANAGER)
-
+        utils.create_roles(ROLES)
+        self.stdout.write(self.style.SUCCESS('Successfully initialized roles'))
+        # Thêm vai trò cho user
+        utils.add_users_for_role(USERROLES)
+        self.stdout.write(self.style.SUCCESS('Successfully initialized user role'))
         #tạo staff user
         utils.create_staff_users(LOGIN)
-
+        self.stdout.write(self.style.SUCCESS('Successfully initialized staff users'))
         # tạo super user
         utils.create_super_users(LOGIN_SYS_ADMIN)
-
-        # thêm member đến group
-        utils.add_members_to_group(MEMBERS)
-        self.stdout.write(self.style.SUCCESS('Successfully initialized permissions and groups'))
-
+        self.stdout.write(self.style.SUCCESS('Successfully initialized super users'))
         # khởi tạo website
         utils.initialize_website()
         self.stdout.write(self.style.SUCCESS('Successfully initialized website'))
 
         #khởi tạo tag
         utils.create_initial_tags(TAGS)
+        self.stdout.write(self.style.SUCCESS('Successfully initialized tag'))
         #khỏi tạo vstorage
         utils.create_vstorage(VSTOTE)
         #lấy token vstorage
         result = utils.get_vstorage_token(VSTOTE)
-        print(result)
         self.stdout.write(self.style.SUCCESS('Successfully initialized tags'))

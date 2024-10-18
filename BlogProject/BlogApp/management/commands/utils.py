@@ -18,69 +18,80 @@ def create_permissions(permissions):
             print(f"Error creating permission: {e}")
 
 
-def create_groups(group_list):
+def create_roles(roles):
     """
-    Tạo các nhóm dựa trên danh sách đầu vào và xóa danh sách sau khi đã sử dụng.
+    Tạo các vai trò (Role) và các quyền (Permission) dựa trên danh sách đầu vào.
 
-    :param group_list: Danh sách các nhóm cần tạo.
-    :type group_list: list
-    :return: Danh sách các nhóm đã được tạo mới.
+    :param roles: Danh sách các vai trò cần tạo.
+    :type roles: list
+    :return: Danh sách các vai trò đã được tạo hoặc cập nhật.
     """
-    for grp in group_list:
+    for rol in roles:
         try:
-            # Tạo hoặc lấy nhóm dựa trên tên
-            group, created = Group.objects.get_or_create(name=grp['name'])
+            # Tạo hoặc lấy vai trò (Role) dựa trên tên
+            role, created = Role.objects.get_or_create(
+                name=rol['name'],
+                defaults={'description': rol['description']}
+            )
 
-            if created:
-                # Nếu nhóm mới được tạo, tạo và lưu priority cho nhóm đó
-                GroupPriority.objects.create(group=group, priority=grp['priority'])
-                print(f"Successfully created group: {group.name} with priority {grp['priority']}")
-            else:
-                # Nếu nhóm đã tồn tại, kiểm tra và cập nhật priority nếu cần
-                group_priority, created = GroupPriority.objects.get_or_create(group=group)
-                if group_priority.priority != grp['priority']:
-                    group_priority.priority = grp['priority']
-                    group_priority.save()
-                    print(f"Updated priority for group: {group.name} to {grp['priority']}")
-                else:
-                    print(f"Group already exists with correct priority: {group.name}")
+            # Cập nhật mô tả nếu vai trò đã tồn tại
+            if not created:
+                role.description = rol['description']
+                role.save()
+
+            # Xử lý các quyền (Permission) cho vai trò
+            for perm in rol['permissions']:
+                try:
+                    # Lấy quyền (Permission) dựa trên tên
+                    permission = Permission.objects.get(name=perm['name'])
+
+                    # Kiểm tra xem quyền đã có trong vai trò hay chưa
+                    if role.permissions.filter(id=permission.id).exists():
+                        print(f"Role {role.name} already has {permission.name}.")
+                    else:
+                        # Thêm quyền vào vai trò nếu chưa có
+                        role.permissions.add(permission)
+                        print(f"Successfully added {permission.name} to role {role.name}")
+
+                except Permission.DoesNotExist:
+                    print(f"Permission {perm['name']} not exists.")
+
+            role.save()
 
         except Exception as e:
-            print(f"Error creating or updating group '{grp['name']}': {e}")
-
-    # Xóa mảng group_list để giải phóng bộ nhớ
-    del group_list
-    return
+            print(f"Error creating role: {e}")
 
 
-def add_permissions_to_group(group_name, permissions_list):
+def add_users_for_role(user_roles):
     """
-    Thêm danh sách quyền vào nhóm dựa trên tên nhóm và danh sách mã quyền.
+    Gán vai trò cho người dùng dựa trên danh sách đầu vào.
 
-    :param group_name: Tên của nhóm cần thêm quyền.
-    :type group_name: str
-    :param permissions_list: Danh sách các từ điển chứa mã quyền.
-    :type permissions_list: list
+    :param user_roles: Danh sách chứa tên người dùng và vai trò tương ứng.
+    :type user_roles: list
     """
-    try:
-        # Lấy hoặc tạo nhóm dựa trên tên
-        group, created = Group.objects.get_or_create(name=group_name)
-        if created:
-            print(f"Successfully created group: {group.name}")
-        else:
-            print(f"Group already exists: {group.name}")
+    for user_role in user_roles:
+        try:
+            # Lấy user dựa trên username
+            user = User.objects.get(username=user_role['username'])
 
-        # Duyệt qua danh sách quyền và thêm vào nhóm
-        for perm_dict in permissions_list:
-            try:
-                permission = Permission.objects.get(codename=perm_dict['codename'])
-                group.permissions.add(permission)
-                print(f"Added permission '{permission.codename}' to group '{group.name}'")
-            except Permission.DoesNotExist:
-                print(f"Permission with codename '{perm_dict['codename']}' does not exist.")
-        del permissions_list
-    except Exception as e:
-        print(f"Error processing group '{group_name}': {e}")
+            # Lấy role dựa trên tên vai trò
+            role = Role.objects.get(name=user_role['role'])
+
+            # Kiểm tra xem người dùng đã có role nào chưa
+            if hasattr(user, 'user_role'):
+                print(f"User {user.username} already has role {user.user_role.role.name}.")
+            else:
+                # Tạo vai trò cho người dùng nếu chưa có
+                UserRole.objects.create(user=user, role=role)
+                print(f"Successfully assigned role {role.name} to user {user.username}")
+
+        except User.DoesNotExist:
+            print(f"User {user_role['username']} not exists.")
+        except Role.DoesNotExist:
+            print(f"Role {user_role['role']} not exists.")
+        except Exception as e:
+            print(f"Error assigning role to user: {e}")
+
 
 def create_staff_users(login_list):
     """

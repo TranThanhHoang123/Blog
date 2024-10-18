@@ -23,7 +23,7 @@ class User(AbstractUser):
     )
     profile_bg = models.URLField(
         max_length=600,
-        default='https://hcm03.vstorage.vngcloud.vn/v1/AUTH_e2739f2170d44cfc8cfebf9aa23752b6/BlogApp/UserAvatar/default.png'
+        default='https://hcm03.vstorage.vngcloud.vn/v1/AUTH_e2739f2170d44cfc8cfebf9aa23752b6/BlogApp/UserBackground/default.png'
     )
     link = models.CharField(max_length=100,null=True)
     is_active = models.BooleanField(default=False)
@@ -303,14 +303,14 @@ class Banner(BaseModel):
 #phân quyền
 class Permission(models.Model):
     name = models.CharField(max_length=60, unique=True, blank=False, null=False)
-    description = models.CharField(max_length=60, blank=False, null=False)
+    description = models.CharField(max_length=1000, blank=False, null=False)
 
     def __str__(self):
         return self.name
 
 class Role(models.Model):
     name = models.CharField(max_length=60, unique=True, blank=False, null=False)
-    description = models.CharField(max_length=60, blank=False, null=False)
+    description = models.CharField(max_length=1000, blank=False, null=False)
     permissions = models.ManyToManyField(Permission, related_name='roles')
 
     def __str__(self):
@@ -319,7 +319,6 @@ class Role(models.Model):
 class UserRole(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_role')
     role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='users')
-
     def __str__(self):
         return f"{self.user.username} - {self.role.name}"
 

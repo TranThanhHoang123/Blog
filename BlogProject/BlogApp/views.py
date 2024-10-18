@@ -114,7 +114,7 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
 
     # Thêm filter_backends và filterset_fields
     def get_permissions(self):
-        if self.action in ['create', 'list', 'blog', 'activate', 'register', 'retrieve']:
+        if self.action in ['create', 'list', 'blog', 'activate', 'register', 'retrieve','followers','following']:
             return [permissions.AllowAny()]
         return [permissions.IsAuthenticated()]
 
@@ -262,11 +262,11 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
                 return Response({'message': 'Unfollowed successfully'}, status=status.HTTP_200_OK)
             except Follow.DoesNotExist:
                 return Response({'error': 'You are not following this user'}, status=status.HTTP_400_BAD_REQUEST)
-    @action(methods=['get'], detail=False, url_path='following')
+    @action(methods=['get'], detail=True, url_path='following')
     def following(self, request, pk=None):
-        user = self.get_object()  # Lấy người dùng hiện tại
+        user = User.objects.get(pk=pk)
         # Lấy danh sách những người mà user đang theo dõi
-        if request.data.params.get("sort_by") and request.data.params.get("sort_by") == "oldest":
+        if "sort_by" in request.query_params and request.query_params.get("sort_by") == "oldest":
             following_users = User.objects.filter(follower__from_user=user).order_by('follower__created_at')
         else:
             following_users = User.objects.filter(follower__from_user=user).order_by('-follower__created_at')
@@ -275,14 +275,16 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
         serializer = serializers.UserListSerializer(page, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
 
-    @action(methods=['get'], detail=False, url_path='followers')
+    @action(methods=['get'], detail=True, url_path='followers')
     def followers(self, request, pk=None):
-        user = request.user  # Lấy người dùng hiện tại từ request
+        user = User.objects.get(pk=pk)
         # Lấy danh sách những người theo dõi user
-        if request.data.params.get("sort_by") and request.data.params.get("sort_by") == "oldest":
+        # Kiểm tra query parameter "sort_by" từ request.query_params
+        if "sort_by" in request.query_params and request.query_params.get("sort_by") == "oldest":
             follower_users = User.objects.filter(following__to_user=user).order_by('following__created_at')
         else:
             follower_users = User.objects.filter(following__to_user=user).order_by('-following__created_at')
+
         page = self.paginate_queryset(follower_users)
         serializer = serializers.UserListSerializer(page, many=True, context={'request': request})
         return self.get_paginated_response(serializer.data)
