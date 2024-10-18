@@ -19,6 +19,79 @@ PERMISSIONS = [
         'defaults': {'name': 'Manager Permission'}
     },
 ]
+MANAGER_PERMISSIONS = [
+    {
+        "name": "Thêm banner",
+        "description": "Tạo banner quảng cáo"
+    },
+    {
+        "name": "Xóa banner",
+        "description": "Xóa banner quảng cáo"
+    },
+    {
+        "name": "Sửa banner",
+        "description": "Xóa banner quảng cáo"
+    },
+    {
+        "name": "Thêm tag",
+        "description": "Thêm tag vào hệ thống"
+    },
+    {
+        "name": "Xóa tag",
+        "description": "Xóa tag khỏi hệ thống"
+    },
+    {
+        "name": "Sửa tag",
+        "description": "Sửa tag trong hệ thống"
+    },
+    {
+        "name": "Thêm category",
+        "description": "Thêm category vào hệ thống"
+    },
+    {
+        "name": "Xóa category",
+        "description": "Xóa category khỏi hệ thống"
+    },
+    {
+        "name": "Sửa category",
+        "description": "Sửa category trong hệ thống"
+    },
+    {
+        "name": "Xem thống kê người dùng",
+        "description": "Xem thống kê tổng quát người dùng và chi tiết"
+    },
+    {
+        "name": "Xem thống kê tin tuyển dụng",
+        "description": "Xem thống kê tổng quát tin tuyển dụng và chi tiết"
+    },
+    {
+        "name": "Xem thống kê tin sản phẩm",
+        "description": "Xem thống kê tổng quát sản phẩm và chi tiết"
+    },
+]
+ADMIN_PERMISSIONS = [
+    {
+        "name":"Xóa blog",
+        "description":"Xóa bất kỳ bài blog nào"
+    },
+    {
+        "name":"Xóa comment",
+        "description":"Xóa bất kỳ bình luận"
+    },
+    {
+        "name":"Xóa sản phẩm",
+        "description":"Xóa bất kỳ sản phẩm nào"
+    },
+    {
+        "name":"Xóa sản tin tuyển dụng",
+        "description":"Xóa bất kỳ tin tuyển dụng nào"
+    },
+    {
+        "name":"",
+        "description":"Xóa bất kỳ bài blog nào"
+    },
+]
+
 # Khởi tạo các Group
 GROUPS = [
     {
@@ -113,7 +186,8 @@ class Command(BaseCommand):
         django.setup()
 
         # Tạo quyền từ danh sách PERMISSIONS
-        utils.create_permissions(PERMISSIONS)
+        PERMISSIONS =  MANAGER_PERMISSIONS + ADMIN_PERMISSIONS
+        utils.create_permissions(MANAGER_PERMISSIONS)
         # Tạo group từ danh sách GROUPS
         utils.create_groups(GROUPS)
         # Thêm quyền vào nhóm 'admin'

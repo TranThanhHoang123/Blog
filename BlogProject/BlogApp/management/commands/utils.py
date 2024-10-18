@@ -1,37 +1,21 @@
-from django.core.management.base import BaseCommand
-from django.contrib.auth.models import Group, Permission, User
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.models import Group
 from BlogApp.models import *
 
-def create_permissions(permission_list):
-    """
-    Tạo các quyền dựa trên danh sách đầu vào.
+def create_permissions(permissions):
 
-    :param permission_list: Danh sách các quyền cần tạo.
-    :type permission_list: list
-    :return: Danh sách các quyền đã được tạo hoặc tồn tại.
-    """
-    created_permissions = []
-
-    for perm in permission_list:
+    for perm in permissions:
         try:
             permission, created = Permission.objects.get_or_create(
-                codename=perm['codename'],
-                content_type=perm['content_type'],
-                defaults=perm['defaults']
+                name = perm['name'],
+                description = perm['description']
             )
             if created:
-                print(f"Successfully created permission: {permission.codename}")
+                print(f"Successfully created permission: {permission.name}")
             else:
-                print(f"Permission already exists: {permission.codename}")
-
-            created_permissions.append(permission)
+                print(f"Permission already exists: {permission.name}")
 
         except Exception as e:
-            print(f"Error creating permission '{perm['codename']}': {e}")
-
-    #giải phóng bộ nhớ
-    del permission_list
+            print(f"Error creating permission: {e}")
 
 
 def create_groups(group_list):

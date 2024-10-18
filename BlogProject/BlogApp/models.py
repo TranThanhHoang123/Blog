@@ -300,6 +300,29 @@ class Banner(BaseModel):
 
     def __str__(self):
         return self.title
+#phân quyền
+class Permission(models.Model):
+    name = models.CharField(max_length=60, unique=True, blank=False, null=False)
+    description = models.CharField(max_length=60, blank=False, null=False)
+
+    def __str__(self):
+        return self.name
+
+class Role(models.Model):
+    name = models.CharField(max_length=60, unique=True, blank=False, null=False)
+    description = models.CharField(max_length=60, blank=False, null=False)
+    permissions = models.ManyToManyField(Permission, related_name='roles')
+
+    def __str__(self):
+        return self.name
+
+class UserRole(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_role')
+    role = models.ForeignKey(Role, on_delete=models.CASCADE, related_name='users')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.role.name}"
+
 
 class GroupPriority(models.Model):
     group = models.OneToOneField(Group, on_delete=models.CASCADE)

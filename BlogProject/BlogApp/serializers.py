@@ -127,7 +127,7 @@ class UserDetailSerializer(UserSerializer):
             blog_count=Count('blog', distinct=True)
         ).get(pk=instance.pk)
         response['is_followed'] = False
-        if self.context['request'].user and Follow.objects.filter(from_user=self.context['request'].user,to_user=instance).exists():
+        if self.context['request'].user.is_authenticated and Follow.objects.filter(from_user=self.context['request'].user,to_user=instance.pk).exists():
             response['is_followed'] = True
         response['following_count'] = user.following_count
         response['follower_count'] = user.follower_count  # Sửa lỗi nhầm từ following_count thành follower_count
