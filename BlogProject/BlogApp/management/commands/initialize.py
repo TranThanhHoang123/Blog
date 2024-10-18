@@ -76,11 +76,35 @@ ADMIN_PERMISSIONS = [
     },
     {
         "name": "Xóa người dùng ra khỏi nhóm quyền",
-        "description": "Xóa người dùng ra khỏi nhóm quyền."
+        "description": "Xóa người dùng ra khỏi nhóm quyền(trừ nhóm admin)"
     },
     {
         "name":"Thay đổi quyền của người dùng",
-        "description":"Thay đổi quyền của người dùng khác nhóm admin."
+        "description":"Thay đổi quyền của người dùng(trừ nhóm admin)"
+    },
+    {
+        "name": "Xem quyền",
+        "description":"Xem danh sách quyền"
+    },
+    {
+        "name": "Xem nhóm quyền",
+        "description":"Xem danh sách nhóm quyền"
+    },
+    {
+        "name": "Xem tất cả người dùng",
+        "description": "Xem danh sách tất cả người dùng"
+    },
+    {
+        "name": "Thêm nhóm quyền",
+        "description":"Xem danh sách nhóm quyền"
+    },
+    {
+        "name": "Sửa nhóm quyền",
+        "description":"Xem danh sách nhóm quyền(trừ nhóm admin)"
+    },
+    {
+        "name": "Xóa nhóm quyền",
+        "description":"Xem danh sách nhóm quyền(trừ nhóm admin)"
     },
 ]
 

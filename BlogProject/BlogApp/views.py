@@ -104,7 +104,7 @@ def custom_refresh_token(request):
 
 
 class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIView):
-    queryset = User.objects.filter(is_active=True)
+    queryset = User.objects.filter(is_active=True).order_by('username')
     serializer_class = serializers.UserSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = my_paginations.UserPagination
@@ -116,6 +116,8 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def get_permissions(self):
         if self.action in ['create', 'list', 'blog', 'activate', 'register', 'retrieve','followers','following']:
             return [permissions.AllowAny()]
+        if self.action in ['admin_user_filter']:
+            return [my_permissions.HasPermission(permission_name='Xem tất cả người dùng')]
         return [permissions.IsAuthenticated()]
 
     def get_serializer_class(self):
@@ -128,6 +130,44 @@ class UserViewSet(viewsets.ViewSet, generics.RetrieveAPIView, generics.ListAPIVi
     def get_object(self):
         return self.request.user
 
+    """
+    Xem tất cả user chỉ dành cho admin
+    Nếu có role thì kiếm người dùng trong role
+    Nếu có staff thì kiếm tất cả người dùng có role
+    Nếu có without_role: là tất cả những user khác trừ user của without_role
+    Nếu không có gì nghĩa là lấy tất cả
+    """
+    @action(methods=['get'], detail=False, url_path='admin/users')
+    def admin_user_filter(self, request):
+        role = request.query_params.get('role', None)
+        is_staff = request.query_params.get('is_staff', False)
+        without_role = request.query_params.get('without_role', None)
+
+        # Bắt đầu với danh sách tất cả người dùng đang hoạt động
+        users = User.objects.filter(is_active=True).order_by('username')
+
+        if role is not None:
+            # Lấy danh sách người dùng với role cụ thể
+            users = User.objects.filter(user_role__role=role).order_by('username')
+
+        elif is_staff:
+            # Lấy danh sách người dùng có user_role (có role)
+            users = User.objects.filter(user_role__isnull=False).order_by('username')
+
+        elif without_role is not None:
+            # Lấy danh sách người dùng không nằm trong role cụ thể
+            users = User.objects.exclude(user_role__role=without_role).order_by('username')
+        # Áp dụng bộ lọc
+        filtered_users = filters.UserAdminFilter(request.GET, queryset=users).qs
+
+        # Phân trang danh sách người dùng
+        paginator = my_paginations.UserPagination()
+        paginated_users = paginator.paginate_queryset(filtered_users, request)
+
+        # Serialize danh sách người dùng
+        serializer = serializers.UserListForAdminSerializer(paginated_users, many=True)
+
+        return paginator.get_paginated_response(serializer.data)
     @action(detail=False, methods=['post'], url_path='register')
     def register(self, request):
         # thêm file vào vstorage
@@ -1191,49 +1231,206 @@ class BannerViewSet(viewsets.ViewSet, generics.ListAPIView, generics.UpdateAPIVi
             return Response(cached_data)
 
 
-class GroupViewSet(viewsets.ViewSet, generics.ListAPIView):
-    queryset = Group.objects.all()
-    serializer_class = serializers.GroupSerializer  # Bạn cần định nghĩa serializer này
-    permission_classes = [my_permissions.IsAdminOrManager]
-    pagination_class = my_paginations.GroupPagination  # Sử dụng phân trang có sẵn của bạn
+class PermissionViewSet(viewsets.ViewSet, generics.ListAPIView):
+    queryset =Permission.objects.all().order_by("name")
+    serializer_class = serializers.PermissionSerializer  # Bạn cần định nghĩa serializer này
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = my_paginations.PermissionPagination  # Sử dụng phân trang có sẵn của bạn
+
+    def get_queryset(self):
+        queryset = self.queryset  # Get the base queryset
+
+        # Check if the action is 'list'
+        if self.action in ['list']:
+
+            # Get the 'name' query parameter from the request
+            name = self.request.query_params.get('name', None)
+
+            # If 'name' is provided, filter the permissions by name
+            if name:
+                queryset = queryset.filter(name__icontains=name)
+
+        return queryset
+
+    def get_permissions(self):
+        if self.action in ['list']:
+            return [my_permissions.HasPermission(permission_name='Xem quyền')]
+        return [permissions.IsAuthenticated()]
+
+    """
+       Lấy danh sách permission
+    """
+    def list(self, request):
+        # Use a dynamic cache key based on the 'name' parameter
+        name = request.query_params.get('name', None)
+        cache_key = f'permission_list_cache_{name}' if name else 'permission_list_cache'
+
+        permissions_data = cache.get(cache_key)
+
+        if permissions_data is None:
+            permissions = self.get_queryset()  # This will apply the filtering if 'name' is provided
+
+            # Phân trang danh sách sản phẩm
+            paginator = self.pagination_class()
+            page = paginator.paginate_queryset(permissions, request)
+
+            # Serialize danh sách sản phẩm
+            serializer = self.get_serializer(page, many=True)
+
+            # Trả về danh sách banner đã phân trang
+            paginated_data = paginator.get_paginated_response(serializer.data)
+
+            # Lưu dữ liệu đã phân trang vào cache với timeout
+            cache.set(cache_key, paginated_data.data, timeout=216000)  # 1 hour
+            return paginated_data
+        else:
+            return Response(permissions_data)
+
+class RoleViewSet(viewsets.ViewSet, generics.ListAPIView, generics.CreateAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+    queryset = Role.objects.all().order_by('name')
+    serializer_class = serializers.RoleSerializer  # Bạn cần định nghĩa serializer này
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = my_paginations.RolePagination # Sử dụng phân trang có sẵn của bạn
     filter_backends = [DjangoFilterBackend]
+
+    def get_queryset(self):
+        queryset = self.queryset  # Get the base queryset
+
+        # Check if the action is 'list'
+        if self.action in ['list']:
+
+            # Get the 'name' query parameter from the request
+            name = self.request.query_params.get('name', None)
+
+            # If 'name' is provided, filter the permissions by name
+            if name:
+                queryset = queryset.filter(name__icontains=name)
+
+        return queryset
 
     def get_permissions(self):
         if self.action in ['all_users']:
             return [my_permissions.IsAdmin()]
-        return [my_permissions.IsAdminOrManager()]
+        if self.action in ['list']:
+            return [my_permissions.HasPermission(permission_name='Xem nhóm quyền')]
+        if self.action in ['create']:
+            return [my_permissions.HasPermission(permission_name='Thêm nhóm quyền')]
+        if self.action in ['update','partial_update']:
+            print("kiểm tra update")
+            return [my_permissions.HasPermission(permission_name='Sửa nhóm quyền')]
+        if self.action in ['destroy']:
+            return [my_permissions.HasPermission(permission_name='Xóa nhóm quyền')]
+        return [permissions.IsAuthenticated()]
 
-    # API để lấy tất cả thành viên nào có group
-    @action(methods=['get'], detail=False, url_path='all-users-with-group')
-    def all_users_with_group(self, request):
-        users_with_group = User.objects.filter(groups__isnull=False, is_active=True).distinct()
-        filtered_users = filters.UserAdminFilter(request.GET, queryset=users_with_group).qs  # Áp dụng bộ lọc
-        paginator = my_paginations.UserPagination()
-        paginated_users = paginator.paginate_queryset(filtered_users, request)
-        serializer = serializers.UserListForAdminSerializer(paginated_users, many=True)
-        return paginator.get_paginated_response(serializer.data)
+    """
+    Lấy danh sách role
+    """
+    def list(self, request):
+        # Use a dynamic cache key based on the 'name' parameter
+        name = request.query_params.get('name', None)
+        cache_key = f'role_list_cache_{name}' if name else 'permission_list_cache'
+
+        permissions_data = cache.get(cache_key)
+
+        if permissions_data is None:
+            permissions = self.get_queryset()  # This will apply the filtering if 'name' is provided
+
+            # Phân trang danh sách sản phẩm
+            paginator = self.pagination_class()
+            page = paginator.paginate_queryset(permissions, request)
+
+            # Serialize danh sách sản phẩm
+            serializer = self.get_serializer(page, many=True)
+
+            # Trả về danh sách banner đã phân trang
+            paginated_data = paginator.get_paginated_response(serializer.data)
+
+            # Lưu dữ liệu đã phân trang vào cache với timeout
+            cache.set(cache_key, paginated_data.data, timeout=216000)  # 1 hour
+            return paginated_data
+        else:
+            return Response(permissions_data)
+    """
+    Tạo role
+    atomic: khi tạo lỗi sẽ rollback lại
+    """
+
+    def create(self, request):
+        with transaction.atomic():
+            serializer = self.get_serializer(data=request.data)
+            if serializer.is_valid():
+                role = serializer.save()
+                permission_ids = request.data.getlist('permission', [])
+
+                # Lấy danh sách quyền từ danh sách ID
+                permissions = Permission.objects.filter(id__in=permission_ids)
+
+                # Thêm các quyền vào role
+                role.permissions.add(*permissions)
+
+                return Response(serializers.RoleDetailSerializer(role).data,status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    """
+    Sửa role
+    Không thể sửa role admin hoặc role manager
+    sửa name và description trước
+    xóa danh sách permission_remove(id)
+    thêm danh sách permission(id)
+    atomic: Khi có lỗi sẽ rollback lại
+    """
+    def update(self, request, pk=None, partial=False):
+        with transaction.atomic():
+            # Lấy role cần cập nhật
+            try:
+                role = Role.objects.get(pk=pk)
+            except Role.DoesNotExist:
+                return Response({"error": "Role does not exists."}, status=status.HTTP_404_NOT_FOUND)
+            if role.name in ['admin','manager']:
+                return Response({"error": "Can not modify admin role and manager role."}, status=status.HTTP_400_BAD_REQUEST)
+            # Cập nhật thông tin cơ bản của role
+            serializer = self.get_serializer(role, data=request.data, partial=True)
+            if serializer.is_valid():
+                role = serializer.save()
+
+                # Xóa các quyền được chỉ định trong 'permission_remove'
+                permission_remove_ids = request.data.getlist('permission_remove', [])
+                if permission_remove_ids:
+                    permissions_to_remove = Permission.objects.filter(id__in=permission_remove_ids)
+                    role.permissions.remove(*permissions_to_remove)
+
+                # Thêm các quyền mới vào 'role'
+                permission_ids = request.data.getlist('permission', [])
+                if permission_ids:
+                    # Lấy danh sách quyền chưa có trong role
+                    permissions_to_add = Permission.objects.filter(
+                        id__in=permission_ids
+                    ).exclude(roles=role)
+
+                    # Thêm các quyền vào role
+                    role.permissions.add(*permissions_to_add)
+
+                return Response(serializers.RoleDetailSerializer(role).data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    """
+    Xóa role
+    Không thể xóa role admin hoặc role manager
+    """
+    def destroy(self, request, *args, **kwargs):
+        role = self.get_object()
+
+        # Kiểm tra nếu role.name là 'admin' hoặc 'manager'
+        if role.name in ['admin', 'manager']:
+            return Response({"error": "Can not delete admin role and manager role."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        # Thực hiện xóa nhóm quyền
+        role.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     # API để lấy thành viên có trong một group cụ thể
-    @action(methods=['get'], detail=True, url_path='users')
-    def users_in_group(self, request, pk=None):
-        group = self.get_object()
-        users_in_group = group.user_set.all()
-        filtered_users = filters.UserAdminFilter(request.GET, queryset=users_in_group).qs  # Áp dụng bộ lọc
-        paginator = my_paginations.UserPagination()
-        paginated_users = paginator.paginate_queryset(filtered_users, request)
-        serializer = serializers.UserListSerializer(paginated_users, many=True)
-        return paginator.get_paginated_response(serializer.data)
-
         # API để lấy tất cả user
-        @action(methods=['get'], detail=False, url_path='admin/users')
-        def all_users(self, request):
-            users = User.objects.filter(is_active=True).order_by('-date_joined')
-            filtered_users = filters.UserAdminFilter(request.GET, queryset=users).qs  # Áp dụng bộ lọc
-            paginator = my_paginations.UserPagination()
-            paginated_users = paginator.paginate_queryset(filtered_users, request)
-            serializer = serializers.UserListForAdminSerializer(paginated_users, many=True,)
-            return paginator.get_paginated_response(serializer.data)
-
     @action(methods=['post'], detail=True, url_path='add-user')
     def add_user(self, request, pk=None):
         group = self.get_object()

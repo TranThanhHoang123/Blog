@@ -33,6 +33,16 @@ class GroupPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+class PermissionPagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class RolePagination(PageNumberPagination):
+    page_size = 20
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
 
 class TagPagination(PageNumberPagination):
     page_size = 20

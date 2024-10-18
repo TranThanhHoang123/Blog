@@ -14,10 +14,12 @@ router.register(r'job-post', views.JobPostViewSet, basename='job-post')  # Speci
 router.register(r'category', views.CategoryViewSet, basename='category')  # Specify the basename here
 router.register(r'product', views.ProductViewSet, basename='product')  # Specify the basename here
 router.register(r'banner', views.BannerViewSet, basename='banner')  # Specify the basename here
-router.register(r'group', views.GroupViewSet, basename='group')  # Specify the basename here
 router.register(r'statical', StatisticalViews.StatsView, basename='statical')
 router.register(r'website', views.WebsiteViewSet, basename='website')
 router.register(r'tag', views.TagViewSet, basename='tag')
+router.register(r'permission', views.PermissionViewSet, basename='permission')
+router.register(r'role', views.RoleViewSet, basename='role')
+
 urlpatterns = [
     path('', include(router.urls)),
     path('o/token/', CustomTokenView.as_view(), name='token'),

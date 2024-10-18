@@ -4,6 +4,35 @@ from rest_framework import serializers
 from .models import *
 from . import my_paginations
 
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = ['id','name','description']
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ['id','name','description','permissions']
+        extra_kwargs = {
+            'name': {'required': True},
+            'description': {'required': True},
+            'permissions': {'required': False},
+        }
+
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ['id','name','description']
+        extra_kwargs = {
+            'name': {'required': True},
+            'description': {'required': True},
+            'permissions': {'required': False},
+        }
+
+class RoleDetailSerializer(RoleSerializer):
+    permissions = PermissionSerializer(many=True)
+    class Meta(RoleSerializer.Meta):
+        fields = RoleSerializer.Meta.fields + ['permissions']
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
@@ -112,26 +141,37 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'link': {'required': False},
         }
 
+from django.shortcuts import get_object_or_404
 
 class UserDetailSerializer(UserSerializer):
-    groups = GroupListSerializer(many=True)
-
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ['groups']
+        fields = UserSerializer.Meta.fields
 
     def to_representation(self, instance):
-        response = super().to_representation(instance)
-        user = User.objects.annotate(
+        # Chỉ lấy một lần thông tin người dùng
+        user = get_object_or_404(User.objects.select_related('user_role__role').annotate(
             following_count=Count('following', distinct=True),
             follower_count=Count('follower', distinct=True),
             blog_count=Count('blog', distinct=True)
-        ).get(pk=instance.pk)
-        response['is_followed'] = False
-        if self.context['request'].user.is_authenticated and Follow.objects.filter(from_user=self.context['request'].user,to_user=instance.pk).exists():
-            response['is_followed'] = True
+        ), pk=instance.pk)
+
+        response = super().to_representation(instance)
+
+        # Kiểm tra nếu người dùng đã theo dõi
+        is_followed = False
+        if self.context['request'].user.is_authenticated:
+            is_followed = Follow.objects.filter(from_user=self.context['request'].user, to_user=user.pk).exists()
+        response['is_followed'] = is_followed
+
+        # Thêm các trường đếm
         response['following_count'] = user.following_count
-        response['follower_count'] = user.follower_count  # Sửa lỗi nhầm từ following_count thành follower_count
+        response['follower_count'] = user.follower_count
         response['blog_count'] = user.blog_count
+
+        # Thêm trường role.name, trả về None nếu không có user_role
+        user_role = getattr(user, 'user_role', None)
+        response['role'] = user_role.role.name if user_role else None
+
         return response
 
 
@@ -142,8 +182,9 @@ class UserListSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'profile_image', 'profile_bg']
 
-class UserListForAdminSerializer(UserDetailSerializer):
-    class Meta(UserDetailSerializer.Meta):
+class UserListForAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
         fields = ['id', 'username', 'first_name', 'last_name', 'profile_image', 'profile_bg','phone_number','email']
 
 
